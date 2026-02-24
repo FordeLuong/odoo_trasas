@@ -2,3 +2,6 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_dispatch_outgoing_user,trasas.dispatch.outgoing.user,model_trasas_dispatch_outgoing,base.group_user,1,1,1,0
 access_dispatch_outgoing_hcns,trasas.dispatch.outgoing.hcns,model_trasas_dispatch_outgoing,trasas_dispatch_management.group_dispatch_hcns,1,1,1,1
 access_dispatch_outgoing_manager,trasas.dispatch.outgoing.manager,model_trasas_dispatch_outgoing,trasas_dispatch_management.group_dispatch_manager,1,1,1,1
+access_dispatch_outgoing_stage_user,trasas.dispatch.outgoing.stage.user,model_trasas_dispatch_outgoing_stage,base.group_user,1,0,0,0
+access_dispatch_outgoing_stage_hcns,trasas.dispatch.outgoing.stage.hcns,model_trasas_dispatch_outgoing_stage,trasas_dispatch_management.group_dispatch_hcns,1,1,1,0
+access_dispatch_outgoing_stage_manager,trasas.dispatch.outgoing.stage.manager,model_trasas_dispatch_outgoing_stage,trasas_dispatch_management.group_dispatch_manager,1,1,1,1

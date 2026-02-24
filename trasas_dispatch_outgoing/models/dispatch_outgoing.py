@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 
 class TrasasDispatchOutgoing(models.Model):
@@ -64,12 +64,10 @@ class TrasasDispatchOutgoing(models.Model):
     def _default_approver(self):
         """Mặc định chọn người duyệt đầu tiên tìm thấy trong Ban Giám đốc"""
         try:
-            # Tìm Department bằng XML ID để đảm bảo chính xác
             dept = self.env.ref(
                 "trasas_demo_users.dep_ban_giam_doc", raise_if_not_found=False
             )
             if dept:
-                # Tìm nhân viên thuộc phòng này có User liên kết
                 employee = self.env["hr.employee"].search(
                     [("department_id", "=", dept.id), ("user_id", "!=", False)], limit=1
                 )
@@ -109,7 +107,18 @@ class TrasasDispatchOutgoing(models.Model):
         string="Nơi lưu bản giấy", help="Vị trí lưu trữ hồ sơ giấy (Tủ/Kệ/File...)"
     )
 
-    # --- Trạng thái ---
+    # --- Stage (Dynamic) ---
+    stage_id = fields.Many2one(
+        "trasas.dispatch.outgoing.stage",
+        string="Giai đoạn",
+        tracking=True,
+        default=lambda self: self._default_stage_id(),
+        group_expand="_read_group_stage_ids",
+        index=True,
+        copy=False,
+    )
+
+    # Computed state from stage flags (backward compatibility)
     state = fields.Selection(
         [
             ("draft", "Dự thảo"),
@@ -123,9 +132,63 @@ class TrasasDispatchOutgoing(models.Model):
             ("cancel", "Đã hủy"),
         ],
         string="Trạng thái",
-        default="draft",
+        compute="_compute_state",
+        store=True,
         tracking=True,
     )
+
+    is_user_approver = fields.Boolean(compute="_compute_is_user_approver")
+
+    def _default_stage_id(self):
+        """Get the default draft stage"""
+        return self.env["trasas.dispatch.outgoing.stage"].search(
+            [("is_draft", "=", True)], limit=1
+        )
+
+    @api.model
+    def _read_group_stage_ids(self, stages, domain):
+        """Show all stages in kanban view"""
+        return self.env["trasas.dispatch.outgoing.stage"].search([], order="sequence")
+
+    @api.depends(
+        "stage_id", "stage_id.is_draft", "stage_id.is_done", "stage_id.is_cancel"
+    )
+    def _compute_state(self):
+        """Derive state from stage for backward compatibility"""
+        # Cache stage references
+        stage_refs = {
+            "outgoing_stage_draft": "draft",
+            "outgoing_stage_waiting_approval": "waiting_approval",
+            "outgoing_stage_approved": "approved",
+            "outgoing_stage_to_promulgate": "to_promulgate",
+            "outgoing_stage_processing": "processing",
+            "outgoing_stage_released": "released",
+            "outgoing_stage_sent": "sent",
+            "outgoing_stage_done": "done",
+            "outgoing_stage_cancel": "cancel",
+        }
+        stage_map = {}
+        for xmlid, state_val in stage_refs.items():
+            stage = self.env.ref(
+                f"trasas_dispatch_outgoing.{xmlid}", raise_if_not_found=False
+            )
+            if stage:
+                stage_map[stage.id] = state_val
+
+        for record in self:
+            if not record.stage_id:
+                record.state = "draft"
+            elif record.stage_id.id in stage_map:
+                record.state = stage_map[record.stage_id.id]
+            elif record.stage_id.is_cancel:
+                record.state = "cancel"
+            elif record.stage_id.is_done:
+                record.state = "done"
+            elif record.stage_id.is_draft:
+                record.state = "draft"
+            else:
+                # Custom stages default to processing
+                record.state = "processing"
 
     @api.depends("drafter_id")
     def _compute_department_id(self):
@@ -134,6 +197,10 @@ class TrasasDispatchOutgoing(models.Model):
                 record.department_id = record.drafter_id.employee_ids[0].department_id
             else:
                 record.department_id = False
+
+    def _compute_is_user_approver(self):
+        for record in self:
+            record.is_user_approver = record.approver_id == self.env.user
 
     # --- Sequence Logic ---
     @api.model_create_multi
@@ -148,57 +215,68 @@ class TrasasDispatchOutgoing(models.Model):
                 )
         return super().create(vals_list)
 
+    # --- Helper: get stage by XML ID ---
+    def _get_stage(self, xmlid):
+        """Get a stage by its XML ID"""
+        return self.env.ref(
+            f"trasas_dispatch_outgoing.{xmlid}", raise_if_not_found=False
+        )
+
     # --- Actions ---
     def action_generate_number(self):
         """Cấp số công văn chính thức (Chỉ dành cho HCNS)"""
+        stage_processing = self._get_stage("outgoing_stage_processing")
+        if not stage_processing:
+            raise UserError("Chưa cấu hình giai đoạn 'Đang xử lý'!")
+
         for record in self:
             if not record.dispatch_number:
                 record.dispatch_number = self.env["ir.sequence"].next_by_code(
                     "trasas.dispatch.outgoing.official"
                 )
-            # Cập nhật ngày ban hành
             record.date_promulgated = fields.Date.today()
-            # Giữ state = processing (HCNS tiếp tục đóng dấu, lưu trữ)
-            record.state = "processing"
+            record.stage_id = stage_processing
             record.message_post(
                 body="Đã cấp số công văn: %s" % record.dispatch_number,
                 subtype_xmlid="mail.mt_comment",
             )
 
-    is_user_approver = fields.Boolean(compute="_compute_is_user_approver")
-
-    def _compute_is_user_approver(self):
-        for record in self:
-            record.is_user_approver = record.approver_id == self.env.user
-
     def action_submit(self):
+        stage_waiting = self._get_stage("outgoing_stage_waiting_approval")
+        if not stage_waiting:
+            raise UserError("Chưa cấu hình giai đoạn 'Chờ duyệt'!")
+
         for record in self:
             if not record.draft_file:
                 raise ValidationError(
                     "Vui lòng đính kèm File dự thảo trước khi gửi duyệt!"
                 )
 
-            # 1. Gửi email template "Yêu cầu duyệt"
-            template = self.env.ref(
+            # Gửi email template "Yêu cầu duyệt"
+            template = stage_waiting.mail_template_id or self.env.ref(
                 "trasas_dispatch_outgoing.email_template_outgoing_to_approve",
                 raise_if_not_found=False,
             )
             if template:
                 template.send_mail(record.id, force_send=True)
 
-            # 2. Create activity for approver
+            # Create activity for approver
             record.activity_schedule(
                 "mail.mail_activity_data_todo",
                 user_id=record.approver_id.id,
                 summary="Duyệt công văn đi: %s" % record.subject,
                 note="Kính gửi Sếp duyệt công văn này.",
             )
-        self.state = "waiting_approval"
+
+            record.stage_id = stage_waiting
 
     def action_approve(self):
+        stage_approved = self._get_stage("outgoing_stage_approved")
+        if not stage_approved:
+            raise UserError("Chưa cấu hình giai đoạn 'Đã duyệt'!")
+
         for record in self:
-            # 1. Mark activity as done when approved
-            # Filter by approver_id to ensure the correct activity is closed even if Admin clicks
+            # Mark activity as done
             activity_type_id = self.env.ref("mail.mail_activity_data_todo").id
             record.activity_ids.filtered(
                 lambda a: (
@@ -207,19 +285,23 @@ class TrasasDispatchOutgoing(models.Model):
                 )
             ).action_feedback(feedback="Đã duyệt")
 
-            # 2. Gửi email template "Đã duyệt"
-            template = self.env.ref(
+            # Gửi email template "Đã duyệt"
+            template = stage_approved.mail_template_id or self.env.ref(
                 "trasas_dispatch_outgoing.email_template_outgoing_approved",
                 raise_if_not_found=False,
             )
             if template:
                 template.send_mail(record.id, force_send=True)
 
-        self.state = "approved"
+            record.stage_id = stage_approved
 
     def action_reject(self):
+        stage_draft = self._get_stage("outgoing_stage_draft")
+        if not stage_draft:
+            raise UserError("Chưa cấu hình giai đoạn 'Dự thảo'!")
+
         for record in self:
-            # 1. Cancel (unlink) activity when rejected
+            # Cancel activity when rejected
             activity_type_id = self.env.ref("mail.mail_activity_data_todo").id
             record.activity_ids.filtered(
                 lambda a: (
@@ -228,7 +310,7 @@ class TrasasDispatchOutgoing(models.Model):
                 )
             ).unlink()
 
-            # 2. Gửi email template "Bị từ chối"
+            # Gửi email template "Bị từ chối"
             template = self.env.ref(
                 "trasas_dispatch_outgoing.email_template_outgoing_rejected",
                 raise_if_not_found=False,
@@ -236,16 +318,19 @@ class TrasasDispatchOutgoing(models.Model):
             if template:
                 template.send_mail(record.id, force_send=True)
 
-        self.state = "draft"
+            record.stage_id = stage_draft
 
     def action_send_to_hcns(self):
         """Gửi cho bộ phận HCNS để ban hành"""
+        stage_to_promulgate = self._get_stage("outgoing_stage_to_promulgate")
+        if not stage_to_promulgate:
+            raise UserError("Chưa cấu hình giai đoạn 'Chờ ban hành'!")
+
         for record in self:
-            # Tìm Trưởng phòng HCNS bằng XML ID (chính xác nhất)
+            # Tìm Trưởng phòng HCNS
             hcns_dept = self.env.ref(
                 "trasas_demo_users.dep_hcns", raise_if_not_found=False
             )
-            # Fallback: tìm bằng tên
             if not hcns_dept:
                 hcns_dept = self.env["hr.department"].search(
                     [("name", "ilike", "Hành chính")], limit=1
@@ -260,7 +345,7 @@ class TrasasDispatchOutgoing(models.Model):
                     "Không tìm thấy Trưởng phòng HCNS. Vui lòng kiểm tra cấu hình Phòng ban và gán Manager cho phòng HCNS."
                 )
 
-            # Tạo Activity cho HCNS (để ban hành)
+            # Tạo Activity cho HCNS
             record.activity_schedule(
                 "mail.mail_activity_data_todo",
                 user_id=hcns_manager.id,
@@ -268,19 +353,21 @@ class TrasasDispatchOutgoing(models.Model):
                 note="Công văn đã được duyệt. Vui lòng cấp số và ban hành.",
             )
 
-        self.state = "to_promulgate"
-
-    # action_promulgate đã bỏ — dùng action_generate_number thay thế
+            record.stage_id = stage_to_promulgate
 
     def action_release(self):
         """HCNS phát hành công văn sau khi đã upload file chính thức"""
+        stage_released = self._get_stage("outgoing_stage_released")
+        if not stage_released:
+            raise UserError("Chưa cấu hình giai đoạn 'Đã phát hành'!")
+
         for record in self:
             if not record.official_file:
                 raise ValidationError(
                     "Vui lòng tải lên File chính thức trước khi phát hành!"
                 )
 
-            # 1. Mark Done Activity "Ban hành" cho user hiện tại (HCNS)
+            # Mark Done Activity cho user hiện tại (HCNS)
             activity_type_id = self.env.ref("mail.mail_activity_data_todo").id
             record.activity_ids.filtered(
                 lambda a: (
@@ -289,15 +376,15 @@ class TrasasDispatchOutgoing(models.Model):
                 )
             ).action_feedback(feedback="Đã phát hành")
 
-            # 2. Gửi email template "Đã phát hành" cho Người soạn
-            template = self.env.ref(
+            # Gửi email template "Đã phát hành"
+            template = stage_released.mail_template_id or self.env.ref(
                 "trasas_dispatch_outgoing.email_template_outgoing_released",
                 raise_if_not_found=False,
             )
             if template:
                 template.send_mail(record.id, force_send=True)
 
-            # 3. Tạo Activity cho Người soạn: "Tiếp nhận và gửi cho đối tác"
+            # Tạo Activity cho Người soạn
             record.activity_schedule(
                 "mail.mail_activity_data_todo",
                 user_id=record.drafter_id.id,
@@ -305,12 +392,16 @@ class TrasasDispatchOutgoing(models.Model):
                 note="Công văn đã được HCNS cấp số và đóng dấu. Vui lòng tiếp nhận và gửi cho đối tác/khách hàng.",
             )
 
-            record.state = "released"
+            record.stage_id = stage_released
 
     def action_send(self):
-        """Người soạn gửi công văn đi cho đối tác (B9)"""
+        """Người soạn gửi công văn đi cho đối tác"""
+        stage_sent = self._get_stage("outgoing_stage_sent")
+        if not stage_sent:
+            raise UserError("Chưa cấu hình giai đoạn 'Đã gửi'!")
+
         for record in self:
-            # Mark Done Activity "Gửi cho đối tác" của Người soạn
+            # Mark Done Activity "Gửi cho đối tác"
             activity_type_id = self.env.ref("mail.mail_activity_data_todo").id
             record.activity_ids.filtered(
                 lambda a: (
@@ -324,16 +415,26 @@ class TrasasDispatchOutgoing(models.Model):
                 % record.recipient_id.name,
                 subtype_xmlid="mail.mt_comment",
             )
-        self.state = "sent"
+
+            record.stage_id = stage_sent
 
     def action_done(self):
+        stage_done = self._get_stage("outgoing_stage_done")
+        if not stage_done:
+            raise UserError("Chưa cấu hình giai đoạn 'Hoàn thành'!")
         for record in self:
-            record.state = "done"
+            record.stage_id = stage_done
 
     def action_cancel(self):
+        stage_cancel = self._get_stage("outgoing_stage_cancel")
+        if not stage_cancel:
+            raise UserError("Chưa cấu hình giai đoạn 'Hủy'!")
         for record in self:
-            record.state = "cancel"
+            record.stage_id = stage_cancel
 
     def action_draft(self):
+        stage_draft = self._get_stage("outgoing_stage_draft")
+        if not stage_draft:
+            raise UserError("Chưa cấu hình giai đoạn 'Dự thảo'!")
         for record in self:
-            record.state = "draft"
+            record.stage_id = stage_draft

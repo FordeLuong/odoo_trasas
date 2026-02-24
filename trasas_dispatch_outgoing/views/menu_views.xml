@@ -11,4 +11,11 @@
               parent="menu_dispatch_outgoing_root"
               action="action_trasas_dispatch_outgoing"
               sequence="10"/>
+
+    <!-- Stage config under parent module's Cấu hình menu -->
+    <menuitem id="menu_dispatch_outgoing_stage_action"
+              name="Giai đoạn công văn đi"
+              parent="trasas_dispatch_management.menu_dispatch_configuration"
+              action="action_dispatch_outgoing_stage"
+              sequence="30"/>
 </odoo>
