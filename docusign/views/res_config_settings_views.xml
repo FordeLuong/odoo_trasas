@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_docusign" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.docusign</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="90"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="DocuSign" name="odoo_docusign" groups="base.group_system">
+                    <block title="DocuSign Integration Settings">
+                        <setting>
+                            <label for="docusign_environment"/>
+                            <div class="text-muted">
+                                Select which DocuSign environment to use for API calls
+                            </div>
+                            <field name="docusign_environment" widget="radio" class="o_light_label"/>
+                        </setting>
+                    </block>
+
+                    <block title="Production Environment">
+                        <setting>
+                            <label for="docusign_prod_base_uri"/>
+                            <div class="text-muted">
+                                Production API base URL
+                            </div>
+                            <field name="docusign_prod_base_uri" placeholder="https://na3.docusign.net"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_prod_account_id"/>
+                            <div class="text-muted">
+                                Production Account ID
+                            </div>
+                            <field name="docusign_prod_account_id" password="True"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_prod_user_guid"/>
+                            <div class="text-muted">
+                                Production API User GUID (UUID format, required for JWT)
+                            </div>
+                            <field name="docusign_prod_user_guid" placeholder="12345678-1234-1234-1234-123456789012"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_prod_integration_key"/>
+                            <div class="text-muted">
+                                Production Integration Key (Client ID)
+                            </div>
+                            <field name="docusign_prod_integration_key" password="True"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_prod_secret_key"/>
+                            <div class="text-muted">
+                                Production Secret Key (Client Secret)
+                            </div>
+                            <field name="docusign_prod_secret_key" password="True"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_prod_private_key" string="RSA Private Key (JWT)"/>
+                            <div class="text-muted">
+                                RSA private key in PEM format for JWT authentication. Required for automatic token generation without user interaction. Generate via DocuSign Admin → Apps and Keys → Add RSA Keypair.
+                            </div>
+                            <field name="docusign_prod_private_key" widget="text" placeholder="-----BEGIN RSA PRIVATE KEY-----&#10;...&#10;-----END RSA PRIVATE KEY-----"/>
+                        </setting>
+                    </block>
+
+                    <block title="Demo/Sandbox Environment">
+                        <setting>
+                            <label for="docusign_demo_base_uri"/>
+                            <div class="text-muted">
+                                Demo/Sandbox API base URL
+                            </div>
+                            <field name="docusign_demo_base_uri" placeholder="https://demo.docusign.net"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_demo_account_id"/>
+                            <div class="text-muted">
+                                Demo/Sandbox Account ID
+                            </div>
+                            <field name="docusign_demo_account_id" password="True"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_demo_user_guid"/>
+                            <div class="text-muted">
+                                Demo/Sandbox API User GUID (UUID format, required for JWT)
+                            </div>
+                            <field name="docusign_demo_user_guid" placeholder="12345678-1234-1234-1234-123456789012"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_demo_integration_key"/>
+                            <div class="text-muted">
+                                Demo/Sandbox Integration Key (Client ID)
+                            </div>
+                            <field name="docusign_demo_integration_key" password="True"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_demo_secret_key"/>
+                            <div class="text-muted">
+                                Demo/Sandbox Secret Key (Client Secret)
+                            </div>
+                            <field name="docusign_demo_secret_key" password="True"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_demo_test_email"/>
+                            <div class="text-muted">
+                                When Demo/Sandbox is active, all DocuSign recipient emails are replaced with this address to avoid sending real emails.
+                            </div>
+                            <field name="docusign_demo_test_email" placeholder="qa@example.com"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_demo_private_key" string="RSA Private Key (JWT)"/>
+                            <div class="text-muted">
+                                RSA private key in PEM format for JWT authentication. Required for automatic token generation without user interaction. Generate via DocuSign Admin → Apps and Keys → Add RSA Keypair.
+                            </div>
+                            <field name="docusign_demo_private_key" widget="text" placeholder="-----BEGIN RSA PRIVATE KEY-----&#10;...&#10;-----END RSA PRIVATE KEY-----"/>
+                        </setting>
+                    </block>
+
+                    <block title="Webhook Configuration">
+                        <setting>
+                            <label for="docusign_webhook_url"/>
+                            <div class="text-muted">
+                                Copy this URL into DocuSign Admin Console → Connect → Add Configuration
+                            </div>
+                            <field name="docusign_webhook_url" readonly="1" class="font-monospace"/>
+                        </setting>
+                        <setting>
+                            <label for="docusign_webhook_hmac_key"/>
+                            <div class="text-muted">
+                                Shared secret for webhook signature verification. Generate a strong random key (32+ chars) and enter the same value in DocuSign Connect "HMAC Key" field.
+                            </div>
+                            <field name="docusign_webhook_hmac_key" password="True"/>
+                        </setting>
+                        <div class="alert alert-info" role="alert">
+                            <h5>How to configure DocuSign Connect:</h5>
+                            <ol>
+                                <li>Login to DocuSign Admin Console (admin.docusign.com or admindemo.docusign.com)</li>
+                                <li>Go to: Settings → Connect → Add Configuration</li>
+                                <li>Enter Configuration Name (e.g., "Odoo Integration")</li>
+                                <li>URL to Publish: Copy the webhook URL above</li>
+                                <li>Enable HMAC: Check the box</li>
+                                <li>HMAC Key: Enter the same HMAC key from the field above</li>
+                                <li>Events to include: Select "Envelope Sent", "Envelope Delivered", "Envelope Completed", "Envelope Declined", "Envelope Voided"</li>
+                                <li>Save the configuration</li>
+                            </ol>
+                        </div>
+                    </block>
+
+                    <block title="File Storage">
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Deprecated:</strong> File system storage is deprecated. Signed documents are now automatically stored as Odoo attachments linked to envelope records. This provides better security, backup integration, and audit trails.
+                        </div>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_docusign_config" model="ir.actions.act_window">
+        <field name="name">DocuSign Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'odoo_docusign'}</field>
+    </record>
+
+    <menuitem id="menu_docusign_config"
+              name="DocuSign Settings"
+              parent="base.menu_administration"
+              action="action_docusign_config"
+              sequence="100"
+              groups="base.group_system"/>
+</odoo>

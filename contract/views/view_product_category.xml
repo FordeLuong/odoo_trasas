@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- View moved to cpe_assets module to avoid circular dependency -->
+    </data>
+</odoo>

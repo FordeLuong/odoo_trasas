@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_view_docusign_connector_inherit" model="ir.ui.view">
+            <field name="name">docusign.connector.form.inherit</field>
+            <field name="model">docusign.connector</field>
+			<field name="inherit_id" ref="odoo_docusign.docusign_connector_res_partner_form"/>
+			<field name="arch" type="xml">
+            <!--  Docusign poilicies do not allow checking status after a document as reached the completed state  -->
+                <xpath expr="//button[@name='status_docs']" position="attributes">
+                    <attribute name="invisible">state == "completed"</attribute>
+                </xpath>
+                <xpath expr="//button[@name='download_docs']" position="attributes">
+                    <attribute name="invisible">state != "completed"</attribute>
+                </xpath>
+                <xpath expr="//button[@name='send_docs']" position="replace"/>
+                <xpath expr="//field[@name='contact_id']" position="after">
+                    <field name="contract_management_id" readonly="1"/>
+                    <field name="contract_addendum_id" readonly="1"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_view_docusign_connector_tree_inherit" model="ir.ui.view">
+            <field name="name">docusign.connector.tree.inherit.contract.linkage</field>
+            <field name="model">docusign.connector</field>
+            <field name="inherit_id" ref="odoo_docusign.docusign_connector_res_partner_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree/field[@name='model']" position="replace">
+                    <field name="model"/>
+                    <field name="contract_management_id"/>
+                    <field name="contract_addendum_id"/>
+                    <field name="sale_id" optional="show"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

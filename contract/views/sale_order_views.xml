@@ -1,0 +1,293 @@
+<odoo>
+    <record id="view_order_form_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="priority" eval="200"/>
+        <!-- Inherit the standard sale order form (subscription view may not be present) -->
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add horizontal subscription progress bar in sheet -->
+            <xpath expr="//form[1]/sheet[1]/group[1]" position="before">
+                <div class="oe_title" style="margin-bottom: 20px;">
+                    <field name="subscription_state" invisible="1"/>
+                    <field name="progress_stage" invisible="1"/>
+                    <div style="margin-top: 15px; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <!-- Draft Stage - Clickable -->
+                            <button name="action_quotation_send" type="object" 
+                                    style="text-align: center; flex: 1; border: none; background: none; cursor: pointer; padding: 10px;"
+                                    invisible="progress_stage != 'draft'">
+                                <i class="fa fa-file-text-o fa-2x" style="color: #5cb85c;"/><br/>
+                                <small style="font-weight: bold;">Draft<br/>(Click to Send Quote)</small>
+                            </button>
+                            <div style="text-align: center; flex: 1;" invisible="progress_stage == 'draft'">
+                                <i class="fa fa-file-text-o fa-2x" style="color: #999;"/><br/>
+                                <small>Draft</small>
+                            </div>
+                            
+                            <div style="flex: 0; padding: 0 5px;">→</div>
+                            
+                            <!-- Confirmed Stage - Not clickable -->
+                            <div style="text-align: center; flex: 1;" invisible="progress_stage != 'confirmed'">
+                                <i class="fa fa-check-circle fa-2x" style="color: #5cb85c;"/><br/>
+                                <small style="font-weight: bold;">Confirmed</small>
+                            </div>
+                            <div style="text-align: center; flex: 1;" invisible="progress_stage == 'confirmed'">
+                                <i class="fa fa-check-circle fa-2x" style="color: #999;"/><br/>
+                                <small>Confirmed</small>
+                            </div>
+                            
+                            <div style="display: contents;" invisible="subscription_state == '7_upsell'">
+                                <div style="flex: 0; padding: 0 5px;">→</div>
+                                
+                                <!-- Contract Stage - Clickable -->
+                                <button name="action_send_contract" type="object" 
+                                        style="text-align: center; flex: 1; border: none; background: none; cursor: pointer; padding: 10px;"
+                                        invisible="progress_stage != 'pending_contract'">
+                                    <i class="fa fa-file-text fa-2x" style="color: #5cb85c;"/><br/>
+                                    <small style="font-weight: bold;">Contract<br/>(Click to Send)</small>
+                                </button>
+                                <div style="text-align: center; flex: 1;" invisible="progress_stage == 'pending_contract'">
+                                    <i class="fa fa-file-text fa-2x" style="color: #999;"/><br/>
+                                    <small>Contract</small>
+                                </div>
+                                
+                                <div style="flex: 0; padding: 0 5px;">→</div>
+                                
+                                <!-- Pending Client Sign Stage - Not clickable (waiting for customer) -->
+                                <div style="text-align: center; flex: 1;" invisible="progress_stage != 'pending_client_signature'">
+                                    <i class="fa fa-pencil-square-o fa-2x" style="color: #5cb85c;"/><br/>
+                                    <small style="font-weight: bold;">Pending Sign</small>
+                                </div>
+                                <div style="text-align: center; flex: 1;" invisible="progress_stage == 'pending_client_signature'">
+                                    <i class="fa fa-pencil-square-o fa-2x" style="color: #999;"/><br/>
+                                    <small>Pending Sign</small>
+                                </div>
+                                
+                                <div style="flex: 0; padding: 0 5px;">→</div>
+                                
+                                <!-- Schedule Install Stage - Clickable button when to_be_schedule, grey fallback otherwise -->
+                                <div style="display: contents;">
+                                    <button name="action_schedule_install_task" type="object" 
+                                            style="text-align: center; flex: 1; border: none; background: none; cursor: pointer; padding: 10px;"
+                                            invisible="progress_stage != 'schedule_install'">
+                                        <i class="fa fa-calendar fa-2x" style="color: #5cb85c;"/><br/>
+                                        <small style="font-weight: bold;">Schedule Install or Config<br/>(Click to Open Task)</small>
+                                    </button>
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage == 'schedule_install'">
+                                        <i class="fa fa-calendar fa-2x" style="color: #999;"/><br/>
+                                        <small>Schedule Install or Config</small>
+                                    </div>
+                                </div>
+                            
+                                    <div style="flex: 0; padding: 0 5px;">→</div>
+
+                                    <!-- Install/Config Stage - renewal quick-complete buttons -->
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage != 'pending_install' or not (subscription_state == '2_renewal' or renewal_of_id)">
+                                        <button name="action_mark_installation_completed" type="object"
+                                                style="border: none; background: none; cursor: pointer; padding: 8px 0; width: 100%;"
+                                                invisible="installation_state == 'completed'">
+                                            <i class="fa fa-wrench fa-2x" style="color: #5cb85c;"/><br/>
+                                            <small style="font-weight: bold;">Pending Install<br/>(Click to Complete)</small>
+                                        </button>
+                                        <button name="action_mark_configuration_completed" type="object"
+                                                style="border: none; background: none; cursor: pointer; padding: 8px 0; width: 100%;"
+                                                invisible="configuration_state == 'completed'">
+                                            <i class="fa fa-cogs fa-2x" style="color: #5cb85c;"/><br/>
+                                            <small style="font-weight: bold;">Pending Configuration<br/>(Click to Complete)</small>
+                                        </button>
+                                        <div style="padding-top: 4px;" invisible="installation_state != 'completed' or configuration_state != 'completed'">
+                                            <i class="fa fa-wrench fa-2x" style="color: #5cb85c;"/><br/>
+                                            <small style="font-weight: bold;">Pending Install or Config</small>
+                                        </div>
+                                    </div>
+                                    <!-- Default pending-install tile (non-renewals or when buttons are hidden) -->
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage != 'pending_install' or (subscription_state == '2_renewal' or renewal_of_id)">
+                                        <i class="fa fa-wrench fa-2x" style="color: #5cb85c;"/><br/>
+                                        <small style="font-weight: bold;">Pending Install or Config</small>
+                                    </div>
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage == 'pending_install'">
+                                        <i class="fa fa-wrench fa-2x" style="color: #999;"/><br/>
+                                        <small>Pending Install or Config</small>
+                                    </div>
+                                
+                                    <div style="flex: 0; padding: 0 5px;">→</div>
+
+                                    <!-- Pending activation state once install/config are completed and contract is active -->
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage != 'pending_activation'">
+                                        <i class="fa fa-bolt fa-2x" style="color: #5cb85c;" title="Pending Activation"/><br/>
+                                        <small style="font-weight: bold;">Pending Activation</small>
+                                    </div>
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage == 'pending_activation'">
+                                        <i class="fa fa-bolt fa-2x" style="color: #999;" title="Pending Activation"/><br/>
+                                        <small>Pending Activation</small>
+                                    </div>
+
+                                    <div style="flex: 0; padding: 0 5px;">→</div>
+                                
+                                    <!-- Final Stage - Active/Issues/Paused/Suspended/Churned -->
+                                    <!-- Active (3_progress, 4_paused, 5_renewed) -->
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage != 'active'">
+                                        <i class="fa fa-play-circle fa-2x" style="color: #5cb85c;" title="Active"/><br/>
+                                        <small style="font-weight: bold;">Active</small>
+                                    </div>
+                                    <!-- Renewed (5_renewed) -->
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage != 'renewed'">
+                                        <i class="fa fa-repeat fa-2x" style="color: #5cb85c;" title="Renewed"/><br/>
+                                        <small style="font-weight: bold;">Renewed</small>
+                                    </div>
+                                    <!-- Active with Issues (3_progress, contract not active) -->
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage != 'active_with_issues'">
+                                        <i class="fa fa-exclamation-triangle fa-2x" style="color: #f0ad4e;" title="Active with Issues"/><br/>
+                                        <small style="font-weight: bold; color: #f0ad4e;">Active w/ Issues</small>
+                                    </div>
+                                    <!-- Paused with Issues (4_paused but contract/install/config not completed) -->
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage != 'paused_with_issues'">
+                                        <i class="fa fa-pause-circle fa-2x" style="color: #f0ad4e;" title="Paused with Issues"/><br/>
+                                        <small style="font-weight: bold; color: #f0ad4e;">Paused w/ Issues</small>
+                                    </div>
+                                    <!-- Paused (4_paused) - Clickable -->
+                                    <button name="action_reactivate_subscription_wizard" type="object" 
+                                            style="text-align: center; flex: 1; border: none; background: none; cursor: pointer; padding: 10px;"
+                                            invisible="progress_stage != 'paused'">
+                                        <i class="fa fa-pause-circle fa-2x" style="color: #f0ad4e;"/><br/>
+                                        <small style="font-weight: bold; color: #f0ad4e;">Paused<br/>(Click to Reactivate)</small>
+                                    </button>
+                                    <!-- Suspended with Issues (8_suspend but contract/install/config not completed) -->
+                                    <button name="reactivate_service" type="object"
+                                            style="text-align: center; flex: 1; border: none; background: none; cursor: pointer; padding: 10px;"
+                                            invisible="progress_stage != 'suspended_with_issues'">
+                                        <i class="fa fa-ban fa-2x" style="color: #d9534f;" title="Suspended with Issues"/><br/>
+                                        <small style="font-weight: bold; color: #d9534f;">Suspended w/ Issues<br/>(Click to Reactivate)</small>
+                                    </button>
+                                    <!-- Suspended (8_suspend) -->
+                                    <button name="reactivate_service" type="object"
+                                            style="text-align: center; flex: 1; border: none; background: none; cursor: pointer; padding: 10px;"
+                                            invisible="progress_stage != 'suspended'">
+                                        <i class="fa fa-ban fa-2x" style="color: #d9534f;"/><br/>
+                                        <small style="font-weight: bold; color: #d9534f;">Suspended<br/>(Click to Reactivate)</small>
+                                    </button>
+                                    <!-- Churned (6_churn) -->
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage != 'churned'">
+                                        <i class="fa fa-times-circle fa-2x" style="color: #777;"/><br/>
+                                        <small style="font-weight: bold; color: #777;">Churned</small>
+                                    </div>
+                                    <!-- Default grey state for Active/Paused/Suspended/Churned when none match -->
+                                    <div style="text-align: center; flex: 1;" invisible="progress_stage == 'active' or progress_stage == 'renewed' or progress_stage == 'active_with_issues' or progress_stage == 'paused' or progress_stage == 'paused_with_issues' or progress_stage == 'suspended' or progress_stage == 'suspended_with_issues' or progress_stage == 'churned' or progress_stage == 'pending_activation'">
+                                        <i class="fa fa-play-circle fa-2x" style="color: #999;" title="Active"/><br/>
+                                        <small>Active</small>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+
+            <xpath expr="//field[@name='client_order_ref']" position="after">
+                <field name="renewal_of_id" readonly="1" options="{'no_open': True}"/>
+                <field name="upsell_from_id" readonly="1" options="{'no_open': True}"/>
+                <field name="service_change_mode"/>
+                <field name="install_required"/>
+                <field name="activation_required"/>
+            </xpath>
+            
+            <!-- Add smart buttons for contracts -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" type="object" name="action_view_contracts"
+                        icon="fa-briefcase" invisible="contract_count == 0">
+                    <field string="Contracts" name="contract_count" widget="statinfo"/>
+                </button>
+                <!-- FSM smart button commented out until FSM modules installed in test env
+                <button class="oe_stat_button" type="object" name="action_view_fsm_tasks"
+                        icon="fa-wrench" invisible="fsm_task_count == 0">
+                    <field string="Install Tasks" name="fsm_task_count" widget="statinfo"/>
+                </button>
+                -->
+            </xpath>
+            <xpath expr="//form/header/button[@name='action_quotation_send']" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//form/header/button[@name='action_confirm']" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//form/header//button[@name='action_draft']" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//button[@name='prepare_upsell_order']" position="attributes">
+                <attribute name="invisible">not is_subscription or subscription_state not in ["3_progress", "4_paused"] or state != "sale" or not has_active_contract</attribute>
+            </xpath>
+
+            <xpath expr="//form/header" position="inside">
+                <!-- Keep contract_state in scope for header modifiers even when Status tab is restricted -->
+                <field name="contract_state" invisible="1"/>
+                <field name="can_resend_contract" invisible="1"/>
+                <field name="docusign_connector_ids" invisible="1"/>
+                <field name="has_docusign_client_user_id" invisible="1"/>
+                <field name="progress_stage" invisible="1"/>
+                <field name="upsell_from_id" invisible="1"/>
+                <field name="has_active_contract" invisible="1"/>
+                <!-- <field name="next_action" invisible="1"/> FSM field - commented out until FSM modules installed -->
+                <button string="Send Contract" type="object" name="action_send_contract"
+                    class="btn-primary" icon="fa-file-signature"
+                    invisible="contract_state != 'pending_contract' or docusign_connector_ids"/>
+                <button string="Resend Contract" type="object" name="action_open_resend_contract_wizard"
+                    class="btn-secondary" icon="fa-refresh"
+                    invisible = "not can_resend_contract"/>
+                <button string="Change Payment Day" type="object" name="action_open_change_payment_day_wizard"
+                    class="btn-secondary" icon="fa-calendar" invisible="not is_subscription"/>
+                
+                <!-- Dynamic Next Action button - Commented out until FSM modules installed in test env
+                <button string="Create Install Task" type="object" name="action_next_step"
+                        class="btn-primary" icon="fa-calendar-plus"
+                        invisible="next_action != 'create_task'"/>
+                <button string="Schedule Install" type="object" name="action_next_step"
+                        class="btn-primary" icon="fa-calendar-check"
+                        invisible="next_action != 'schedule_task'"/>
+                <button string="Activate Service" type="object" name="action_next_step"
+                        class="btn-primary" icon="fa-power-off"
+                        invisible="next_action != 'activate_service'"/>
+                -->
+            </xpath>
+
+            <!-- Make order lines readonly when not in draft stage -->
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="readonly">progress_stage != 'draft'</attribute>
+            </xpath>
+            
+            <xpath expr="//form[1]/sheet[1]/notebook[1]" position="inside">
+                <page string="Status" name="status" invisible="upsell_from_id">
+                    <group name="status_group">
+                        <field name="contract_state" readonly="uid != 197"/>
+                        <field name="installation_state" readonly="uid != 197"/>
+                        <field name="configuration_state" readonly="uid != 197"/>
+                        <field name="service_change_mode" readonly="uid != 197"/>
+                        <field name="internet_service_state" readonly="uid != 197"/>
+                        <field name="iptv_service_state" readonly="uid != 197"/>
+                    </group>
+                </page>
+                <page string="Terms/Conditions" name="terms_conditions">
+                <group name="tc_group_2ca">
+                    <field name="cover_letter_id" readonly="1"/>
+                    <field name="terms_conditions_ids" widget="many2many_tags"/>
+                    <field name="clause_ids"/>
+                </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Force-save/readonly partner and sale_line on project task form to keep linkage stable -->
+    <record id="project_task_force_save_partner_sale_line" model="ir.ui.view">
+        <field name="name">project.task.form.force.save.partner.sale.line</field>
+        <field name="model">project.task</field>
+        <field name="priority" eval="200"/>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <!-- Use broad selectors to avoid layout drift across versions -->
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="force_save">1</attribute>
+                <attribute name="readonly">True</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

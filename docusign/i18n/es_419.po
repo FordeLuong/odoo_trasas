@@ -1,0 +1,2086 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* odoo_docusign
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0+e-20231127\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-28 13:35+0000\n"
+"PO-Revision-Date: 2026-01-28 07:36-0600\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.8\n"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid ""
+"-----BEGIN RSA PRIVATE KEY-----\n"
+"...\n"
+"-----END RSA PRIVATE KEY-----"
+msgstr ""
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "12345678-1234-1234-1234-123456789012"
+msgstr "12345678-1234-1234-1234-123456789012"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid ""
+"<br/>\n"
+"                                            <span class=\"o_label\">New</span>"
+msgstr ""
+"<br/>\n"
+"                                            <span class=\"o_label\">Nuevo</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid ""
+"<br/>\n"
+"                                            <span class=\"o_label\">Sent</span>"
+msgstr ""
+"<br/>\n"
+"                                            <span class=\"o_label\">Enviado</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid ""
+"<br/>\n"
+"                                        <span class=\"o_label\">Success Rate</span>"
+msgstr ""
+"<br/>\n"
+"                                        <span class=\"o_label\">Tasa de éxito</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid "<span class=\"o_label\">Completed</span>"
+msgstr "<span class=\"o_label\">Completado</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid "<span class=\"o_label\">Pending</span>"
+msgstr "<span class=\"o_label\">Pendiente</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "<span class=\"o_stat_text\">Completed</span>"
+msgstr "<span class=\"o_stat_text\">Completado</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "<span class=\"o_stat_text\">New</span>"
+msgstr "<span class=\"o_stat_text\">Nuevo</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "<span class=\"o_stat_text\">Pending Signatures</span>"
+msgstr "<span class=\"o_stat_text\">Pendientes de firmas</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "<span class=\"o_stat_text\">Sent</span>"
+msgstr "<span class=\"o_stat_text\">Enviado</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "<span class=\"text-muted\"> completed</span>"
+msgstr "<span class=\"text-muted\"> Completado</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "<span class=\"text-muted\"> days</span>"
+msgstr "<span class=\"text-muted\"> Días</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "<span class=\"text-muted\"> envelopes tracked</span>"
+msgstr "<span class=\"text-muted\"> Sobres rastreados</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "<span class=\"text-muted\"> envelopes</span>"
+msgstr "<span class=\"text-muted\"> sobres</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "<span class=\"text-muted\"> signers</span>"
+msgstr "<span class=\"text-muted\"> Firmantes</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.token_redirect_fail_page
+msgid ""
+"<span class=\"tick\" style=\"font-size: 90px;                             line-height: "
+"1;                             margin-bottom: -11px\">\n"
+"                ✕\n"
+"            </span>\n"
+"            <span>Failed! please contact the support</span>"
+msgstr ""
+"<span class=\"tick\" style=\"font-size: 90px;                             line-height: "
+"1;                             margin-bottom: -11px\">\n"
+"                ✕\n"
+"            </span>\n"
+"            <span>¡Fallado! Por favor, contacta con el soporte</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.token_redirect_success_page
+msgid ""
+"<span class=\"tick\" style=\"font-size: 90px;                             line-height: "
+"1;                             margin-bottom: -30px;\">\n"
+"                ✔\n"
+"            </span>\n"
+"            <span>Successfully generated token!</span>"
+msgstr ""
+"<span class=\"tick\" style=\"font-size: 90px;                             line-height: "
+"1;                             margin-bottom: -30px;\">\n"
+"                ✔\n"
+"            </span>\n"
+"            <span>¡Token generado con éxito!</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid "<span>Actions</span>"
+msgstr "<span>Acciones</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid "<span>View Records</span>"
+msgstr "<span>Ver récords</span>"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid ""
+"<strong>Deprecated:</strong> File system storage is deprecated. Signed documents are now "
+"automatically stored as Odoo attachments linked to envelope records. This provides better "
+"security, backup integration, and audit trails."
+msgstr ""
+"<strong>Obsoleto:</strong> El almacenamiento en el sistema de archivos está obsoleto. Los "
+"documentos firmados ahora se almacenan automáticamente como archivos adjuntos de Odoo "
+"vinculados a los registros de sobres. Esto proporciona mejor seguridad, integración de copias "
+"de seguridad y rastreos de auditoría."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__access_token
+msgid "Access Token"
+msgstr "Token de Acceso"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__account_type
+msgid "Account Type"
+msgstr "Tipo de cuenta"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/res_users.py:0
+#, python-format
+msgid "Account type can't be empty!"
+msgstr "¡El tipo de cuenta no puede estar vacío!"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__message_needaction
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__message_needaction
+msgid "Action Needed"
+msgstr "Acción requerida"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_environment
+msgid "Active Environment"
+msgstr "Entorno activo"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__activity_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__activity_ids
+msgid "Activities"
+msgstr "Actividades"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__activity_exception_decoration
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Decoración de Actividad  de Excepción"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__activity_state
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__activity_state
+msgid "Activity State"
+msgstr "Estado de la actividad"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__activity_type_icon
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Ícono de tipo de actividad"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "All recipients have signed the document"
+msgstr "Todos los destinatarios han firmado el documento"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid ""
+"An unexpected error occurred while checking signature status. Please try again or contact "
+"support."
+msgstr ""
+"Ocurrió un error inesperado al comprobar el estado de la firma. Por favor, inténtalo de nuevo "
+"o contacta con el soporte."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "An unexpected error occurred while downloading documents. Please contact support."
+msgstr "Ocurrió un error inesperado al descargar documentos. Por favor, contacta con soporte."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "An unexpected error occurred while sending documents. Please contact support."
+msgstr "Ocurrió un error inesperado al enviar documentos. Por favor, contacta con soporte."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid ""
+"An unexpected error occurred while sending the document to DocuSign. Please contact support."
+msgstr ""
+"Se produjo un error inesperado al enviar el documento a DocuSign. Por favor, contacta con "
+"soporte."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__message_attachment_count
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__message_attachment_count
+msgid "Attachment Count"
+msgstr "Nº de archivos adjuntos"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__attachment_ids
+msgid "Attachments (Only PDF)"
+msgstr "Adjuntos (Solo PDF)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__avg_completion_time
+msgid "Avg Completion Time (days)"
+msgstr "Tiempo medio de finalización (días)"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Avg. Time"
+msgstr "Tiempo promedio"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Cannot check status: DocuSign envelope ID is missing for %s."
+msgstr "No se puede comprobar el estado: falta el ID del sobre de DocuSign para %s."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Cannot mark document as %s without a DocuSign Envelope ID."
+msgstr "No se puede marcar el documento como %s sin un ID de sobre DocuSign."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Cannot send to %s yet. Please wait for %s to complete their signature first."
+msgstr "No puedo enviarlo a %s todavía. Por favor, espera a que %s complete su firma primero."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__code
+msgid "Code"
+msgstr "Código"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__total_completed
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__state__completed
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector_lines__status__completed
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Completed"
+msgstr "Completado"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__recent_completed
+msgid "Completed Last 7 Days"
+msgstr "Completados en los últimos 7 días"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid "Completed Records"
+msgstr "Registros completos"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__completion_rate
+msgid "Completion Rate (%)"
+msgstr "Tasa de finalización (%)"
+
+#. module: odoo_docusign
+#: model:ir.model,name:odoo_docusign.model_res_config_settings
+msgid "Config Settings"
+msgstr "Ajustes de configuración"
+
+#. module: odoo_docusign
+#: model:ir.ui.menu,name:odoo_docusign.docusign_menu_users
+msgid "Configurations"
+msgstr "Configuraciones"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__connector_line_ids
+msgid "Connector Lines"
+msgstr "Líneas conectoras"
+
+#. module: odoo_docusign
+#: model:ir.model,name:odoo_docusign.model_res_partner
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__contact_id
+msgid "Contact"
+msgstr "Contacto"
+
+#. module: odoo_docusign
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__model__contacts
+msgid "Contacts"
+msgstr "Contactos"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Contract %(event)s to %(recipient)s at %(time)s"
+msgstr "Contrato %(event)s a %(recipient)s en %(time)s"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Contract values confirmed from DocuSign: %s"
+msgstr "Valores de contrato confirmados por DocuSign: %s"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid ""
+"Contract values updated from completed DocuSign envelope (values differ from original):<br/>%s"
+msgstr ""
+"Valores de contrato actualizados desde el sobre DocuSign completado (los valores difieren del "
+"original):<br/>%s"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Copy this URL into DocuSign Admin Console → Connect → Add Configuration"
+msgstr ""
+"Copia esta URL en la Consola de Administración de DocuSign → Conecta → Añade Configuración"
+
+#. module: odoo_docusign
+#: model_terms:ir.actions.act_window,help:odoo_docusign.action_docusign_dashboard
+msgid "Create your first DocuSign dashboard"
+msgstr "Crea tu primer panel de control de DocuSign"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__create_uid
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__create_uid
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__create_uid
+#: model:ir.model.fields,field_description:odoo_docusign.field_message_wizard__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__create_date
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__create_date
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__create_date
+#: model:ir.model.fields,field_description:odoo_docusign.field_message_wizard__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+msgid "Customer Signed"
+msgstr "Firmado por el cliente"
+
+#. module: odoo_docusign
+#: model:ir.ui.menu,name:odoo_docusign.menu_docusign_dashboard
+msgid "Dashboard"
+msgstr "Escritorio"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__name
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Dashboard Name"
+msgstr "Nombre del tablero"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_demo_user_guid
+msgid "Demo API User GUID"
+msgstr "GUID de usuario de la API de demostración"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_demo_account_id
+msgid "Demo Account ID"
+msgstr "ID de cuenta demo"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_demo_base_uri
+msgid "Demo Base URI"
+msgstr "URI base de demostración"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_demo_integration_key
+msgid "Demo Integration Key"
+msgstr "Clave de Integración de Demos"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_demo_private_key
+msgid "Demo RSA Private Key"
+msgstr "Demo RSA Clave Privada"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_demo_secret_key
+msgid "Demo Secret Key"
+msgstr "Clave secreta de demostración"
+
+#. module: odoo_docusign
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__res_config_settings__docusign_environment__demo
+msgid "Demo/Sandbox"
+msgstr "Demo/Sandbox"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Demo/Sandbox API User GUID (UUID format, required for JWT)"
+msgstr "GUID de usuario de la API de Demo/Sandbox (formato UUID, necesario para JWT)"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Demo/Sandbox API base URL"
+msgstr "URL base de la API de demostración/sandbox"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Demo/Sandbox Account ID"
+msgstr "ID de cuenta de demo/sandbox"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Demo/Sandbox Environment"
+msgstr "Entorno de Demo/Sandbox"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Demo/Sandbox Integration Key (Client ID)"
+msgstr "Clave de integración demo/sandbox (ID de cliente)"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Demo/Sandbox Secret Key (Client Secret)"
+msgstr "Clave secreta de demo/sandbox (Secreto del cliente)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_demo_test_email
+msgid "Demo/Sandbox Test Email"
+msgstr "Correo electrónico de prueba de demostración/sandbox"
+
+#. module: odoo_docusign
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__res_users__account_type__dev
+msgid "Developer"
+msgstr "Desarrollador"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__display_name
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__display_name
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__display_name
+#: model:ir.model.fields,field_description:odoo_docusign.field_message_wizard__display_name
+msgid "Display Name"
+msgstr "Nombre para mostrar"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__docs_policy
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__docs_policy
+msgid "Docs Policy"
+msgstr "Política de Docs"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "DocuSign"
+msgstr "DocuSign"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_demo_user_guid
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_prod_user_guid
+msgid ""
+"DocuSign API User GUID (UUID format). Required for JWT authentication. Find in DocuSign Admin "
+"> Users > API Username > Actions > Edit"
+msgstr ""
+"GUID de usuario de la API de DocuSign (formato UUID). Obligatorio para la autenticación JWT. "
+"Encontrar en DocuSign administrador > usuarios > API nombre de usuario > acciones > editar"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__user_account_id
+msgid "DocuSign Account"
+msgstr "Cuenta DocuSign"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "DocuSign Completion"
+msgstr "Finalización de DocuSign"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "DocuSign Custom Fields"
+msgstr "Campos personalizados de DocuSign"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "DocuSign Custom Fields - Values Changed"
+msgstr "Campos personalizados de DocuSign - Valores modificados"
+
+#. module: odoo_docusign
+#: model:ir.actions.act_window,name:odoo_docusign.action_docusign_dashboard
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "DocuSign Dashboard"
+msgstr "Panel de control de DocuSign"
+
+#. module: odoo_docusign
+#: model:ir.model,name:odoo_docusign.model_docusign_dashboard
+msgid "DocuSign Dashboard Statistics"
+msgstr "Estadísticas del Panel de Control de DocuSign"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_account_bank_statement_line__docusign_connector_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_account_move__docusign_connector_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_account_payment__docusign_connector_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_purchase_order__docusign_connector_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_partner__docusign_connector_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__docusign_connector_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_sale_order__docusign_connector_ids
+msgid "DocuSign Documents"
+msgstr "Documentos de DocuSign"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "DocuSign Integration Settings"
+msgstr "Configuración de integración de DocuSign"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid ""
+"DocuSign JWT authentication not configured. Please configure in Settings → DocuSign Settings"
+msgstr ""
+"Autenticación JWT de DocuSign no configurada. Por favor, configúralo en Configuración → "
+"Configuración de DocuSign"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "DocuSign Recipient Event"
+msgstr "Evento de destinatario de DocuSign"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__recipient_id
+msgid "DocuSign Recipient ID"
+msgstr "ID de destinatario de DocuSign"
+
+#. module: odoo_docusign
+#: model:ir.actions.act_window,name:odoo_docusign.action_docusign_config
+#: model:ir.ui.menu,name:odoo_docusign.menu_docusign_config
+msgid "DocuSign Settings"
+msgstr "Configuración de DocuSign"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "DocuSign Status Update"
+msgstr "Actualización de estado de DocuSign"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "DocuSign Webhook Event"
+msgstr "Evento de webhook de DocuSign"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid "DocuSign authentication not configured. Please contact administrator."
+msgstr "Autenticación DocuSign no configurada. Por favor, contacta con el administrador."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__client_user_id
+msgid "DocuSign clientUserId to enable embedded signing"
+msgstr "ClientUserId de DocuSign para habilitar la firma integrada"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_demo_base_uri
+msgid "DocuSign demo/sandbox API base URL (e.g., https://demo.docusign.net)"
+msgstr "URL base de la demo/sandbox de DocuSign (por ejemplo, https://demo.docusign.net)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_demo_account_id
+msgid "DocuSign demo/sandbox account ID"
+msgstr "ID de cuenta demo/sandbox de DocuSign"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_demo_integration_key
+msgid "DocuSign demo/sandbox integration key (Client ID)"
+msgstr "Clave de integración demo/sandbox de DocuSign (ID de cliente)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_demo_secret_key
+msgid "DocuSign demo/sandbox secret key (Client Secret)"
+msgstr "Clave secreta de demo/sandbox de DocuSign (Secreto del cliente)"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid "DocuSign did not return a signing URL."
+msgstr "DocuSign no devolvió una URL de firma."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid ""
+"DocuSign is not configured. Please configure credentials in Settings -> DocuSign Settings"
+msgstr ""
+"DocuSign no está configurado. Por favor, configura las credenciales en Configuración -> "
+"Configuración de DocuSign"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_prod_base_uri
+msgid "DocuSign production API base URL (e.g., https://na3.docusign.net)"
+msgstr "URL base de la API de producción de DocuSign (por ejemplo, https://na3.docusign.net)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_prod_account_id
+msgid "DocuSign production account ID"
+msgstr "ID de cuenta de producción de DocuSign"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_prod_integration_key
+msgid "DocuSign production integration key (Client ID)"
+msgstr "Clave de integración de producción de DocuSign (ID de cliente)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_prod_secret_key
+msgid "DocuSign production secret key (Client Secret)"
+msgstr "Clave secreta de producción de DocuSign (Secreto del cliente)"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid "DocuSign recipient view failed (%s): %s"
+msgstr "Error en la vista del destinatario de DocuSign (%s): %s"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Document %s sent to %s for signature"
+msgstr "El documento %s enviado a %s para su firma"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Document Completed"
+msgstr "Documento completado"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__name
+msgid "Document Name"
+msgstr "Nombre del documento"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Document Sent"
+msgstr "Documento enviado"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Document declined by %s"
+msgstr "Documento rechazado por %s"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Document delivered to %s"
+msgstr "Documento entregado a %s"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Document download failed: Missing DocuSign envelope ID for %s."
+msgstr "Descarga de documento fallida: falta el ID del sobre DocuSign para %s."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Document download failed: Missing DocuSign envelope ID."
+msgstr "Descarga de documento fallida: falta el ID del sobre de DocuSign."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Document sent successfully to: %s"
+msgstr "Documento enviado con éxito a: %s"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Document sent to %s"
+msgstr "Documento enviado a %s"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Document sent to %s for signature"
+msgstr "Documento enviado a %s para su firma"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Document signed by %s"
+msgstr "Documento firmado por %s"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Document signed by %s (verified via status check)"
+msgstr "Documento firmado por %s (verificado mediante comprobación de estado)"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Document signed by %s (webhook)"
+msgstr "Documento firmado por %s (webhook)"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Document signed by %s and downloaded successfully"
+msgstr "Documento firmado por %s y descargado correctamente"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Document voided for %s"
+msgstr "Documento anulado por %s"
+
+#. module: odoo_docusign
+#: model:ir.ui.menu,name:odoo_docusign.docusign_menu_dashboard
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_res_partner_tree
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+msgid "Documents"
+msgstr "Documentos"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Documents downloaded and stored successfully"
+msgstr "Documentos descargados y almacenados correctamente"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Documents have already been sent to all recipients."
+msgstr "Los documentos ya han sido enviados a todos los destinatarios."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Documents sent successfully to all recipients!"
+msgstr "¡Documentos enviados con éxito a todos los destinatarios!"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_res_partner_form
+msgid ""
+"Documents will be sent one by one, following the order of the recipients listed below. Click "
+"the \"Send\" button to initiate the process, and after each recipient signs, click the "
+"\"Download\" button to retrieve their signed documents before moving to the next recipient."
+msgstr ""
+"Los documentos se enviarán uno a uno, siguiendo el orden de los destinatarios que se indican "
+"a continuación. Haz clic en el botón \"Enviar\" para iniciar el proceso y, después de que "
+"cada destinatario firme, haz clic en el botón \"Descargar\" para recuperar sus documentos "
+"firmados antes de pasar al siguiente destinatario."
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_res_partner_form
+msgid ""
+"Documents will be sent to all recipients at the same time. Click the \"Send\" button to start "
+"the process, and use the \"Download\" button to retrieve signed documents from recipients who "
+"have completed their signatures."
+msgstr ""
+"Los documentos se enviarán a todos los destinatarios al mismo tiempo. Haz clic en el botón "
+"\"Enviar\" para iniciar el proceso y utiliza el botón \"Descargar\" para recuperar documentos "
+"firmados de los destinatarios que hayan completado sus firmas."
+
+#. module: odoo_docusign
+#: model:ir.ui.menu,name:odoo_docusign.docusign_menu
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_res_partner_form
+msgid "Docusign"
+msgstr "DocuSign"
+
+#. module: odoo_docusign
+#: model:ir.model,name:odoo_docusign.model_docusign_connector_lines
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_res_partner_form
+msgid "Docusign Connector Lines"
+msgstr "Líneas conectoras Docusign"
+
+#. module: odoo_docusign
+#: model:ir.actions.act_window,name:odoo_docusign.action_docusign_connector_action_invoice
+#: model:ir.actions.act_window,name:odoo_docusign.action_docusign_connector_action_partner
+#: model:ir.actions.act_window,name:odoo_docusign.action_docusign_connector_action_purchase
+#: model:ir.actions.act_window,name:odoo_docusign.action_docusign_connector_action_sale
+msgid "Docusign Connectors"
+msgstr "Conectores Docusign"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_invoice_form_inherit_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_partner_form_inherit_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_purchase_order_form_inherit_docusign
+msgid "Docusign Docs"
+msgstr "Documentos de DocuSign"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_user_setting
+msgid "Docusign Login"
+msgstr "Inicio de sesión de Docusign"
+
+#. module: odoo_docusign
+#: model:ir.actions.act_window,name:odoo_docusign.docusign_connector_res_partner_action
+msgid "Docusign Menu"
+msgstr "Menú Docusign"
+
+#. module: odoo_docusign
+#: model:ir.model,name:odoo_docusign.model_docusign_connector
+msgid "Docusign Records"
+msgstr "Registros de Docusign"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_user_setting
+msgid "Docusign Settings"
+msgstr "Configuración de Docusign"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_res_partner_form
+msgid "Download Signed Documents"
+msgstr "Descargar documentos firmados"
+
+#. module: odoo_docusign
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector_lines__status__draft
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Draft envelope discarded"
+msgstr "Sobre de borrador descartado"
+
+#. module: odoo_docusign
+#: model:ir.model.constraint,message:odoo_docusign.constraint_docusign_connector_lines_envelope_id_partner_unique
+msgid "Each partner can appear only once per envelope!"
+msgstr "¡Cada socio puede aparecer sólo una vez por sobre!"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__email
+msgid "Email"
+msgstr "Email"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Email address is missing for recipient: %s. Please update the contact information."
+msgstr ""
+"Falta la dirección de correo electrónico del destinatario: %s. Por favor, actualice la "
+"información de contacto."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__client_user_id
+msgid "Embedded Client User ID"
+msgstr "ID de usuario de cliente integrado"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__embedded_completed_at
+msgid "Embedded Signing Completed At"
+msgstr "Firma integrada completada en"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__embedded_started_at
+msgid "Embedded Signing Started At"
+msgstr "La firma integrada comenzó en"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__embedded_signing_url
+msgid "Embedded Signing URL"
+msgstr "URL de firma incrustada"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Enable HMAC: Check the box"
+msgstr "Activar HMAC: Marque la casilla"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Enter Configuration Name (e.g., \"Odoo Integration\")"
+msgstr "Introduce el nombre de configuración (por ejemplo, \"Integración Odoo\")"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__envelope_id
+msgid "Envelope ID"
+msgstr "ID del sobre"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Envelope Status"
+msgstr "Estado del sobre"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope completed by all recipients"
+msgstr "Sobre completado por todos los destinatarios"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope corrected"
+msgstr "Sobre corregido"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope created"
+msgstr "Sobre creado"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope declined by a recipient"
+msgstr "Sobre rechazado por un destinatario"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope deleted after send"
+msgstr "Sobre eliminado después del envío"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope opened by recipients"
+msgstr "Sobre abierto por los destinatarios"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope permanently removed by DocuSign"
+msgstr "Sobre eliminado permanentemente por DocuSign"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope queued for purge"
+msgstr "Sobre en cola para purga"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope resent"
+msgstr "Sobre reenviado"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope resent to recipient"
+msgstr "Sobre reenviado al destinatario"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope sent to recipients"
+msgstr "Sobre enviado a los destinatarios"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope status updated: %s"
+msgstr "Estado del sobre actualizado: %s"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Envelope voided or expired"
+msgstr "Sobre anulado o vencido"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid ""
+"Events to include: Select \"Envelope Sent\", \"Envelope Delivered\", \"Envelope Completed\", "
+"\"Envelope Declined\", \"Envelope Voided\""
+msgstr ""
+"Eventos a incluir: Selecciona \"Sobre enviado\", \"Sobre entregado\", \"Sobre completado\", "
+"\"Sobre rechazado\", \"Sobre anulado\""
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid "Failed to generate JWT token: {}"
+msgstr "No se ha podido generar el token JWT: {}"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/res_users.py:0
+#, python-format
+msgid "Failed to refresh access token. Please re-authenticate."
+msgstr "No se pudo actualizar el token de acceso. Por favor, vuelve a autenticar."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/res_users.py:0
+#, python-format
+msgid "Failed to refresh access token: {}"
+msgstr "No se pudo actualizar el token de acceso: {}"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "File Storage"
+msgstr "Almacenamiento de archivos"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__responsible_id
+msgid "Filter by Responsible"
+msgstr "Filtrar por Responsable"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Filters"
+msgstr "Filtros"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__message_follower_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__message_follower_ids
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__message_partner_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidores (Contactos)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector__activity_type_icon
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Icono de Font Awesome ej. fa-tasks"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__date_from
+msgid "From Date"
+msgstr "Desde"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_user_setting
+msgid "Get Access Token"
+msgstr "Obtener token de acceso"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_invoice_form_inherit_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_partner_form_inherit_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_purchase_order_form_inherit_docusign
+msgid "Get Signature"
+msgstr "Consigue la firma"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_user_setting
+msgid "Get login with Docusign account"
+msgstr "Inicia sesión con la cuenta de Docusign"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Go to: Settings → Connect → Add Configuration"
+msgstr "Ve a: Configuración → Conectar → Añadir configuración"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "HMAC Key: Enter the same HMAC key from the field above"
+msgstr "Clave HMAC: Introduce la misma clave HMAC desde el campo anterior"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__has_message
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__has_message
+msgid "Has Message"
+msgstr "Tiene mensaje"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_user_setting
+msgid "Here you can log-in with your Docusign account to get connected with Odoo."
+msgstr "Aquí puedes iniciar sesión con tu cuenta de Docusign para conectarte con Odoo."
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "How to configure DocuSign Connect:"
+msgstr "Cómo configurar DocuSign Connect:"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__id
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__id
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__id
+#: model:ir.model.fields,field_description:odoo_docusign.field_message_wizard__id
+msgid "ID"
+msgstr "ID"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__activity_exception_icon
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__activity_exception_icon
+msgid "Icon"
+msgstr "Icono"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector__activity_exception_icon
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Icono para indicar una actividad de excepción."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector__message_needaction
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si está marcado, hay nuevos mensajes que requieren tu atención."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector__message_has_error
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector__message_has_sms_error
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__message_has_error
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si se encuentra seleccionado, algunos mensajes tienen error de envío."
+
+#. module: odoo_docusign
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__docs_policy__in
+msgid "In Hierarchy"
+msgstr "En la jerarquía"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__client_id
+msgid "Integration Key"
+msgstr "Clave de integración"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid "Invalid RSA private key configured. Please check DocuSign Settings."
+msgstr "RSA inválida configurada. Por favor, revisa la configuración de DocuSign."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Invalid email address for recipient %s: %s"
+msgstr "Dirección de correo electrónico inválida para el destinatario %s: %s"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__invoice_id
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__model__invoice
+msgid "Invoice"
+msgstr "Factura"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__message_is_follower
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__message_is_follower
+msgid "Is Follower"
+msgstr "Es seguidor"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid "JWT authentication failed: {}. Please re-authenticate or check DocuSign settings."
+msgstr ""
+"Fallido la autenticación JWT: {}. Por favor, re-autentifíquese o revise la configuración de "
+"DocuSign."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid "JWT authentication requires PyJWT library. Please contact administrator."
+msgstr ""
+"La autenticación JWT requiere la biblioteca PyJWT. Por favor, contacta con el administrador."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/docu_client.py:0
+#, python-format
+msgid "JWT authentication requires cryptography library. Please contact administrator."
+msgstr ""
+"La autenticación JWT requiere una biblioteca de criptografía. Por favor, contacta con el "
+"administrador."
+
+#. module: odoo_docusign
+#: model:ir.model,name:odoo_docusign.model_account_move
+msgid "Journal Entry"
+msgstr "Asiento contable"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Last 7 Days"
+msgstr "Últimos 7 Días"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__embedded_event
+msgid "Last Embedded Event"
+msgstr "Último evento incrustado"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__write_uid
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__write_uid
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__write_uid
+#: model:ir.model.fields,field_description:odoo_docusign.field_message_wizard__write_uid
+msgid "Last Updated by"
+msgstr "Actualizado por"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__write_date
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__write_date
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__write_date
+#: model:ir.model.fields,field_description:odoo_docusign.field_message_wizard__write_date
+msgid "Last Updated on"
+msgstr "Actualizado el"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__linked_record_id
+msgid "Linked Record"
+msgstr "Registro vinculado"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__login_url
+msgid "Login URL"
+msgstr "URL de login"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Login to DocuSign Admin Console (admin.docusign.com or admindemo.docusign.com)"
+msgstr ""
+"Iniciar sesión en la Consola de Administración de DocuSign (admin.docusign.com o "
+"admindemo.docusign.com)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_message_wizard__message
+msgid "Message"
+msgstr "Mensaje"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__message_has_error
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__message_has_error
+msgid "Message Delivery error"
+msgstr "Error de Envío de Mensaje"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__message_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__message_ids
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__model
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__res_model
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+msgid "Model"
+msgstr "Modelo"
+
+#. module: odoo_docusign
+#: model_terms:ir.actions.act_window,help:odoo_docusign.action_docusign_dashboard
+msgid "Monitor your DocuSign envelope statistics, completion rates, and pending signatures."
+msgstr ""
+"Supervisa las estadísticas de tu sobre de DocuSign, las tasas de finalización y las firmas "
+"pendientes."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__my_activity_date_deadline
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Mi fecha límite de actividad"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__total_new
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__state__new
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+msgid "New"
+msgstr "Nuevo"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid "New Records"
+msgstr "Nuevos récords"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__activity_calendar_event_id
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "Próximo evento del calendario de actividades"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__activity_date_deadline
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Fecha límite de la siguiente actividad"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__activity_summary
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__activity_summary
+msgid "Next Activity Summary"
+msgstr "Resumen de la siguiente actividad"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__activity_type_id
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__activity_type_id
+msgid "Next Activity Type"
+msgstr "Siguiente tipo de actividad"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/res_users.py:0
+#, python-format
+msgid "No access token available. Please authenticate with DocuSign."
+msgstr "No hay token de acceso disponible. Por favor, autentica con DocuSign."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "No recipients available for document download."
+msgstr "No hay destinatarios disponibles para descargar documentos."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/res_users.py:0
+#, python-format
+msgid "No refresh token available. Please re-authenticate."
+msgstr "No hay token de actualización disponible. Por favor, vuelve a autenticar."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/res_users.py:0
+#, python-format
+msgid ""
+"Not a valid request for access token\n"
+"Try again in few seconds after re-trying login with above button."
+msgstr ""
+"No es una solicitud válida para el token de acceso\n"
+"Inténtalo de nuevo en unos segundos después de intentar iniciar sesión con el botón de arriba."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/res_users.py:0
+#, python-format
+msgid "Not a valid request for user info."
+msgstr "No es una solicitud válida de información de usuario."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__message_needaction_counter
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Número de acciones"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__message_has_error_counter
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__message_has_error_counter
+msgid "Number of errors"
+msgstr "Número de errores"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector__message_needaction_counter
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Número de mensajes que requieren acción"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector__message_has_error_counter
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Número de mensajes con error de envío"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.message_wizard_form
+msgid "Ok"
+msgstr "Ok"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Only PDF files are supported. Please convert %s to PDF format."
+msgstr "Solo se admiten archivos PDF. Por favor, convierta %s a formato PDF."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__total_open
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__model__open
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__state__open
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+msgid "Open"
+msgstr "Abierto"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/res_users.py:0
+#, python-format
+msgid ""
+"Package docusign-esign not found. If you plan to use it, please install the docusign-esign "
+"library from https://pypi.org/project/docusign-esign/"
+msgstr ""
+"Paquete docusign-esign no encontrado. Si planeas usarlo, por favor instala la biblioteca de "
+"docusign-esign de https://pypi.org/project/docusign-esign/"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__partner_id
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+msgid "Partner"
+msgstr "Socio"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__recipients_pending
+msgid "Pending Signatures"
+msgstr "Pendientes de firmas"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Please add at least one recipient before sending documents."
+msgstr "Por favor, añade al menos un destinatario antes de enviar los documentos."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Please attach at least one PDF document before sending."
+msgstr "Por favor, adjunte al menos un documento PDF antes de enviarlo."
+
+#. module: odoo_docusign
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__res_config_settings__docusign_environment__production
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__res_users__account_type__prod
+msgid "Production"
+msgstr "Producción"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_prod_user_guid
+msgid "Production API User GUID"
+msgstr "API de producción GUID de usuario"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Production API User GUID (UUID format, required for JWT)"
+msgstr "API de producción GUID de usuario (formato UUID, necesario para JWT)"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Production API base URL"
+msgstr "URL base de la API de producción"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_prod_account_id
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Production Account ID"
+msgstr "ID de cuenta de producción"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_prod_base_uri
+msgid "Production Base URI"
+msgstr "URI base de producción"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Production Environment"
+msgstr "Entorno de producción"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_prod_integration_key
+msgid "Production Integration Key"
+msgstr "Clave de Integración de Producción"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Production Integration Key (Client ID)"
+msgstr "Clave de Integración de Producción (ID de Cliente)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_prod_private_key
+msgid "Production RSA Private Key"
+msgstr "Clave privada RSA de producción"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_prod_secret_key
+msgid "Production Secret Key"
+msgstr "Llave secreta de producción"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Production Secret Key (Client Secret)"
+msgstr "Llave secreta de producción (Secreto del cliente)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__model__purchase
+msgid "Purchase"
+msgstr "Compra"
+
+#. module: odoo_docusign
+#: model:ir.model,name:odoo_docusign.model_purchase_order
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__purchase_id
+msgid "Purchase Order"
+msgstr "Orden de compra"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Quick Stats"
+msgstr "Estadísticas rápidas"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "RSA Private Key (JWT)"
+msgstr "Clave privada RSA (JWT)"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_demo_private_key
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_prod_private_key
+msgid ""
+"RSA private key for JWT authentication (PEM format). Required for automatic token generation."
+msgstr ""
+"Clave privada RSA para la autenticación JWT (formato PEM). Necesario para la generación "
+"automática de tokens."
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid ""
+"RSA private key in PEM format for JWT authentication. Required for automatic token generation "
+"without user interaction. Generate via DocuSign Admin → Apps and Keys → Add RSA Keypair."
+msgstr ""
+"Clave privada RSA en formato PEM para autenticación JWT. Requerida para la generación "
+"automática de tokens sin interacción del usuario. Genera mediante DocuSign Admin → "
+"aplicaciones y claves → añadir un par de claves RSA."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__rating_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__rating_ids
+msgid "Ratings"
+msgstr "Calificaciones"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Recent Activity"
+msgstr "Actividad Reciente"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Recipient"
+msgstr "Destinatario"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Recipient %s must have an email address before sending documents."
+msgstr ""
+"El destinatario %s debe tener una dirección de correo electrónico antes de enviar los "
+"documentos."
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Recipient Status"
+msgstr "Estado de receptor"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Recipient chose Finish Later"
+msgstr "El destinatario eligió Finalizar más tarde"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Recipient completed their actions"
+msgstr "El destinatario completó sus acciones"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Recipient declined to sign"
+msgstr "El destinatario se negó a firmar"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Recipient delegation recorded"
+msgstr "Delegación receptora registrada"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Recipient email auto-responded or bounced"
+msgstr "El correo electrónico del destinatario respondió automáticamente o rebotó"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Recipient failed authentication"
+msgstr "Falló la autenticación del destinatario"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Recipient notified to sign"
+msgstr "Se notificó al destinatario que firme"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Recipient opened the envelope"
+msgstr "El destinatario abrió el sobre."
+
+#. module: odoo_docusign
+#: model:ir.model.constraint,message:odoo_docusign.constraint_docusign_connector_lines_partner_required
+msgid "Recipient partner is required!"
+msgstr "¡Se requiere socio destinatario!"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Recipient reassigned"
+msgstr "Destinatario reasignado"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_res_partner_form
+msgid "Recipients"
+msgstr "Destinatarios"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__record_id
+msgid "Record"
+msgstr "Grabar"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__record_name
+msgid "Record Name"
+msgstr "Nombre Registro"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__redirect_url
+msgid "Redirect URL"
+msgstr "Redireccionar URL"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid "Refresh Statistics"
+msgstr "Estadísticas de actualización"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__refresh_token
+msgid "Refresh Token"
+msgstr "Actualizar token"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "Reminder email sent"
+msgstr ""
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__responsible_id
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+msgid "Responsible"
+msgstr "Responsable"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__activity_user_id
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__activity_user_id
+msgid "Responsible User"
+msgstr "Usuario responsable"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__message_has_sms_error
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Error de entrega del SMS"
+
+#. module: odoo_docusign
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__model__sale
+msgid "Sale"
+msgstr "Venta"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__sale_id
+msgid "Sale Order"
+msgstr "Pedido de venta"
+
+#. module: odoo_docusign
+#: model:ir.model,name:odoo_docusign.model_sale_order
+msgid "Sales Order"
+msgstr "Pedido de Ventas"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Save the configuration"
+msgstr "Guardar la configuración"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__client_secret
+msgid "Secret Key"
+msgstr "Clave secreta"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_environment
+msgid "Select which DocuSign environment to use"
+msgstr "Selecciona qué entorno DocuSign usar"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Select which DocuSign environment to use for API calls"
+msgstr "Selecciona qué entorno DocuSign usar para las llamadas a la API"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_res_partner_form
+msgid "Send Documents for Signatures"
+msgstr "Envía documentos para firmas"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__send_status
+msgid "Send Status"
+msgstr "Estado de envío"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__total_sent
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__state__sent
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector_lines__status__sent
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Sent"
+msgstr "Enviado"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__recent_sent
+msgid "Sent Last 7 Days"
+msgstr "Enviado hace 7 días"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_kanban
+msgid "Sent Records"
+msgstr "Registros enviados"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__name
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_webhook_hmac_key
+msgid ""
+"Shared secret for HMAC signature verification. Generate a strong random key (32+ characters) "
+"and enter the same value in DocuSign Connect configuration."
+msgstr ""
+"Secreto compartido para la verificación de la firma HMAC. Genera una clave aleatoria fuerte "
+"(32+ caracteres) e introduce el mismo valor en la configuración de DocuSign Connect."
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid ""
+"Shared secret for webhook signature verification. Generate a strong random key (32+ chars) "
+"and enter the same value in DocuSign Connect \"HMAC Key\" field."
+msgstr ""
+"Secreto compartido para la verificación de la firma del webhook. Genera una clave aleatoria "
+"fuerte (32+ caracteres) e introduce el mismo valor en el campo \"HMAC Key\" de DocuSign "
+"Connect."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__sign_status
+msgid "Sign Status"
+msgstr "Estado del signo"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Signature Confirmed"
+msgstr "Firma confirmada"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__recipients_completed
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Signed"
+msgstr "Firmado"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__signed_attachment_ids
+msgid "Signed Attachments"
+msgstr "Anexos firmados"
+
+#. module: odoo_docusign
+#: model:ir.model.fields.selection,name:odoo_docusign.selection__docusign_connector__docs_policy__out
+msgid "Simultaneously"
+msgstr "Simultáneamente"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__state
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_search_view
+msgid "State"
+msgstr "Estado"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__status
+msgid "Status"
+msgstr "Estado"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Status Overview"
+msgstr "Resumen del estado"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector__activity_state
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Estado basado en actividades\n"
+"Vencida: la fecha tope ya ha pasado\n"
+"Hoy: La fecha tope es hoy\n"
+"Planificada: futuras actividades."
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0
+#, python-format
+msgid "Status check completed successfully"
+msgstr "Comprobación de estado completada con éxito"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Success Rate"
+msgstr "Tasa de éxito"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/models/models.py:0 code:addons/odoo_docusign/models/res_users.py:0
+#, python-format
+msgid "Successful"
+msgstr "Exitoso"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__date_to
+msgid "To Date"
+msgstr "Hasta"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_users__token_expires_at
+msgid "Token Expires At"
+msgstr "El token caduca a las"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__total_recipients
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Total Recipients"
+msgstr "Total de receptores"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_dashboard__total_records
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.view_docusign_dashboard_form
+msgid "Total Records"
+msgstr "Total Records"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector__activity_exception_decoration
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Tipo de actividad de excepción registrada."
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "URL to Publish: Copy the webhook URL above"
+msgstr "URL para publicar: Copia la URL del webhook arriba"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/controllers.py:0
+#, python-format
+msgid "Unable to fetch code and access token!"
+msgstr "¡No se puede obtener código ni token de acceso!"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__un_signed_attachment_ids
+msgid "Unsigned Attachments"
+msgstr "Adjuntos sin firmar"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.docusign_connector_res_partner_form
+msgid "Update Document Statuses"
+msgstr "Actualizar el estado de los documentos"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_webhook_url
+msgid ""
+"Use this URL in DocuSign Connect configuration. Copy and paste into DocuSign Admin > Connect "
+"> Add Configuration"
+msgstr ""
+"Utiliza esta URL en la configuración de DocuSign Connect. Copiar y pegar en DocuSign Admin > "
+"conectar > añadir configuración"
+
+#. module: odoo_docusign
+#: model:ir.model,name:odoo_docusign.model_res_users
+msgid "User"
+msgstr "Usuario"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "Webhook Configuration"
+msgstr "Configuración de Webhook"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_webhook_hmac_key
+msgid "Webhook HMAC Key"
+msgstr "Clave HMAC de Webhook"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_res_config_settings__docusign_webhook_url
+msgid "Webhook URL"
+msgstr "URL del Webhook"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector__website_message_ids
+#: model:ir.model.fields,field_description:odoo_docusign.field_docusign_connector_lines__website_message_ids
+msgid "Website Messages"
+msgstr "Mensajes del sitio web"
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector__website_message_ids
+#: model:ir.model.fields,help:odoo_docusign.field_docusign_connector_lines__website_message_ids
+msgid "Website communication history"
+msgstr "Historial de comunicaciones del sitio web"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid ""
+"When Demo/Sandbox is active, all DocuSign recipient emails are replaced with this address to "
+"avoid sending real emails."
+msgstr ""
+"Cuando Demo/Sandbox está activo, todos los correos electrónicos de los destinatarios de "
+"DocuSign se reemplazan con esta dirección para evitar enviar correos electrónicos reales."
+
+#. module: odoo_docusign
+#: model:ir.model.fields,help:odoo_docusign.field_res_config_settings__docusign_demo_test_email
+msgid ""
+"When environment is Demo/Sandbox, all DocuSign recipient emails are replaced with this "
+"address."
+msgstr ""
+"Cuando el entorno es Demo/Sandbox, todos los correos electrónicos de los destinatarios de "
+"DocuSign se reemplazan con esta dirección."
+
+#. module: odoo_docusign
+#: model:ir.model,name:odoo_docusign.model_message_wizard
+msgid "Wizard"
+msgstr "Asistente"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "https://demo.docusign.net"
+msgstr "https://demo.docusign.net"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "https://na3.docusign.net"
+msgstr "https://na3.docusign.net"
+
+#. module: odoo_docusign
+#: model_terms:ir.ui.view,arch_db:odoo_docusign.res_config_settings_view_form_docusign
+msgid "qa@example.com"
+msgstr "qa@ejemplo.com"
+
+#. module: odoo_docusign
+#. odoo-python
+#: code:addons/odoo_docusign/controllers/webhook_controller.py:0
+#, python-format
+msgid "unknown time"
+msgstr "tiempo desconocido"

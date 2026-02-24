@@ -1,0 +1,12 @@
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Docusign Model -->
+        <record id="seq_docusign_connector" model="ir.sequence">
+            <field name="name">Docusign Connector</field>
+            <field name="code">docusign.connector</field>
+            <field name="prefix">DOC-</field>
+            <field name="padding">5</field>
+            <field name="implementation">no_gap</field>
+        </record>
+    </data>
+</odoo>
