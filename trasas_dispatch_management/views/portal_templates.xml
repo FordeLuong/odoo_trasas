@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Dispatch to Portal Homepage -->
+    <template id="portal_my_home_dispatch" name="Portal My Home: Dispatch" 
+              inherit_id="portal.portal_my_home" priority="40">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Công văn</t>
+                <t t-set="url" t-value="'/my/dispatches'"/>
+                <t t-set="placeholder_count" t-value="'dispatch_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Add to Sidebar (Like portal_custom) -->
+    <template id="portal_sidebar_dispatch" name="Portal Sidebar: Dispatch"
+              inherit_id="portal_custom.portal_my_home_inherit" priority="10">
+        <xpath expr="//div[hasclass('text-muted')][hasclass('fw-bold')][contains(., 'ỨNG DỤNG')]" position="after">
+            <a href="/my/dispatches" class="sidebar-link">
+                <div class="app-icon-wrapper me-3" style="background: #fff3e0; color: #ff6f00;">
+                    <i class="fa fa-file-text-o"/>
+                </div>
+                <span>Công văn</span>
+            </a>
+        </xpath>
+    </template>
+
+    <!-- Add to Mobile App Grid (Commented out temporarily to avoid ParseError) -->
+    <!--
+    <template id="portal_mobile_dispatch" name="Portal Mobile: Dispatch"
+              inherit_id="portal_custom.portal_my_home_inherit" priority="10">
+        <xpath expr="//div[hasclass('mobile-app-grid')]" position="inside">
+            <a href="/my/dispatches" class="mobile-app-item">
+                <div class="mobile-app-icon" style="background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);">
+                    <i class="fa fa-file-text-o"/>
+                </div>
+                <span class="mobile-app-label">Công văn</span>
+            </a>
+        </xpath>
+    </template>
+    -->
+
+    <!-- List View -->
+    <template id="portal_my_dispatches" name="My Dispatches">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Công văn của tôi</t>
+            </t>
+            
+            <div class="container mt-4">
+                <!-- Filters -->
+                <div class="mb-3">
+                    <a t-attf-href="/my/dispatches" 
+                       t-attf-class="btn btn-sm #{'btn-primary' if not filterby else 'btn-outline-secondary'}">
+                        Tất cả (<t t-esc="dispatch_count"/>)
+                    </a>
+                    <a t-attf-href="/my/dispatches?filterby=processing" 
+                       t-attf-class="btn btn-sm #{'btn-primary' if filterby == 'processing' else 'btn-outline-secondary'}">
+                        Đang xử lý
+                    </a>
+                    <a t-attf-href="/my/dispatches?filterby=waiting" 
+                       t-attf-class="btn btn-sm #{'btn-primary' if filterby == 'waiting' else 'btn-outline-secondary'}">
+                        Chờ xác nhận
+                    </a>
+                    <a t-attf-href="/my/dispatches?filterby=overdue" 
+                       t-attf-class="btn btn-sm #{'btn-danger' if filterby == 'overdue' else 'btn-outline-danger'}">
+                        Quá hạn
+                    </a>
+                    <a t-attf-href="/my/dispatches?filterby=done" 
+                       t-attf-class="btn btn-sm #{'btn-success' if filterby == 'done' else 'btn-outline-success'}">
+                        Hoàn thành
+                    </a>
+                </div>
+
+                <!-- Table -->
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Số đến</th>
+                                    <th>Số hiệu</th>
+                                    <th>Nơi gửi</th>
+                                    <th>Hạn xử lý</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="dispatches" t-as="dispatch">
+                                    <tr t-attf-class="#{'table-danger' if dispatch.is_overdue else ''}">
+                                        <td>
+                                            <a t-attf-href="/my/dispatch/#{dispatch.id}" class="fw-bold">
+                                                <t t-esc="dispatch.name"/>
+                                            </a>
+                                        </td>
+                                        <td><t t-esc="dispatch.dispatch_number"/></td>
+                                        <td><t t-esc="dispatch.sender_id.name"/></td>
+                                        <td>
+                                            <t t-if="dispatch.deadline">
+                                                <t t-esc="dispatch.deadline"/>
+                                                <t t-if="dispatch.is_overdue">
+                                                    <span class="badge bg-danger ms-1">Quá hạn</span>
+                                                </t>
+                                            </t>
+                                        </td>
+                                        <td>
+                                            <span t-if="dispatch.state == 'draft'" class="badge bg-secondary">Mới</span>
+                                            <span t-elif="dispatch.state == 'processing'" class="badge bg-warning">Đang xử lý</span>
+                                            <span t-elif="dispatch.state == 'waiting_confirmation'" class="badge bg-info">Chờ xác nhận</span>
+                                            <span t-elif="dispatch.state == 'done'" class="badge bg-success">Hoàn thành</span>
+                                            <span t-else="" class="badge bg-dark">Đã hủy</span>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pager -->
+                <div t-if="pager" class="mt-3">
+                    <t t-call="portal.pager"/>
+                </div>
+
+                <!-- Empty State -->
+                <t t-if="not dispatches">
+                    <div class="text-center py-5">
+                        <i class="fa fa-inbox fa-3x text-muted mb-3"/>
+                        <h5 class="text-muted">Chưa có công văn nào</h5>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- Detail View -->
+    <template id="portal_dispatch_detail" name="Dispatch Detail">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <!-- Success/Error Messages -->
+                <t t-if="request.params.get('message') == 'submitted'">
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="fa fa-check-circle me-2"/>
+                        Phản hồi đã được gửi thành công! Đang chờ HCNS xác nhận.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+
+                <!-- Back Button -->
+                <a href="/my/dispatches" class="btn btn-light mb-3">
+                    <i class="fa fa-arrow-left me-1"/> Quay lại danh sách
+                </a>
+
+                <!-- Dispatch Card -->
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fa fa-file-text-o me-2"/>
+                            <t t-esc="dispatch.name"/> - <t t-esc="dispatch.dispatch_number"/>
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Info Grid -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fa fa-building me-2"/>Nơi gửi:</strong>
+                                <p class="mb-0"><t t-esc="dispatch.sender_id.name"/></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fa fa-calendar me-2"/>Ngày nhận:</strong>
+                                <p class="mb-0"><t t-esc="dispatch.date_received"/></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fa fa-clock-o me-2"/>Hạn xử lý:</strong>
+                                <p class="mb-0">
+                                    <t t-esc="dispatch.deadline"/>
+                                    <t t-if="dispatch.is_overdue">
+                                        <span class="badge bg-danger ms-2">Quá hạn</span>
+                                    </t>
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fa fa-info-circle me-2"/>Trạng thái:</strong>
+                                <p class="mb-0">
+                                    <span t-if="dispatch.state == 'processing'" class="badge bg-warning">Đang xử lý</span>
+                                    <span t-elif="dispatch.state == 'waiting_confirmation'" class="badge bg-info">Chờ xác nhận</span>
+                                    <span t-elif="dispatch.state == 'done'" class="badge bg-success">Hoàn thành</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="mb-4">
+                            <h5><i class="fa fa-file-text me-2"/>Trích yếu</h5>
+                            <p class="border-start border-primary border-3 ps-3">
+                                <t t-esc="dispatch.extract_content"/>
+                            </p>
+                        </div>
+
+                        <!-- Directive -->
+                        <t t-if="dispatch.directive_note">
+                            <div class="mb-4">
+                                <h5><i class="fa fa-comments me-2"/>Ý kiến chỉ đạo</h5>
+                                <div class="border rounded p-3 bg-light">
+                                    <t t-raw="dispatch.directive_note"/>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Attachments -->
+                        <t t-if="dispatch.attachment_ids">
+                            <div class="mb-4">
+                                <h5><i class="fa fa-paperclip me-2"/>File đính kèm</h5>
+                                <t t-foreach="dispatch.attachment_ids" t-as="attachment">
+                                    <a t-attf-href="/web/content/#{attachment.id}?download=true" 
+                                       class="btn btn-outline-primary btn-sm me-2 mb-2">
+                                        <i class="fa fa-download me-1"/>
+                                        <t t-esc="attachment.name"/>
+                                    </a>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- Response Form (Only if response required and processing) -->
+                        <t t-if="dispatch.response_required and dispatch.state == 'processing'">
+                            <hr class="my-4"/>
+                            <h5 class="mb-3"><i class="fa fa-reply me-2"/>Gửi phản hồi</h5>
+                            <form method="POST" 
+                                  t-attf-action="/my/dispatch/#{dispatch.id}/submit" 
+                                  enctype="multipart/form-data">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Số văn bản phản hồi *</label>
+                                        <input type="text" name="response_dispatch_number" 
+                                               class="form-control" required="1"
+                                               t-att-value="dispatch.name"
+                                               placeholder="VD: 123/CV-TRASAS"/>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">File phản hồi *</label>
+                                        <input type="file" name="response_file" 
+                                               class="form-control" required="1"
+                                               accept=".pdf,.doc,.docx"/>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Ghi chú</label>
+                                    <textarea name="response_note" class="form-control" 
+                                              rows="3" placeholder="Nhập ghi chú (tùy chọn)"/>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-paper-plane me-2"/>
+                                    Gửi phản hồi
+                                </button>
+                            </form>
+                        </t>
+
+                        <!-- Response Submitted -->
+                        <t t-if="dispatch.state == 'waiting_confirmation'">
+                            <div class="alert alert-info">
+                                <i class="fa fa-info-circle me-2"/>
+                                <strong>Phản hồi đã được gửi.</strong> Đang chờ HCNS xác nhận.
+                            </div>
+                            <t t-if="dispatch.response_dispatch_number">
+                                <p><strong>Số văn bản phản hồi:</strong> <t t-esc="dispatch.response_dispatch_number"/></p>
+                            </t>
+                        </t>
+
+                        <!-- Completed -->
+                        <t t-if="dispatch.state == 'done'">
+                            <div class="alert alert-success">
+                                <i class="fa fa-check-circle me-2"/>
+                                <strong>Công văn đã hoàn thành.</strong>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

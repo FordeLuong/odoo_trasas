@@ -1,0 +1,14 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_trasas_contract_user,access.trasas.contract.user,model_trasas_contract,group_contract_user,1,1,1,0
+access_trasas_contract_approver,access.trasas.contract.approver,model_trasas_contract,group_contract_approver,1,1,0,0
+access_trasas_contract_manager,access.trasas.contract.manager,model_trasas_contract,group_contract_manager,1,1,1,1
+access_trasas_contract_type_user,access.trasas.contract.type.user,model_trasas_contract_type,group_contract_user,1,0,0,0
+access_trasas_contract_type_approver,access.trasas.contract.type.approver,model_trasas_contract_type,group_contract_approver,1,0,0,0
+access_trasas_contract_type_manager,access.trasas.contract.type.manager,model_trasas_contract_type,group_contract_manager,1,1,1,1
+access_trasas_contract_appendix_user,access.trasas.contract.appendix.user,model_trasas_contract_appendix,group_contract_user,1,1,1,1
+access_trasas_contract_appendix_approver,access.trasas.contract.appendix.approver,model_trasas_contract_appendix,group_contract_approver,1,0,0,0
+access_trasas_contract_appendix_manager,access.trasas.contract.appendix.manager,model_trasas_contract_appendix,group_contract_manager,1,1,1,1
+access_trasas_contract_reject_wizard,access.trasas.contract.reject.wizard,model_trasas_contract_reject_wizard,group_contract_approver,1,1,1,1
+access_trasas_contract_stage_user,access.trasas.contract.stage.user,model_trasas_contract_stage,group_contract_user,1,0,0,0
+access_trasas_contract_stage_approver,access.trasas.contract.stage.approver,model_trasas_contract_stage,group_contract_approver,1,0,0,0
+access_trasas_contract_stage_manager,access.trasas.contract.stage.manager,model_trasas_contract_stage,group_contract_manager,1,1,1,1

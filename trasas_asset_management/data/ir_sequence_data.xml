@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ SEQUENCE MẶC ĐỊNH ============ -->
+    <record id="seq_trasas_asset_default" model="ir.sequence">
+        <field name="name">TRASAS Asset Sequence (Default)</field>
+        <field name="code">trasas.asset</field>
+        <field name="prefix">%(range_y)s/TS-</field>
+        <field name="suffix">-TRS</field>
+        <field name="padding">2</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="implementation">standard</field>
+        <field name="use_date_range" eval="True"/>
+    </record>
+
+    <!-- ============ SEQUENCES THEO NHÓM: STT.YY/TS-NHÓM-TRS ============ -->
+    <!--
+        Format: 01.26/TS-NXCT-TRS
+        prefix = ""  (STT tự sinh bởi padding)
+        suffix = ".%(range_y)s/TS-NXCT-TRS"
+        → Kết quả: 01.26/TS-NXCT-TRS
+
+        Lưu ý: Odoo sequence prefix/suffix chạy trước STT
+        Nên dùng prefix chứa pattern, suffix chứa phần cuối
+    -->
+
+    <!-- Nhà cửa / Công trình XD / Kho bãi -->
+    <record id="seq_trasas_asset_nxct" model="ir.sequence">
+        <field name="name">TRASAS Asset - NXCT</field>
+        <field name="code">trasas.asset.nxct</field>
+        <field name="prefix"></field>
+        <field name="suffix">.%(range_y)s/TS-NXCT-TRS</field>
+        <field name="padding">2</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="use_date_range" eval="True"/>
+    </record>
+
+    <!-- Máy móc thiết bị sản xuất -->
+    <record id="seq_trasas_asset_mmtb" model="ir.sequence">
+        <field name="name">TRASAS Asset - MMTB</field>
+        <field name="code">trasas.asset.mmtb</field>
+        <field name="prefix"></field>
+        <field name="suffix">.%(range_y)s/TS-MMTB-TRS</field>
+        <field name="padding">2</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="use_date_range" eval="True"/>
+    </record>
+
+    <!-- Thiết bị văn phòng giá trị lớn -->
+    <record id="seq_trasas_asset_tbvp" model="ir.sequence">
+        <field name="name">TRASAS Asset - TBVP</field>
+        <field name="code">trasas.asset.tbvp</field>
+        <field name="prefix"></field>
+        <field name="suffix">.%(range_y)s/TS-TBVP-TRS</field>
+        <field name="padding">2</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="use_date_range" eval="True"/>
+    </record>
+
+    <!-- Tài sản vô hình -->
+    <record id="seq_trasas_asset_tsvh" model="ir.sequence">
+        <field name="name">TRASAS Asset - TSVH</field>
+        <field name="code">trasas.asset.tsvh</field>
+        <field name="prefix"></field>
+        <field name="suffix">.%(range_y)s/TS-TSVH-TRS</field>
+        <field name="padding">2</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="use_date_range" eval="True"/>
+    </record>
+</odoo>

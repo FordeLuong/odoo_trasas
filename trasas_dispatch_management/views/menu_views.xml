@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_dispatch_management_root"
+              name="Quản lý Công văn"
+              sequence="10"
+              web_icon="mail,static/description/icon.png"
+              groups="base.group_user"/>
+
+    <!-- Sub Menu: Công văn đến -->
+    <menuitem id="menu_dispatch_incoming_root"
+              name="Công văn đến"
+              parent="menu_dispatch_management_root"
+              sequence="10"
+              groups="trasas_dispatch_management.group_dispatch_user"/>
+
+    <menuitem id="menu_dispatch_incoming_action"
+              name="Danh sách Công văn"
+              parent="menu_dispatch_incoming_root"
+              action="action_trasas_dispatch_incoming"
+              sequence="10"/>
+
+
+    <!-- Sub Menu: Cấu hình -->
+    <menuitem id="menu_dispatch_configuration"
+              name="Cấu hình"
+              parent="menu_dispatch_management_root"
+              sequence="100"
+              groups="group_dispatch_manager"/>
+
+    <menuitem id="menu_dispatch_type_action"
+              name="Loại văn bản"
+              parent="menu_dispatch_configuration"
+              action="action_trasas_dispatch_type"
+              sequence="10"/>
+</odoo>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ CRON JOB: KIỂM TRA GIẤY TỜ SẮP HẾT HẠN ============ -->
+    <record id="ir_cron_check_expiring_documents" model="ir.cron">
+        <field name="name">TRASAS: Kiểm tra giấy tờ pháp lý sắp hết hạn</field>
+        <field name="model_id" ref="model_trasas_asset"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_check_expiring_documents()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 01:00:00')"/>
+        <field name="priority">5</field>
+    </record>
+</odoo>

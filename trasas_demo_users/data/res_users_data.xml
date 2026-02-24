@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ============================================================
+             TRASAS DEMO USERS - 5 TÀI KHOẢN
+             ============================================================
+             
+             Tất cả đều có password: trasas2026
+             
+             1. giamdoc@trasas.com - Giám đốc (Approver)
+             2. hcns.truong@trasas.com - Trưởng phòng HCNS (Manager)
+             3. hcns.nv@trasas.com - Nhân viên HCNS (User)
+             4. vanhanh@trasas.com - Nhân viên Vận hành (User)
+             5. ketoan@trasas.com - Nhân viên Kế toán (User)
+        ============================================================ -->
+
+        <!-- ============ USER 1: GIÁM ĐỐC - APPROVER ============ -->
+        <record id="user_giam_doc" model="res.users">
+            <field name="name">Trần Văn Minh</field>
+            <field name="login">giamdoc@trasas.com</field>
+            <field name="email">giamdoc@trasas.com</field>
+            <field name="password">trasas2026</field>
+            <field name="active">True</field>
+            
+            <!-- Link to Employee -->
+            <field name="employee_id" ref="employee_giam_doc"/>
+            
+            <!-- Groups: Contract Approver (phê duyệt hợp đồng, công văn) -->
+            <field name="group_ids" eval="[
+                (4, ref('base.group_user')),
+                (4, ref('trasas_contract_management.group_contract_approver')),
+            ]"/>
+        </record>
+
+        <!-- ============ USER 2: TRƯỞNG PHÒNG HCNS - MANAGER ============ -->
+        <record id="user_hcns_truong" model="res.users">
+            <field name="name">Nguyễn Thị Lan</field>
+            <field name="login">hcns.truong@trasas.com</field>
+            <field name="email">hcns.truong@trasas.com</field>
+            <field name="password">trasas2026</field>
+            <field name="active">True</field>
+            
+            <!-- Link to Employee -->
+            <field name="employee_id" ref="employee_hcns_truong"/>
+            
+            <!-- Groups: Contract Manager (quản lý hồ sơ, công văn, tài sản) -->
+            <field name="group_ids" eval="[
+                (4, ref('base.group_user')),
+                (4, ref('base.group_system')),
+                (4, ref('trasas_contract_management.group_contract_manager')),
+            ]"/>
+        </record>
+
+        <!-- ============ USER 3: NHÂN VIÊN HCNS - USER ============ -->
+        <record id="user_hcns_nv" model="res.users">
+            <field name="name">Phạm Văn Hùng</field>
+            <field name="login">hcns.nv@trasas.com</field>
+            <field name="email">hcns.nv@trasas.com</field>
+            <field name="password">trasas2026</field>
+            <field name="active">True</field>
+            
+            <!-- Link to Employee -->
+            <field name="employee_id" ref="employee_hcns_nv"/>
+            
+            <!-- Groups: Contract User (xử lý công văn, hồ sơ) -->
+            <field name="group_ids" eval="[
+                (4, ref('base.group_user')),
+                (4, ref('trasas_contract_management.group_contract_user')),
+            ]"/>
+        </record>
+
+        <!-- ============ USER 4: NHÂN VIÊN VẬN HÀNH - USER ============ -->
+        <record id="user_van_hanh" model="res.users">
+            <field name="name">Lê Thị Mai</field>
+            <field name="login">vanhanh@trasas.com</field>
+            <field name="email">vanhanh@trasas.com</field>
+            <field name="password">trasas2026</field>
+            <field name="active">True</field>
+            
+            <!-- Link to Employee -->
+            <field name="employee_id" ref="employee_van_hanh"/>
+            
+            <!-- Groups: Contract User (tạo hồ sơ hợp đồng, trình ký) -->
+            <field name="group_ids" eval="[
+                (4, ref('base.group_user')),
+                (4, ref('trasas_contract_management.group_contract_user')),
+            ]"/>
+        </record>
+
+        <!-- ============ USER 5: NHÂN VIÊN KẾ TOÁN - USER ============ -->
+        <record id="user_ke_toan" model="res.users">
+            <field name="name">Hoàng Văn Nam</field>
+            <field name="login">ketoan@trasas.com</field>
+            <field name="email">ketoan@trasas.com</field>
+            <field name="password">trasas2026</field>
+            <field name="active">True</field>
+            
+            <!-- Link to Employee -->
+            <field name="employee_id" ref="employee_ke_toan"/>
+            
+            <!-- Groups: Contract User (hỗ trợ báo cáo, audit) -->
+            <field name="group_ids" eval="[
+                (4, ref('base.group_user')),
+                (4, ref('trasas_contract_management.group_contract_user')),
+            ]"/>
+        </record>
+
+        <!-- ============ UPDATE EMPLOYEE RECORDS WITH USER_ID ============ -->
+        <record id="employee_giam_doc" model="hr.employee">
+            <field name="user_id" ref="user_giam_doc"/>
+        </record>
+
+        <record id="employee_hcns_truong" model="hr.employee">
+            <field name="user_id" ref="user_hcns_truong"/>
+        </record>
+
+        <record id="employee_hcns_nv" model="hr.employee">
+            <field name="user_id" ref="user_hcns_nv"/>
+        </record>
+
+        <record id="employee_van_hanh" model="hr.employee">
+            <field name="user_id" ref="user_van_hanh"/>
+        </record>
+
+        <record id="employee_ke_toan" model="hr.employee">
+            <field name="user_id" ref="user_ke_toan"/>
+        </record>
+    </data>
+</odoo>

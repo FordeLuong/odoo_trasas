@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ FORM VIEW ============ -->
+    <record id="view_contract_type_form" model="ir.ui.view">
+        <field name="name">trasas.contract.type.form</field>
+        <field name="model">trasas.contract.type</field>
+        <field name="arch" type="xml">
+            <form string="Loại hợp đồng">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_contracts" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-file-text-o">
+                            <field name="contract_count" widget="statinfo" string="Hợp đồng"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                            <field name="default_duration_days"/>
+                            <field name="name_pattern" placeholder="Ví dụ: {code}/{year}/{sequence:04d}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" placeholder="Mô tả chi tiết về loại hợp đồng này..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ LIST VIEW ============ -->
+    <record id="view_contract_type_list" model="ir.ui.view">
+        <field name="name">trasas.contract.type.list</field>
+        <field name="model">trasas.contract.type</field>
+        <field name="arch" type="xml">
+            <list string="Loại hợp đồng">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="default_duration_days"/>
+                <field name="contract_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ SEARCH VIEW ============ -->
+    <record id="view_contract_type_search" model="ir.ui.view">
+        <field name="name">trasas.contract.type.search</field>
+        <field name="model">trasas.contract.type</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm loại hợp đồng">
+                <field name="name"/>
+                <field name="code"/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ ACTION ============ -->
+    <record id="action_contract_type" model="ir.actions.act_window">
+        <field name="name">Loại hợp đồng</field>
+        <field name="res_model">trasas.contract.type</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo loại hợp đồng đầu tiên
+            </p>
+            <p>
+                Loại hợp đồng là master data để phân loại và tự động đặt tên hợp đồng.
+            </p>
+        </field>
+    </record>
+</odoo>

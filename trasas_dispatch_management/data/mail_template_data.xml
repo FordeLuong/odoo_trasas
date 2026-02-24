@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- 1. Email cho Người xử lý (Khi được phân công - action_confirm) -->
+        <record id="email_template_dispatch_assigned" model="mail.template">
+            <field name="name">Công văn đến: Phân công xử lý</field>
+            <field name="model_id" ref="model_trasas_dispatch_incoming"/>
+            <field name="subject">Bạn được phân công xử lý công văn: {{ object.dispatch_number }}</field>
+            <field name="email_from">{{ (object.create_uid.email_formatted or user.email_formatted) }}</field>
+            <field name="partner_to">{{ ",".join([str(p.id) for p in object.handler_ids.mapped('partner_id')]) }}</field>
+            <field name="description">Gửi cho người xử lý khi công văn được tiếp nhận</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Kính gửi <t t-out="object.handler_ids.mapped('name') or ''">Người xử lý</t>,<br/><br/>
+                        Bạn vừa được phân công xử lý công văn đến với nội dung sau:<br/><br/>
+                        <strong>Số hiệu:</strong> <t t-out="object.dispatch_number"/><br/>
+                        <strong>Ngày đến:</strong> <t t-out="object.date_received"/><br/>
+                        <strong>Nơi gửi:</strong> <t t-out="object.sender_id.name"/><br/>
+                        <strong>Trích yếu:</strong> <t t-out="object.extract_content"/><br/>
+                        <strong>Hạn xử lý:</strong> <strong style="color:red"><t t-out="object.deadline or 'Không có hạn'"/></strong><br/><br/>
+                        
+                        <t t-if="object.response_required">
+                            <span style="background-color: #f39c12; color: white; padding: 3px 6px; border-radius: 3px;">Yêu cầu phản hồi</span><br/><br/>
+                        </t>
+
+                        Vui lòng truy cập hệ thống để xem chi tiết và xử lý.<br/><br/>
+                        
+                        <div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.get_base_url() + '/web#id=' + str(object.id) + '&amp;model=trasas.dispatch.incoming&amp;view_type=form'"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Xem Công văn
+                            </a>
+                        </div>
+                        
+                        Trân trọng,<br/>
+                        Hệ thống Quản lý Công văn TRASAS
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- 2. Email cho HCNS (Khi người xử lý gửi phản hồi - action_submit_response) -->
+        <record id="email_template_dispatch_response_submitted" model="mail.template">
+            <field name="name">Công văn đến: Đã có phản hồi</field>
+            <field name="model_id" ref="model_trasas_dispatch_incoming"/>
+            <field name="subject">Đã có phản hồi cho công văn: {{ object.dispatch_number }}</field>
+            <field name="email_from">{{ (user.email_formatted) }}</field>
+            <!-- Người nhận sẽ được set trong code (Group HCNS) hoặc Admin tạm thời -->
+            <field name="description">Gửi cho HCNS khi người xử lý submit phản hồi</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Kính gửi Bộ phận Hành chính Nhân sự,<br/><br/>
+                        Người xử lý <strong><t t-out="user.name"/></strong> đã gửi văn bản phản hồi cho công văn:<br/><br/>
+                        <strong>Số hiệu gốc:</strong> <t t-out="object.dispatch_number"/><br/>
+                        <strong>Số văn bản phản hồi:</strong> <t t-out="object.response_dispatch_number"/><br/>
+                        <strong>Ngày phản hồi:</strong> <t t-out="object.response_date"/><br/><br/>
+                        
+                        Vui lòng kiểm tra và xác nhận hoàn tất.<br/><br/>
+                        
+                        <div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.get_base_url() + '/web#id=' + str(object.id) + '&amp;model=trasas.dispatch.incoming&amp;view_type=form'"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Kiểm tra Phản hồi
+                            </a>
+                        </div>
+                        
+                        Trân trọng,<br/>
+                        Hệ thống Quản lý Công văn TRASAS
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- 3. Email cho Người xử lý (Khi hoàn thành - action_confirm_response/action_done) -->
+        <record id="email_template_dispatch_completed" model="mail.template">
+            <field name="name">Công văn đến: Hoàn thành</field>
+            <field name="model_id" ref="model_trasas_dispatch_incoming"/>
+            <field name="subject">Công văn hoàn thành: {{ object.dispatch_number }}</field>
+            <field name="email_from">{{ (user.email_formatted) }}</field>
+            <field name="partner_to">{{ ",".join([str(p.id) for p in object.handler_ids.mapped('partner_id')]) }}</field>
+            <field name="description">Gửi cho người xử lý khi công văn hoàn tất</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Kính gửi <t t-out="object.handler_ids.mapped('name') or ''">Người xử lý</t>,<br/><br/>
+                        Công văn số <strong><t t-out="object.dispatch_number"/></strong> đã được xử lý hoàn tất và lưu trữ.<br/><br/>
+                        
+                        <t t-if="object.response_dispatch_number">
+                            <strong>Kết quả:</strong> Đã phát hành văn bản phản hồi số <t t-out="object.response_dispatch_number"/>.<br/>
+                        </t>
+
+                        Cảm ơn bạn đã phối hợp xử lý.<br/><br/>
+                        
+                        Trân trọng,<br/>
+                        Hệ thống Quản lý Công văn TRASAS
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- 4. Email Cảnh báo quá hạn (Cron job) -->
+        <record id="email_template_dispatch_overdue" model="mail.template">
+            <field name="name">Công văn đến: Cảnh báo Quá hạn</field>
+            <field name="model_id" ref="model_trasas_dispatch_incoming"/>
+            <field name="subject">[QUÁ HẠN] Nhắc nhở xử lý công văn: {{ object.dispatch_number }}</field>
+            <!-- Sender là hệ thống hoặc bot -->
+            <field name="description">Gửi cảnh báo khi công văn quá hạn</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Kính gửi <t t-out="object.handler_ids.mapped('name') or ''">Người xử lý</t>,<br/><br/>
+                        Hệ thống nhận thấy Công văn dưới đây đã <strong>QUÁ HẠN</strong> xử lý:<br/><br/>
+                        <strong>Số hiệu:</strong> <t t-out="object.dispatch_number"/><br/>
+                        <strong>Trích yếu:</strong> <t t-out="object.extract_content"/><br/>
+                        <strong>Hạn xử lý:</strong> <strong style="color:red"><t t-out="object.deadline"/></strong><br/>
+                        <strong>Số ngày quá hạn:</strong> <t t-out="object.overdue_days"/> ngày<br/><br/>
+                        
+                        Vui lòng truy cập hệ thống để cập nhật trạng thái hoặc báo cáo kết quả ngay lập tức.<br/><br/>
+                        
+                        <div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.get_base_url() + '/web#id=' + str(object.id) + '&amp;model=trasas.dispatch.incoming&amp;view_type=form'"
+                                style="background-color: #d9534f; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Xử lý Ngay
+                            </a>
+                        </div>
+                        
+                        Trân trọng,<br/>
+                        Hệ thống Quản lý Công văn TRASAS
+                    </p>
+                </div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

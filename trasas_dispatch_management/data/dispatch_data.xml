@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Sequence for Dispatch Incoming -->
+        <record id="seq_trasas_dispatch_incoming" model="ir.sequence">
+            <field name="name">Công văn đến Sequence</field>
+            <field name="code">trasas.dispatch.incoming</field>
+            <field name="prefix"></field>
+            <field name="suffix">.%(y)s/CVĐ-TRS</field>
+            <field name="padding">2</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Sequence for Dispatch Response (Outgoing) -->
+        <record id="seq_trasas_dispatch_response" model="ir.sequence">
+            <field name="name">Công văn phản hồi Sequence</field>
+            <field name="code">trasas.dispatch.response</field>
+            <field name="prefix"></field>
+            <field name="suffix">.%(y)s/CV-TRS</field>
+            <field name="padding">2</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- FORCE UPDATE SEQUENCE: Override existing values -->
+        <function model="ir.sequence" name="write">
+            <value eval="[ref('seq_trasas_dispatch_incoming')]"/>
+            <value eval="{'prefix': '', 'suffix': '.%(y)s/CVĐ-TRS', 'padding': 2, 'use_date_range': True}"/>
+        </function>
+
+        <function model="ir.sequence" name="write">
+            <value eval="[ref('seq_trasas_dispatch_incoming')]"/>
+            <value eval="{'prefix': '', 'suffix': '.%(y)s/CVĐ-TRS', 'padding': 2, 'use_date_range': True}"/>
+        </function>
+
+
+        <!-- Master Data: Loại công văn -->
+        <record id="type_quyet_dinh" model="trasas.dispatch.type">
+            <field name="name">Quyết định</field>
+            <field name="code">QD</field>
+        </record>
+        <record id="type_thong_bao" model="trasas.dispatch.type">
+            <field name="name">Thông báo</field>
+            <field name="code">TB</field>
+        </record>
+        <record id="type_cong_van" model="trasas.dispatch.type">
+            <field name="name">Công văn</field>
+            <field name="code">CV</field>
+        </record>
+        <record id="type_to_trinh" model="trasas.dispatch.type">
+            <field name="name">Tờ trình</field>
+            <field name="code">TTr</field>
+        </record>
+        <record id="type_bao_cao" model="trasas.dispatch.type">
+            <field name="name">Báo cáo</field>
+            <field name="code">BC</field>
+        </record>
+    </data>
+</odoo>

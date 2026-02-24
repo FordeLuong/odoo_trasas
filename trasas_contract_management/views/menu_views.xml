@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ ROOT MENU ============ -->
+    <menuitem id="menu_contract_root"
+              name="Hợp đồng TRASAS"
+              sequence="50"
+              web_icon="trasas_contract_management,static/description/icon.png"/>
+
+    <!-- ============ MAIN MENUS ============ -->
+    <menuitem id="menu_contract_main"
+              name="Hợp đồng"
+              parent="menu_contract_root"
+              sequence="10"/>
+    
+    <menuitem id="menu_contract_reports"
+              name="Báo cáo"
+              parent="menu_contract_root"
+              sequence="20"/>
+    
+    <menuitem id="menu_contract_config"
+              name="Cấu hình"
+              parent="menu_contract_root"
+              sequence="100"
+              groups="trasas_contract_management.group_contract_manager"/>
+
+    <!-- ============ CONTRACT MENUS ============ -->
+    <menuitem id="menu_all_contracts"
+              name="Tất cả hợp đồng"
+              parent="menu_contract_main"
+              action="action_contract"
+              sequence="10"/>
+    
+    <menuitem id="menu_my_contracts"
+              name="Hợp đồng của tôi"
+              parent="menu_contract_main"
+              action="action_my_contracts"
+              sequence="20"/>
+    
+    <menuitem id="menu_waiting_contracts"
+              name="Chờ phê duyệt"
+              parent="menu_contract_main"
+              action="action_waiting_contracts"
+              sequence="30"
+              groups="trasas_contract_management.group_contract_approver"/>
+    
+    <menuitem id="menu_expiring_contracts"
+              name="Sắp hết hạn"
+              parent="menu_contract_main"
+              action="action_expiring_contracts"
+              sequence="40"/>
+
+    <!-- ============ CONFIGURATION MENUS ============ -->
+    <menuitem id="menu_contract_types"
+              name="Loại hợp đồng"
+              parent="menu_contract_config"
+              action="action_contract_type"
+              sequence="10"/>
+
+    <menuitem id="menu_contract_stages"
+              name="Giai đoạn hợp đồng"
+              parent="menu_contract_config"
+              action="action_contract_stage"
+              sequence="20"/>
+</odoo>

@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dispatch_type_user,trasas.dispatch.type.user,model_trasas_dispatch_type,trasas_dispatch_management.group_dispatch_user,1,0,0,0
+access_dispatch_type_hcns,trasas.dispatch.type.hcns,model_trasas_dispatch_type,trasas_dispatch_management.group_dispatch_hcns,1,1,1,0
+access_dispatch_type_manager,trasas.dispatch.type.manager,model_trasas_dispatch_type,trasas_dispatch_management.group_dispatch_manager,1,1,1,1
+access_dispatch_incoming_user,trasas.dispatch.incoming.user,model_trasas_dispatch_incoming,trasas_dispatch_management.group_dispatch_user,1,1,1,0
+access_dispatch_incoming_hcns,trasas.dispatch.incoming.hcns,model_trasas_dispatch_incoming,trasas_dispatch_management.group_dispatch_hcns,1,1,1,0
+access_dispatch_incoming_manager,trasas.dispatch.incoming.manager,model_trasas_dispatch_incoming,trasas_dispatch_management.group_dispatch_manager,1,1,1,1
+access_dispatch_incoming_portal,trasas.dispatch.incoming.portal,model_trasas_dispatch_incoming,base.group_portal,1,1,0,0
+access_dispatch_type_portal,trasas.dispatch.type.portal,model_trasas_dispatch_type,base.group_portal,1,0,0,0

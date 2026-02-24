@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Giai đoạn mặc định cho Hợp đồng -->
+        <record id="stage_draft" model="trasas.contract.stage">
+            <field name="name">Nháp</field>
+            <field name="sequence">1</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Đang soạn thảo</field>
+            <field name="legend_blocked">Thiếu thông tin</field>
+            <field name="legend_done">Sẵn sàng gửi duyệt</field>
+            <field name="requirements">Hoàn thiện nội dung hợp đồng trước khi gửi rà soát/duyệt.</field>
+        </record>
+
+        <record id="stage_in_review" model="trasas.contract.stage">
+            <field name="name">Đang rà soát</field>
+            <field name="sequence">2</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Đang rà soát nội bộ</field>
+            <field name="legend_blocked">Cần chỉnh sửa</field>
+            <field name="legend_done">Rà soát xong</field>
+            <field name="requirements">Lấy ý kiến nội bộ, chỉnh sửa và hoàn thiện nội dung.</field>
+        </record>
+
+        <record id="stage_waiting" model="trasas.contract.stage">
+            <field name="name">Chờ duyệt</field>
+            <field name="sequence">3</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Chờ Giám đốc phê duyệt</field>
+            <field name="legend_blocked">Cần bổ sung hồ sơ</field>
+            <field name="legend_done">Đã duyệt xong</field>
+            <field name="requirements">Giám đốc xem xét và phê duyệt hợp đồng.</field>
+        </record>
+
+        <record id="stage_approved" model="trasas.contract.stage">
+            <field name="name">Đã duyệt</field>
+            <field name="sequence">4</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Chuẩn bị ký kết</field>
+            <field name="legend_blocked">Chưa sẵn sàng ký</field>
+            <field name="legend_done">Sẵn sàng ký</field>
+            <field name="requirements">Giám đốc đã duyệt. Chuẩn bị bắt đầu ký kết.</field>
+        </record>
+
+        <record id="stage_signing" model="trasas.contract.stage">
+            <field name="name">Đang ký</field>
+            <field name="sequence">5</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Đang trong quá trình ký</field>
+            <field name="legend_blocked">Chờ đối tác</field>
+            <field name="legend_done">Đã ký đầy đủ</field>
+            <field name="requirements">Thu thập chữ ký từ TRASAS và đối tác.</field>
+        </record>
+
+        <record id="stage_signed" model="trasas.contract.stage">
+            <field name="name">Đã ký</field>
+            <field name="sequence">6</field>
+            <field name="fold" eval="True"/>
+            <field name="legend_normal">Hợp đồng có hiệu lực</field>
+            <field name="legend_blocked">Cần đóng dấu/lưu kho</field>
+            <field name="legend_done">Hoàn tất lưu kho</field>
+            <field name="requirements">Hoàn tất ký kết. HCNS đóng dấu và lưu kho.</field>
+        </record>
+
+        <record id="stage_expired" model="trasas.contract.stage">
+            <field name="name">Hết hạn</field>
+            <field name="sequence">7</field>
+            <field name="fold" eval="True"/>
+            <field name="legend_normal">Hợp đồng đã hết hạn</field>
+            <field name="legend_blocked">Cần gia hạn</field>
+            <field name="legend_done">Đã gia hạn</field>
+            <field name="requirements">Hợp đồng hết hạn. Xem xét gia hạn hoặc tạo hợp đồng mới.</field>
+        </record>
+
+        <record id="stage_cancel" model="trasas.contract.stage">
+            <field name="name">Đã hủy</field>
+            <field name="sequence">8</field>
+            <field name="fold" eval="True"/>
+            <field name="legend_normal">Hợp đồng đã hủy</field>
+            <field name="legend_blocked">Không áp dụng</field>
+            <field name="legend_done">Không áp dụng</field>
+            <field name="requirements">Hợp đồng đã bị hủy.</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ SECURITY GROUPS ============ -->
+    
+    <!-- ============ PRIVILEGE (New in Odoo 19) ============ -->
+    <record id="privilege_trasas_contract" model="res.groups.privilege">
+        <field name="name">Quản lý Hợp đồng</field>
+        <field name="category_id" ref="base.module_category_human_resources"/>
+        <field name="sequence">10</field>
+    </record>
+
+    <!-- 
+        PHÂN QUYỀN TÁCH RIÊNG - KHÔNG KẾ THỪA
+        ======================================
+        - group_contract_user: Phòng Vận hành (tạo, gửi duyệt, ký)
+        - group_contract_approver: Ban Giám đốc (CHỈ phê duyệt/từ chối)
+        - group_contract_manager: HCNS/Admin (đóng dấu, lưu kho, quản lý)
+    -->
+
+    <!-- Nhóm 1: Phòng Vận hành - Contract User -->
+    <record id="group_contract_user" model="res.groups">
+        <field name="name">Contract User (Phòng Vận hành)</field>
+        <field name="privilege_id" ref="privilege_trasas_contract"/>
+        <!-- Inherit Sign User rights to access Sign Requests -->
+        <field name="implied_ids" eval="[(4, ref('sign.group_sign_user'))]"/>
+        <field name="comment">Phòng Vận hành - Tạo hợp đồng, gửi duyệt, theo dõi ký kết</field>
+    </record>
+    
+    <!-- Nhóm 2: Ban Giám đốc - Contract Approver -->
+    <!-- KHÔNG kế thừa group_contract_user -->
+    <record id="group_contract_approver" model="res.groups">
+        <field name="name">Contract Approver (Ban Giám đốc)</field>
+        <field name="privilege_id" ref="privilege_trasas_contract"/>
+        <!-- CHỈ kế thừa Sign để xem yêu cầu ký, KHÔNG kế thừa User -->
+        <field name="implied_ids" eval="[(4, ref('sign.group_sign_user'))]"/>
+        <field name="comment">Ban Giám đốc - CHỈ phê duyệt/từ chối, ký hợp đồng</field>
+    </record>
+    
+    <!-- Nhóm 3: HCNS/Admin - Contract Manager -->
+    <!-- KHÔNG kế thừa group_contract_approver -->
+    <record id="group_contract_manager" model="res.groups">
+        <field name="name">Contract Manager (HCNS)</field>
+        <field name="privilege_id" ref="privilege_trasas_contract"/>
+        <!-- CHỈ kế thừa Sign để xem yêu cầu ký -->
+        <field name="implied_ids" eval="[(4, ref('sign.group_sign_user'))]"/>
+        <field name="comment">HCNS/Admin - Đóng dấu, upload scan, lưu kho, quản lý tất cả</field>
+    </record>
+
+    <!-- Admin automatically gets Manager rights -->
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_contract_manager'))]"/>
+    </record>
+    
+    <!-- ============ RECORD RULES ============ -->
+    
+    <!-- Rule: User chỉ được SỬA/XÓA hợp đồng của mình -->
+    <record id="contract_user_rule" model="ir.rule">
+        <field name="name">Contract User: Edit Own Contracts</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_contract_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Rule: User được XEM tất cả hợp đồng -->
+    <record id="contract_user_read_all_rule" model="ir.rule">
+        <field name="name">Contract User: Read All Contracts</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_contract_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    
+    <!-- Rule: Approver thấy tất cả hợp đồng và CÓ QUYỀN DUYỆT (Write) -->
+    <record id="contract_approver_rule" model="ir.rule">
+        <field name="name">Contract Approver: All Contracts</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_contract_approver'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    
+    <!-- Rule: Manager toàn quyền -->
+    <record id="contract_manager_rule" model="ir.rule">
+        <field name="name">Contract Manager: Full Access</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_contract_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+</odoo>

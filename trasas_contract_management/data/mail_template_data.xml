@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ EMAIL TEMPLATE: YÊU CẦU PHÊ DUYỆT ============ -->
+    <record id="email_template_contract_approval_request" model="mail.template">
+        <field name="name">TRASAS: Yêu cầu phê duyệt hợp đồng</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="subject">Yêu cầu phê duyệt: {{ object.name }} - {{ object.title }}</field>
+        <field name="email_to">{{ ','.join([u.email for u in object.env.ref('trasas_contract_management.group_contract_approver').user_ids if u.email]) }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #875A7B;">Yêu cầu phê duyệt hợp đồng</h2>
+                
+                <p>Kính gửi Ban Giám đốc,</p>
+                
+                <p>Hợp đồng sau đây cần được phê duyệt:</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; width: 30%;"><strong>Số hợp đồng:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.name"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Tiêu đề:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.title"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Loại hợp đồng:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.contract_type_id.name"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Đối tác:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.partner_id.name"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Thời hạn:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.date_start"/> đến <t t-out="object.date_end"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Người tạo:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.user_id.name"/></td>
+                    </tr>
+                </table>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.contract&amp;view_type=form" 
+                       style="background-color: #875A7B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết và phê duyệt
+                    </a>
+                </p>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                    Email này được gửi tự động từ hệ thống quản lý hợp đồng TRASAS.
+                </p>
+            </div>
+        </field>
+    </record>
+
+    <!-- ============ EMAIL TEMPLATE: ĐÃ PHÊ DUYỆT ============ -->
+    <record id="email_template_contract_approved" model="mail.template">
+        <field name="name">TRASAS: Hợp đồng đã được phê duyệt</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="subject">Đã phê duyệt: {{ object.name }} - {{ object.title }}</field>
+        <field name="email_to">{{ object.user_id.email or '' }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #28a745;">✓ Hợp đồng đã được phê duyệt</h2>
+                
+                <p>Kính gửi <t t-out="object.user_id.name"/>,</p>
+                
+                <p>Hợp đồng <strong><t t-out="object.name"/></strong> đã được phê duyệt bởi <t t-out="object.approver_id.name"/>.</p>
+                
+                <p>Bạn có thể tiến hành bước tiếp theo trong quy trình ký kết.</p>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.contract&amp;view_type=form" 
+                       style="background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết hợp đồng
+                    </a>
+                </p>
+            </div>
+        </field>
+    </record>
+
+    <!-- ============ EMAIL TEMPLATE: BỊ TỪ CHỐI ============ -->
+    <record id="email_template_contract_rejected" model="mail.template">
+        <field name="name">TRASAS: Hợp đồng bị từ chối</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="subject">Từ chối: {{ object.name }} - {{ object.title }}</field>
+        <field name="email_to">{{ object.user_id.email or '' }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #dc3545;">✗ Hợp đồng bị từ chối</h2>
+                
+                <p>Kính gửi <t t-out="object.user_id.name"/>,</p>
+                
+                <p>Hợp đồng <strong><t t-out="object.name"/></strong> đã bị từ chối bởi <t t-out="object.approver_id.name or 'Ban Giám đốc'"/>.</p>
+                
+                <t t-if="object.rejection_reason">
+                <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                    <strong>Lý do từ chối:</strong><br/>
+                    <t t-out="object.rejection_reason"/>
+                </div>
+                </t>
+                
+                <p>Vui lòng xem xét và chỉnh sửa hợp đồng theo yêu cầu.</p>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.contract&amp;view_type=form" 
+                       style="background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết hợp đồng
+                    </a>
+                </p>
+            </div>
+        </field>
+    </record>
+
+    <!-- ============ EMAIL TEMPLATE: YÊU CẦU ĐÓNG DẤU ============ -->
+    <record id="email_template_contract_seal_request" model="mail.template">
+        <field name="name">TRASAS: Yêu cầu đóng dấu hợp đồng</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="subject">Yêu cầu đóng dấu: {{ object.name }} - {{ object.title }}</field>
+        <field name="email_to">{{ object.company_id.email or '' }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #875A7B;">Yêu cầu đóng dấu hợp đồng</h2>
+                
+                <p>Kính gửi Phòng HCNS,</p>
+                
+                <p>Hợp đồng <strong><t t-out="object.name"/></strong> đã hoàn tất ký kết và cần được đóng dấu.</p>
+                
+                <p>Sau khi đóng dấu, vui lòng upload bản scan cuối cùng vào hệ thống.</p>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.contract&amp;view_type=form" 
+                       style="background-color: #875A7B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết hợp đồng
+                    </a>
+                </p>
+            </div>
+        </field>
+    </record>
+
+    <!-- ============ EMAIL TEMPLATE: SẮP HẾT HẠN ============ -->
+    <record id="email_template_contract_expiring" model="mail.template">
+        <field name="name">TRASAS: Hợp đồng sắp hết hạn</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="subject"> Hợp đồng sắp hết hạn: {{ object.name }}</field>
+        <field name="email_to">{{ ','.join(set(filter(None, [object.user_id.email or ''] + [u.email for u in object.env.ref('trasas_contract_management.group_contract_user').user_ids if u.email]))) }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #ff9800;">⚠️ Hợp đồng sắp hết hạn</h2>
+                
+                <p>Kính gửi <t t-out="object.user_id.name"/>,</p>
+                
+                <p>Hợp đồng <strong><t t-out="object.name"/></strong> sẽ hết hạn trong <strong><t t-out="object.days_to_expire"/> ngày</strong>.</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; width: 30%;"><strong>Tiêu đề:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.title"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Đối tác:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.partner_id.name"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Ngày hết hạn:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.date_end"/></td>
+                    </tr>
+                </table>
+                
+                <p>Vui lòng xem xét gia hạn hoặc tạo hợp đồng mới nếu cần thiết.</p>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.contract&amp;view_type=form" 
+                       style="background-color: #ff9800; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết hợp đồng
+                    </a>
+                </p>
+            </div>
+        </field>
+    </record>
+
+    <!-- ============ EMAIL TEMPLATE: NHẮC HẠN KÝ ============ -->
+    <record id="email_template_signing_deadline" model="mail.template">
+        <field name="name">TRASAS: Nhắc nhở hạn ký hợp đồng</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="subject"> Nhắc nhở hạn ký: {{ object.name }}</field>
+        <field name="email_to">{{ object.user_id.email or '' }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #ff5722;">Nhắc nhở hạn ký hợp đồng</h2>
+                
+                <p>Kính gửi <t t-out="object.user_id.name"/>,</p>
+                
+                <p>Hợp đồng <strong><t t-out="object.name"/></strong> sắp đến hạn ký.</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; width: 30%;"><strong>Hạn ký:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.sign_deadline"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Trạng thái:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="dict(object._fields['state'].selection).get(object.state)"/></td>
+                    </tr>
+                </table>
+                
+                <p>Vui lòng hoàn tất ký kết trước hạn.</p>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.contract&amp;view_type=form" 
+                       style="background-color: #ff5722; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết hợp đồng
+                    </a>
+                </p>
+            </div>
+        </field>
+    </record>
+    <!-- ============ EMAIL TEMPLATE: GỬI HỢP ĐỒNG CHO ĐỐI TÁC ============ -->
+    <record id="email_template_contract_send_to_partner" model="mail.template">
+        <field name="name">TRASAS: Gửi Hợp đồng cho Đối tác</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="subject">Hợp đồng kinh tế số {{ object.name }} - {{ object.title }}</field>
+        <field name="email_to">{{ object.partner_id.email or '' }}</field>
+        <field name="description">Gửi cho đối tác khi bắt đầu ký kết</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #008784;">Gửi Hợp đồng Kinh tế</h2>
+                
+                <p>Kính gửi Quý đối tác <strong><t t-out="object.partner_id.name"/></strong>,</p>
+                
+                <p>Công ty TRASAS xin gửi đến Quý đối tác bản thảo/bản ký của hợp đồng <strong><t t-out="object.title"/></strong> (Số: <t t-out="object.name"/>).</p>
+                
+                <p>Chi tiết hợp đồng vui lòng xem trong file đính kèm.</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; width: 30%;"><strong>Số hợp đồng:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.name"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Tiêu đề:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.title"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Thời hạn:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.date_start"/> đến <t t-out="object.date_end"/></td>
+                    </tr>
+                </table>
+                
+                <p>Rất mong nhận được phản hồi sớm từ Quý đối tác.</p>
+                
+                <p>Trân trọng,<br/>
+                <t t-out="object.company_id.name"/></p>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                    Email này được gửi tự động từ hệ thống quản lý hợp đồng TRASAS.
+                </p>
+            </div>
+        </field>
+    </record>
+    <!-- ============ EMAIL TEMPLATE: YÊU CẦU RÀ SOÁT (B3) ============ -->
+    <record id="email_template_contract_review_request" model="mail.template">
+        <field name="name">TRASAS: Yêu cầu rà soát hợp đồng</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="subject">Yêu cầu rà soát: {{ object.name }} - {{ object.title }}</field>
+        <field name="email_to">{{ object.reviewer_id.email if object.reviewer_id else '' }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #17a2b8;">Yêu cầu rà soát hợp đồng</h2>
+                
+                <p>Kính gửi <t t-out="object.reviewer_id.name or 'Bộ phận rà soát'"/>,</p>
+                
+                <p>Hợp đồng <strong><t t-out="object.name"/></strong> cần được rà soát nội dung trước khi trình ký.</p>
+                
+                <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #17a2b8; margin: 20px 0;">
+                    <strong>Tiêu đề:</strong> <t t-out="object.title"/><br/>
+                    <strong>Đối tác:</strong> <t t-out="object.partner_id.name"/><br/>
+                    <strong>Người tạo:</strong> <t t-out="object.user_id.name"/>
+                </div>
+                
+                <p>Vui lòng kiểm tra và phản hồi.</p>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.contract&amp;view_type=form" 
+                       style="background-color: #17a2b8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết và rà soát
+                    </a>
+                </p>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                    Email này được gửi tự động từ hệ thống quản lý hợp đồng TRASAS.
+                </p>
+            </div>
+        </field>
+    </record>
+
+    <!-- ============ EMAIL TEMPLATE: YÊU CẦU KÝ (ĐỐI TÁC ĐÃ KÝ - B14) ============ -->
+    <record id="email_template_contract_sign_request_partner_signed" model="mail.template">
+        <field name="name">TRASAS: Yêu cầu ký (Đối tác đã ký)</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="subject">Yêu cầu ký: {{ object.name }} - Đối tác đã ký</field>
+        <field name="email_to">{{ object.approver_id.email if object.approver_id else object.company_id.email }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #28a745;">Yêu cầu ký hợp đồng</h2>
+                
+                <p>Kính gửi Ban Giám đốc,</p>
+                
+                <p>Hợp đồng <strong><t t-out="object.name"/></strong> đã được đối tác <strong><t t-out="object.partner_id.name"/></strong> ký trước.</p>
+                
+                <p>Vui lòng xem xét và ký đóng dấu để hoàn tất quy trình.</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; width: 30%;"><strong>Số hợp đồng:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.name"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Tiêu đề:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.title"/></td>
+                    </tr>
+                </table>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.contract&amp;view_type=form" 
+                       style="background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết và ký
+                    </a>
+                </p>
+            </div>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ PRIVILEGE (Odoo 19) ============ -->
+    <record id="privilege_trasas_asset" model="res.groups.privilege">
+        <field name="name">Quản lý Tài sản</field>
+        <field name="category_id" ref="base.module_category_human_resources"/>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- ============ SECURITY GROUPS ============ -->
+
+    <!-- Nhóm 1: HCNS — Asset Manager (toàn quyền CRUD) -->
+    <record id="group_asset_manager" model="res.groups">
+        <field name="name">Asset Manager (HCNS)</field>
+        <field name="privilege_id" ref="privilege_trasas_asset"/>
+        <field name="comment">HCNS - Toàn quyền tạo, sửa, xóa, upload tài sản và pháp lý</field>
+    </record>
+
+    <!-- Nhóm 2: Ban Giám đốc — Asset Director (chỉ xem, tra cứu) -->
+    <record id="group_asset_director" model="res.groups">
+        <field name="name">Asset Director (Ban Giám đốc)</field>
+        <field name="privilege_id" ref="privilege_trasas_asset"/>
+        <field name="comment">BGĐ - Xem tất cả tài sản, tra cứu, xem pháp lý, xuất báo cáo</field>
+    </record>
+
+    <!-- Admin tự động có quyền Manager -->
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_asset_manager'))]"/>
+    </record>
+
+    <!-- ============ RECORD RULES ============ -->
+
+    <!-- Manager (HCNS): Toàn quyền trên tài sản -->
+    <record id="asset_manager_rule" model="ir.rule">
+        <field name="name">Asset Manager: Full Access</field>
+        <field name="model_id" ref="model_trasas_asset"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_asset_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Director (BGĐ): Chỉ xem -->
+    <record id="asset_director_rule" model="ir.rule">
+        <field name="name">Asset Director: Read Only</field>
+        <field name="model_id" ref="model_trasas_asset"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_asset_director'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Manager: Toàn quyền trên giấy tờ pháp lý -->
+    <record id="legal_doc_manager_rule" model="ir.rule">
+        <field name="name">Legal Document Manager: Full Access</field>
+        <field name="model_id" ref="model_trasas_asset_legal_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_asset_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Director: Chỉ xem giấy tờ pháp lý -->
+    <record id="legal_doc_director_rule" model="ir.rule">
+        <field name="name">Legal Document Director: Read Only</field>
+        <field name="model_id" ref="model_trasas_asset_legal_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_asset_director'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+</odoo>

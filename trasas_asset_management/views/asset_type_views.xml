@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ FORM VIEW ============ -->
+    <record id="trasas_asset_type_view_form" model="ir.ui.view">
+        <field name="name">trasas.asset.type.form</field>
+        <field name="model">trasas.asset.type</field>
+        <field name="arch" type="xml">
+            <form string="Nhóm tài sản">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" class="oe_stat_button"
+                                icon="fa-building"
+                                name="action_view_assets">
+                            <field name="asset_count" widget="statinfo"
+                                   string="Tài sản"/>
+                        </button>
+                    </div>
+
+                    <group>
+                        <group string="Thông tin">
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="group_code"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group string="Cấu hình">
+                            <field name="sequence_id"/>
+                            <field name="default_depreciation_rate"
+                                   />
+                        </group>
+                    </group>
+
+                    <group string="Mô tả">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ LIST VIEW ============ -->
+    <record id="trasas_asset_type_view_list" model="ir.ui.view">
+        <field name="name">trasas.asset.type.list</field>
+        <field name="model">trasas.asset.type</field>
+        <field name="arch" type="xml">
+            <list string="Nhóm tài sản" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="group_code"/>
+                <field name="default_depreciation_rate" />
+                <field name="sequence_id"/>
+                <field name="asset_count"/>
+            </list>
+        </field>
+    </record>
+</odoo>

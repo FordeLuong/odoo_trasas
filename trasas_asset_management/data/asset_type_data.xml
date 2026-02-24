@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ DỮ LIỆU MẪU NHÓM TÀI SẢN ============ -->
+
+    <record id="asset_type_nxct" model="trasas.asset.type">
+        <field name="name">Nhà cửa / Công trình xây dựng / Kho bãi</field>
+        <field name="code">NXCT</field>
+        <field name="group_code">nxct</field>
+        <field name="sequence">1</field>
+        <field name="sequence_id" ref="seq_trasas_asset_nxct"/>
+        <field name="default_depreciation_rate">2.5</field>
+        <field name="description">Nhà cửa, công trình xây dựng, kho bãi, nhà xưởng, văn phòng...</field>
+    </record>
+
+    <record id="asset_type_mmtb" model="trasas.asset.type">
+        <field name="name">Máy móc thiết bị sản xuất</field>
+        <field name="code">MMTB</field>
+        <field name="group_code">mmtb</field>
+        <field name="sequence">2</field>
+        <field name="sequence_id" ref="seq_trasas_asset_mmtb"/>
+        <field name="default_depreciation_rate">10.0</field>
+        <field name="description">Máy móc, dây chuyền sản xuất, thiết bị công nghệ...</field>
+    </record>
+
+    <record id="asset_type_tbvp" model="trasas.asset.type">
+        <field name="name">Thiết bị văn phòng giá trị lớn</field>
+        <field name="code">TBVP</field>
+        <field name="group_code">tbvp</field>
+        <field name="sequence">3</field>
+        <field name="sequence_id" ref="seq_trasas_asset_tbvp"/>
+        <field name="default_depreciation_rate">12.5</field>
+        <field name="description">Máy tính, máy in công nghiệp, server, thiết bị IT giá trị lớn...</field>
+    </record>
+
+    <record id="asset_type_tsvh" model="trasas.asset.type">
+        <field name="name">Tài sản vô hình</field>
+        <field name="code">TSVH</field>
+        <field name="group_code">tsvh</field>
+        <field name="sequence">4</field>
+        <field name="sequence_id" ref="seq_trasas_asset_tsvh"/>
+        <field name="default_depreciation_rate">5.0</field>
+        <field name="description">Bản quyền, phần mềm, thương hiệu, bằng sáng chế...</field>
+    </record>
+</odoo>

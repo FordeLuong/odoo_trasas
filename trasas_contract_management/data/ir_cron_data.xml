@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ CRON JOB: KIỂM TRA HỢP ĐỒNG SẮP HẾT HẠN ============ -->
+    <record id="ir_cron_check_expiring_contracts" model="ir.cron">
+        <field name="name">TRASAS: Kiểm tra hợp đồng sắp hết hạn</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_check_expiring_contracts()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 01:00:00')"/>
+        <field name="priority">5</field>
+    </record>
+
+    <!-- ============ CRON JOB: KIỂM TRA HẠN KÝ ============ -->
+    <record id="ir_cron_check_signing_deadline" model="ir.cron">
+        <field name="name">TRASAS: Kiểm tra hạn ký hợp đồng</field>
+        <field name="model_id" ref="model_trasas_contract"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_check_signing_deadline()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 02:00:00')"/>
+        <field name="priority">5</field>
+    </record>
+
+    <!-- ============ SEQUENCE: TẠO SỐ HỢP ĐỒNG TỰ ĐỘNG ============ -->
+    <record id="seq_trasas_contract" model="ir.sequence">
+        <field name="name">TRASAS Contract Sequence</field>
+        <field name="code">trasas.contract</field>
+        <field name="prefix">HD/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+        <field name="implementation">standard</field>
+    </record>
+</odoo>

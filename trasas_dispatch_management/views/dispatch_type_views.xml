@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View -->
+    <record id="view_trasas_dispatch_type_tree" model="ir.ui.view">
+        <field name="name">trasas.dispatch.type.list</field>
+        <field name="model">trasas.dispatch.type</field>
+        <field name="arch" type="xml">
+            <list string="Loại công văn" editable="bottom">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="description"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_trasas_dispatch_type" model="ir.actions.act_window">
+        <field name="name">Loại công văn</field>
+        <field name="res_model">trasas.dispatch.type</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo loại công văn mới
+            </p>
+        </field>
+    </record>
+</odoo>

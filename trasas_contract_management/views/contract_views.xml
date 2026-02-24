@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ FORM VIEW ============ -->
+    <record id="view_contract_form" model="ir.ui.view">
+        <field name="name">trasas.contract.form</field>
+        <field name="model">trasas.contract</field>
+        <field name="arch" type="xml">
+            <form string="Hợp đồng TRASAS">
+                <header>
+                    <!-- Nút: Gửi duyệt -->
+                    <button name="action_submit_for_approval" 
+                            string="Gửi duyệt" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state != 'draft'"
+                            groups="trasas_contract_management.group_contract_user"/>
+
+                    <!-- Nút: Gửi rà soát -->
+                    <button name="action_submit_for_review" 
+                            string="Gửi rà soát" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="state != 'draft'"
+                            groups="trasas_contract_management.group_contract_user"/>
+                    
+                    <!-- Nút: Xác nhận rà soát -->
+                    <button name="action_confirm_review" 
+                            string="Xác nhận rà soát" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state != 'in_review'"
+                            groups="trasas_contract_management.group_contract_user"/>
+                    
+                    <!-- Nút: Phê duyệt -->
+                    <button name="action_approve" 
+                            string="Phê duyệt" 
+                            type="object" 
+                            class="btn-success"
+                            invisible="state != 'waiting'"
+                            groups="trasas_contract_management.group_contract_approver"/>
+                    
+                    <!-- Nút: Từ chối -->
+                    <button name="action_reject" 
+                            string="Từ chối" 
+                            type="object" 
+                            class="btn-danger"
+                            invisible="state != 'waiting'"
+                            groups="trasas_contract_management.group_contract_approver"/>
+                    
+                    <!-- Nút: Bắt đầu ký -->
+                    <button name="action_start_signing" 
+                            string="Bắt đầu ký" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state != 'approved' or is_approver"
+                            groups="trasas_contract_management.group_contract_user"/>
+                    
+                    <!-- ============ LUỒNG: TRASAS KÝ TRƯỚC ============ -->
+                    <!-- B11: Xác nhận TRASAS đã ký (Giám đốc) -->
+                    <button name="action_mark_internal_signed"
+                            string="Xác nhận TRASAS đã ký"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'signing' or signing_flow != 'trasas_first' or internal_sign_date or is_approver"
+                            groups="trasas_contract_management.group_contract_user"/>
+                            
+                    <!-- B12: Xác nhận Đã gửi cho Đối tác -->
+                    <button name="action_mark_sent_to_partner"
+                            string="Xác nhận Đã gửi Đối tác"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'signing' or signing_flow != 'trasas_first' or not internal_sign_date or sent_to_partner_date"
+                            groups="trasas_contract_management.group_contract_user"/>
+                    
+                    <!-- B13: Xác nhận Hoàn tất (TRASAS First) -->
+                    <button name="action_confirm_signed" 
+                            string="Xác nhận Hoàn tất" 
+                            type="object" 
+                            class="btn-success"
+                            invisible="state != 'signing' or signing_flow != 'trasas_first' or not sent_to_partner_date"
+                            groups="trasas_contract_management.group_contract_user"/>
+
+                    <!-- ============ LUỒNG: ĐỐI TÁC KÝ TRƯỚC ============ -->
+                    <!-- B14: Xác nhận Đối tác đã ký -->
+                    <button name="action_mark_partner_signed"
+                            string="Xác nhận Đối tác đã ký"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'signing' or signing_flow != 'partner_first' or partner_sign_date"
+                            groups="trasas_contract_management.group_contract_user"/>
+                            
+                    <!-- B15: Xác nhận TRASAS đã ký (Giám đốc - Luồng Đối tác ký trước) -->
+                    <button name="action_mark_internal_signed"
+                            string="Xác nhận TRASAS đã ký"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'signing' or signing_flow != 'partner_first' or not partner_sign_date or internal_sign_date or is_approver"
+                            groups="trasas_contract_management.group_contract_user"/>
+                    
+                    <!-- B13: Xác nhận Hoàn tất (Partner First) -->
+                    <button name="action_confirm_signed" 
+                            string="Xác nhận Hoàn tất" 
+                            type="object" 
+                            class="btn-success"
+                            invisible="state != 'signing' or signing_flow != 'partner_first' or not internal_sign_date"
+                            groups="trasas_contract_management.group_contract_user"/>
+
+                    <!-- Nút: Gửi lại Email cho Đối tác (Manual) -->
+                    <button name="action_send_contract_to_partner"
+                            string="Gửi Email Đối tác"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state not in ['approved', 'signing', 'signed']"
+                            groups="trasas_contract_management.group_contract_user"/>
+
+                    
+                    <!-- Nút: Hủy -->
+                    <button name="action_cancel" 
+                            string="Hủy" 
+                            type="object"
+                            confirm="Bạn có chắc muốn hủy hợp đồng này?"
+                            invisible="state in ['signed', 'expired', 'cancel']"
+                            groups="trasas_contract_management.group_contract_manager"/>
+                    
+                    <!-- Nút: Đặt về nháp -->
+                    <button name="action_set_to_draft" 
+                            string="Đặt về nháp" 
+                            type="object"
+                            invisible="state in ['draft', 'signed']"
+                            groups="trasas_contract_management.group_contract_manager"/>
+                    
+                    <!-- Statusbar -->
+                    <field name="state" widget="statusbar" 
+                           statusbar_visible="draft,in_review,waiting,approved,signing,signed,expired"/>
+                    <field name="is_approver" invisible="1"/>
+                </header>
+                
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_sign_requests"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-pencil"
+                                invisible="sign_request_count == 0">
+                            <field name="sign_request_count" widget="statinfo" string="Chữ ký số"/>
+                        </button>
+                    </div>
+                    
+                    <!-- Ribbon cho hợp đồng hết hạn -->
+                    <div class="ribbon ribbon-top-right" invisible="state != 'expired'">
+                        <span class="bg-danger">Hết hạn</span>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                        <h2>
+                            <field name="title" placeholder="Tiêu đề hợp đồng..."/>
+                        </h2>
+                    </div>
+                    
+                    <group>
+                        <group string="Thông tin chung">
+                            <field name="contract_date" readonly="state not in ['draft']"/>
+                            <field name="contract_type_id" 
+                                   options="{'no_create': True}"
+                                   readonly="state not in ['draft']"/>
+                            <field name="partner_id" 
+                                   readonly="state not in ['draft']"/>
+                            <field name="signing_flow" 
+                                   widget="radio"
+                                   readonly="state not in ['draft', 'waiting']"/>
+                            <field name="suggested_reviewer_id" 
+                                   invisible="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                            <field name="user_id" readonly="1"/>
+                        </group>
+                        
+                        <group string="Thời hạn">
+                            <field name="date_start" 
+                                   readonly="state not in ['draft', 'waiting']"/>
+                            <field name="date_end" 
+                                   readonly="state not in ['draft', 'waiting']"/>
+                            <field name="duration_days" readonly="1"/>
+                            <field name="days_to_expire" 
+                                   readonly="1"
+                                   invisible="state not in ['signed']"
+                                   decoration-danger="days_to_expire &lt; 30"
+                                   decoration-warning="days_to_expire &lt; 60"/>
+                            <field name="sign_deadline" 
+                                   readonly="state not in ['draft', 'waiting', 'approved']"/>
+                            <field name="signed_date" 
+                                   readonly="1"
+                                   invisible="state != 'signed'"/>
+                            <field name="storage_location" placeholder="VD: Tủ A, Kệ 2"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Thông tin chi tiết" name="details">
+                            <group>
+                                <field name="description" 
+                                       placeholder="Mô tả chi tiết nội dung hợp đồng..."
+                                       nolabel="1"/>
+                            </group>
+                        </page>
+                        
+                        <page string="Phê duyệt" name="approval">
+                            <group>
+                                <group>
+                                    <field name="reviewer_id" readonly="1"/>
+                                    <field name="review_date" readonly="1"/>
+                                    <field name="approver_id" readonly="1"/>
+                                    <field name="approved_date" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="signed_date" readonly="1"/>
+                                </group>
+                            </group>
+                            <group string="Theo dõi ký kết" invisible="state == 'draft'">
+                                <group>
+                                    <field name="signing_flow" readonly="1"/>
+                                    <field name="internal_sign_date"/>
+                                </group>
+                                <group>
+                                    <field name="sent_to_partner_date"/>
+                                    <field name="partner_sign_date"/>
+                                </group>
+                            </group>
+                            <group invisible="not rejection_reason">
+                                <field name="rejection_reason" readonly="1" nolabel="1"/>
+                            </group>
+                        </page>
+                        
+                        <page string="File đính kèm" name="files">
+                            <group>
+                                <field name="final_scan_file" 
+                                       filename="final_scan_filename"
+                                       readonly="state in ['signed', 'cancel']"/>
+                                <field name="final_scan_filename" invisible="1"/>
+                                
+                                <separator string="▼ Dành cho bộ phận vận hành upload bản đã đóng dấu ▼" colspan="2"/>
+                                <field name="stamped_file" 
+                                       filename="stamped_filename"
+                                       readonly="state not in ['signing', 'signed']"/>
+                                <field name="stamped_filename" invisible="1"/>
+                            </group>
+                            <separator string="Hướng dẫn"/>
+                            <div class="alert alert-info" role="alert">
+                                <p><strong>Quy trình upload:</strong></p>
+                                <ul>
+                                    <li><strong>Bản scan đang ký:</strong> Upload vào "Bản scan đã ký" để xác nhận hoàn tất ký kết.</li>
+                                    <li><strong>Bản đóng dấu:</strong> Sau khi hoàn tất ký, upload bản có dấu đỏ vào "Bản đóng dấu".</li>
+                                    <li>Các file khác có thể kéo thả vào Chatter bên dưới.</li>
+                                </ul>
+                            </div>
+                        </page>
+                        
+                        <page string="Ghi chú nội bộ" name="notes">
+                            <field name="notes" placeholder="Ghi chú chỉ dành cho nội bộ TRASAS..."/>
+                        </page>
+                        <page string="Phụ lục" name="appendices">
+                            <field name="appendix_ids" context="{'default_contract_id': id}">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="sign_date"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'signed'"/>
+                                    <button name="action_confirm_signed" 
+                                            string="Đã ký" 
+                                            type="object" 
+                                            icon="fa-check"
+                                            invisible="state != 'draft'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <!-- Chatter -->
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ LIST VIEW ============ -->
+    <record id="view_contract_list" model="ir.ui.view">
+        <field name="name">trasas.contract.list</field>
+        <field name="model">trasas.contract</field>
+        <field name="arch" type="xml">
+            <list string="Hợp đồng TRASAS" 
+                  decoration-danger="state == 'expired' or (state == 'signed' and days_to_expire &lt; 30)"
+                  decoration-warning="state == 'signed' and days_to_expire &lt; 60"
+                  decoration-info="state == 'waiting'"
+                  decoration-success="state == 'signed'"
+                  decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="contract_type_id"/>
+                <field name="partner_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="days_to_expire" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="state" widget="badge" 
+                       decoration-success="state == 'signed'"
+                       decoration-info="state in ['approved', 'signing']"
+                       decoration-warning="state == 'waiting'"
+                       decoration-danger="state in ['expired', 'cancel']"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ KANBAN VIEW ============ -->
+    <record id="view_contract_kanban" model="ir.ui.view">
+        <field name="name">trasas.contract.kanban</field>
+        <field name="model">trasas.contract</field>
+        <field name="arch" type="xml">
+            <kanban highlight_color="color" default_group_by="stage_id" class="o_kanban_small_column" sample="1">
+                <field name="stage_id" options="{&quot;group_by_tooltip&quot;: {&quot;requirements&quot;: &quot;Yêu cầu&quot;}}"/>
+                <field name="legend_normal"/>
+                <field name="legend_blocked"/>
+                <field name="legend_done"/>
+                <field name="color"/>
+                <field name="user_id"/>
+                <field name="active"/>
+                <field name="state"/>
+                <field name="company_id" invisible="1"/>
+                <progressbar field="kanban_state" colors="{&quot;done&quot;: &quot;success&quot;, &quot;blocked&quot;: &quot;danger&quot;, &quot;normal&quot;: &quot;muted&quot;}"/>
+                <templates>
+                    <t t-name="menu">
+                        <a t-if="record.active.raw_value" role="menuitem" type="archive" class="dropdown-item">Lưu trữ</a>
+                        <a t-if="!record.active.raw_value" role="menuitem" type="unarchive" class="dropdown-item">Bỏ lưu trữ</a>
+                        <t t-if="widget.deletable"><a role="menuitem" type="delete" class="dropdown-item">Xóa</a></t>
+                    </t>
+                    <t t-name="card">
+                        <widget name="web_ribbon" title="Đã ký" bg_color="text-bg-success" invisible="state != 'signed'"/>
+                        <widget name="web_ribbon" title="Đã hủy" bg_color="text-bg-danger" invisible="state != 'cancel'"/>
+                        <widget name="web_ribbon" title="Hết hạn" bg_color="text-bg-warning" invisible="state != 'expired'"/>
+                        <field class="fw-bold fs-5" name="name"/>
+                        <field name="title" class="text-muted"/>
+                        <field name="partner_id"/>
+                        <field name="contract_type_id" widget="badge"/>
+                        <footer>
+                            <field name="priority" widget="priority"/>
+                            <field class="ms-1 align-items-center" name="activity_ids" widget="kanban_activity"/>
+                            <div class="d-flex ms-auto align-items-center">
+                                <field name="kanban_state" class="mx-1" widget="state_selection"/>
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                            </div>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============ SEARCH VIEW ============ -->
+    <record id="view_contract_search" model="ir.ui.view">
+        <field name="name">trasas.contract.search</field>
+        <field name="model">trasas.contract</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm hợp đồng">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="partner_id"/>
+                <field name="contract_type_id"/>
+                <field name="user_id"/>
+                
+                <!-- Filters -->
+                <separator/>
+                <filter string="Hợp đồng của tôi" name="my_contracts" 
+                        domain="[('user_id', '=', uid)]"/>
+                <filter string="Chờ duyệt" name="waiting" 
+                        domain="[('state', '=', 'waiting')]"/>
+                <filter string="Đã duyệt" name="approved" 
+                        domain="[('state', '=', 'approved')]"/>
+                <filter string="Đang ký" name="signing" 
+                        domain="[('state', '=', 'signing')]"/>
+                <filter string="Đã ký" name="signed" 
+                        domain="[('state', '=', 'signed')]"/>
+                <separator/>
+                <!-- <filter string="Sắp hết hạn (30 ngày)" name="expiring_soon" 
+                        domain="[('state', '=', 'signed'), ('date_end', '&lt;=', (context_today() + relativedelta(days=30)).strftime('%Y-%m-%d')), ('date_end', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/> -->
+                <filter string="Hết hạn" name="expired" 
+                        domain="[('state', '=', 'expired')]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" 
+                        domain="[('active', '=', False)]"/>
+                
+                <!-- Group By -->
+                <!-- <group expand="0" string="Group By">
+                    <filter string="Trạng thái" name="group_state" 
+                            context="{'group_by': 'state'}"/>
+                    <filter string="Loại hợp đồng" name="group_type" 
+                            context="{'group_by': 'contract_type_id'}"/>
+                    <filter string="Đối tác" name="group_partner" 
+                            context="{'group_by': 'partner_id'}"/>
+                    <filter string="Người tạo" name="group_user" 
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Tháng bắt đầu" name="group_date_start" 
+                            context="{'group_by': 'date_start:month'}"/>
+                    <filter string="Tháng kết thúc" name="group_date_end" 
+                            context="{'group_by': 'date_end:month'}"/>
+                </group> -->
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ ACTION ============ -->
+    <record id="action_contract" model="ir.actions.act_window">
+        <field name="name">Hợp đồng</field>
+        <field name="res_model">trasas.contract</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo hợp đồng đầu tiên
+            </p>
+            <p>
+                Click vào nút "Create" để tạo hợp đồng mới.<br/>
+                Hệ thống sẽ hỗ trợ bạn quản lý toàn bộ vòng đời hợp đồng từ soạn thảo đến ký kết.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Action: Hợp đồng của tôi -->
+    <record id="action_my_contracts" model="ir.actions.act_window">
+        <field name="name">Hợp đồng của tôi</field>
+        <field name="res_model">trasas.contract</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_my_contracts': 1}</field>
+    </record>
+    
+    <!-- Action: Chờ phê duyệt -->
+    <record id="action_waiting_contracts" model="ir.actions.act_window">
+        <field name="name">Chờ phê duyệt</field>
+        <field name="res_model">trasas.contract</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_waiting': 1}</field>
+    </record>
+    
+    <!-- Action: Sắp hết hạn -->
+    <record id="action_expiring_contracts" model="ir.actions.act_window">
+        <field name="name">Sắp hết hạn</field>
+        <field name="res_model">trasas.contract</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_expiring_soon': 1}</field>
+    </record>
+</odoo>

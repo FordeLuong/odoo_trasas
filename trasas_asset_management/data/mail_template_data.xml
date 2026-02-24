@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ EMAIL TEMPLATE: TÀI SẢN MỚI ĐÃ TẠO (B1) ============ -->
+    <record id="email_template_asset_created" model="mail.template">
+        <field name="name">TRASAS: Tài sản mới đã tạo</field>
+        <field name="model_id" ref="model_trasas_asset"/>
+        <field name="subject">Tài sản mới: {{ object.code }} - {{ object.name }}</field>
+        <field name="email_to">{{ object.responsible_user_id.email or '' }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #008784;">Tài sản mới đã được tạo</h2>
+                
+                <p>Kính gửi <t t-out="object.responsible_user_id.name"/>,</p>
+                
+                <p>Tài sản sau đã được tạo trên hệ thống:</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; width: 30%;"><strong>Mã tài sản:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.code"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Tên tài sản:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.name"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Nhóm tài sản:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.asset_group_id.name"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Vị trí:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.location or 'Chưa cập nhật'"/></td>
+                    </tr>
+                </table>
+                
+                <p>Vui lòng upload đầy đủ hồ sơ pháp lý cho tài sản này.</p>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.asset&amp;view_type=form" 
+                       style="background-color: #008784; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết tài sản
+                    </a>
+                </p>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                    Email này được gửi tự động từ hệ thống quản lý tài sản TRASAS.
+                </p>
+            </div>
+        </field>
+    </record>
+
+    <!-- ============ EMAIL TEMPLATE: GIẤY TỜ SẮP HẾT HẠN (Cron) ============ -->
+    <record id="email_template_document_expiring" model="mail.template">
+        <field name="name">TRASAS: Giấy tờ pháp lý sắp hết hạn</field>
+        <field name="model_id" ref="model_trasas_asset"/>
+        <field name="subject">⚠️ Giấy tờ sắp hết hạn: {{ object.code }} - {{ object.name }}</field>
+        <field name="email_to">{{ object.responsible_user_id.email or '' }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #ff9800;">⚠️ Cảnh báo giấy tờ sắp hết hạn</h2>
+                
+                <p>Kính gửi <t t-out="object.responsible_user_id.name"/>,</p>
+                
+                <p>Tài sản <strong><t t-out="object.name"/></strong> (Mã: <t t-out="object.code"/>) có giấy tờ pháp lý sắp hết hạn.</p>
+                
+                <p>Vui lòng kiểm tra và thực hiện gia hạn trước hạn.</p>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.asset&amp;view_type=form" 
+                       style="background-color: #ff9800; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết tài sản
+                    </a>
+                </p>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                    Email này được gửi tự động từ hệ thống quản lý tài sản TRASAS.
+                </p>
+            </div>
+        </field>
+    </record>
+
+    <!-- ============ EMAIL TEMPLATE: GIẤY TỜ ĐÃ HẾT HẠN (Cron) ============ -->
+    <record id="email_template_document_expired" model="mail.template">
+        <field name="name">TRASAS: Giấy tờ pháp lý đã hết hiệu lực</field>
+        <field name="model_id" ref="model_trasas_asset"/>
+        <field name="subject">❌ Giấy tờ hết hiệu lực: {{ object.code }} - {{ object.name }}</field>
+        <field name="email_to">{{ object.responsible_user_id.email or '' }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #dc3545;">❌ Giấy tờ pháp lý đã hết hiệu lực</h2>
+                
+                <p>Kính gửi <t t-out="object.responsible_user_id.name"/>,</p>
+                
+                <p>Tài sản <strong><t t-out="object.name"/></strong> (Mã: <t t-out="object.code"/>) có giấy tờ pháp lý <strong>đã hết hiệu lực</strong>.</p>
+                
+                <p>Vui lòng kiểm tra và xử lý (gia hạn hoặc thu hồi).</p>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.asset&amp;view_type=form" 
+                       style="background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết tài sản
+                    </a>
+                </p>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                    Email này được gửi tự động từ hệ thống quản lý tài sản TRASAS.
+                </p>
+            </div>
+        </field>
+    </record>
+
+    <!-- ============ EMAIL TEMPLATE: THAY ĐỔI TRẠNG THÁI (B6) ============ -->
+    <record id="email_template_asset_state_changed" model="mail.template">
+        <field name="name">TRASAS: Tài sản thay đổi trạng thái</field>
+        <field name="model_id" ref="model_trasas_asset"/>
+        <field name="subject">Cập nhật trạng thái: {{ object.code }} - {{ object.name }}</field>
+        <field name="email_to">{{ object.responsible_user_id.email or '' }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #17a2b8;">Cập nhật trạng thái tài sản</h2>
+                
+                <p>Kính gửi Ban Giám đốc,</p>
+                
+                <p>Tài sản sau đã thay đổi trạng thái:</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; width: 30%;"><strong>Mã tài sản:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.code"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Tên:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.name"/></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Trạng thái hiện tại:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">
+                            <t t-out="dict(object._fields['state'].selection).get(object.state)"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Nhóm tài sản:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.asset_group_id.name"/></td>
+                    </tr>
+                </table>
+                
+                <p>
+                    <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.asset&amp;view_type=form" 
+                       style="background-color: #17a2b8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Xem chi tiết tài sản
+                    </a>
+                </p>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                    Email này được gửi tự động từ hệ thống quản lý tài sản TRASAS.
+                </p>
+            </div>
+        </field>
+    </record>
+</odoo>

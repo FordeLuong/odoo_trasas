@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ ACTIONS ============ -->
+
+    <!-- Action: Danh sách tài sản -->
+    <record id="action_trasas_asset" model="ir.actions.act_window">
+        <field name="name">Tài sản</field>
+        <field name="res_model">trasas.asset</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="trasas_asset_view_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo tài sản đầu tiên
+            </p>
+            <p>
+                Quản lý thông tin tài sản có giá trị lớn: BĐS, xe, máy móc thiết bị...
+            </p>
+        </field>
+    </record>
+
+    <!-- Action: Hồ sơ pháp lý (tổng hợp tất cả) -->
+    <record id="action_trasas_legal_document" model="ir.actions.act_window">
+        <field name="name">Hồ sơ Pháp lý</field>
+        <field name="res_model">trasas.asset.legal.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Chưa có hồ sơ pháp lý
+            </p>
+            <p>
+                Hồ sơ pháp lý được tạo từ tab "Hồ sơ Pháp lý" trong form tài sản.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action: Cấu hình loại tài sản -->
+    <record id="action_trasas_asset_type" model="ir.actions.act_window">
+        <field name="name">Loại tài sản</field>
+        <field name="res_model">trasas.asset.type</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo loại tài sản đầu tiên
+            </p>
+            <p>
+                Cấu hình danh mục loại tài sản: BĐS, Xe, Máy móc...
+            </p>
+        </field>
+    </record>
+
+    <!-- ============ MENUS ============ -->
+
+    <!-- Root Menu (Application) -->
+    <menuitem id="menu_trasas_asset_root"
+              name="Quản lý Tài sản"
+              web_icon="trasas_asset_management,static/description/icon.png"
+              sequence="40"/>
+
+    <!-- Tài sản -->
+    <menuitem id="menu_trasas_asset"
+              name="Tài sản"
+              parent="menu_trasas_asset_root"
+              action="action_trasas_asset"
+              sequence="10"/>
+
+    <!-- Hồ sơ Pháp lý -->
+    <menuitem id="menu_trasas_legal_document"
+              name="Hồ sơ Pháp lý"
+              parent="menu_trasas_asset_root"
+              action="action_trasas_legal_document"
+              sequence="20"/>
+
+    <!-- Cấu hình -->
+    <menuitem id="menu_trasas_asset_config"
+              name="Cấu hình"
+              parent="menu_trasas_asset_root"
+              sequence="90"
+              groups="trasas_asset_management.group_asset_manager"/>
+
+    <menuitem id="menu_trasas_asset_type"
+              name="Loại tài sản"
+              parent="menu_trasas_asset_config"
+              action="action_trasas_asset_type"
+              sequence="10"/>
+</odoo>

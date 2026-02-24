@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Hợp đồng mua bán -->
+        <record id="contract_type_purchase" model="trasas.contract.type">
+            <field name="name">Hợp đồng mua bán</field>
+            <field name="code">HĐMB</field>
+            <field name="sequence">1</field>
+            <field name="default_duration_days">365</field>
+            <field name="name_pattern">{code}/{year}/{sequence:03d}</field>
+        </record>
+
+        <!-- Hợp đồng kinh tế -->
+        <record id="contract_type_economic" model="trasas.contract.type">
+            <field name="name">Hợp đồng kinh tế</field>
+            <field name="code">HĐKT</field>
+            <field name="sequence">2</field>
+            <field name="default_duration_days">365</field>
+            <field name="name_pattern">{code}/{year}/{sequence:03d}</field>
+        </record>
+
+        <!-- Hợp đồng vận chuyển -->
+        <record id="contract_type_transport" model="trasas.contract.type">
+            <field name="name">Hợp đồng vận chuyển</field>
+            <field name="code">HĐVC</field>
+            <field name="sequence">3</field>
+            <field name="default_duration_days">180</field>
+            <field name="name_pattern">{code}/{year}/{sequence:03d}</field>
+        </record>
+        
+        <!-- Hợp đồng bảo hiểm -->
+        <record id="contract_type_insurance" model="trasas.contract.type">
+            <field name="name">Hợp đồng bảo hiểm</field>
+            <field name="code">HĐBH</field>
+            <field name="sequence">4</field>
+            <field name="default_duration_days">365</field>
+            <field name="name_pattern">{code}/{year}/{sequence:03d}</field>
+        </record>
+    </data>
+</odoo>

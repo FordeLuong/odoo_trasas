@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ FORM VIEW ============ -->
+    <record id="trasas_asset_view_form" model="ir.ui.view">
+        <field name="name">trasas.asset.form</field>
+        <field name="model">trasas.asset</field>
+        <field name="arch" type="xml">
+            <form string="Tài sản">
+                <header>
+                    <!-- === CHUNG: Mới → Đang sử dụng === -->
+                    <button name="action_confirm"
+                            string="Đưa vào sử dụng"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"
+                            groups="trasas_asset_management.group_asset_manager"/>
+
+                    <!-- === THIẾT BỊ (MMTB, TBVP, TSVH): Sửa chữa / Bảo trì / Thanh lý === -->
+                    <button name="action_repair"
+                            string="Sửa chữa"
+                            type="object"
+                            class="btn-warning"
+                            invisible="state != 'in_use' or asset_group == 'nxct'"
+                            groups="trasas_asset_management.group_asset_manager"/>
+
+                    <button name="action_maintenance"
+                            string="Bảo trì định kỳ"
+                            type="object"
+                            class="btn-warning"
+                            invisible="state != 'in_use' or asset_group == 'nxct'"
+                            groups="trasas_asset_management.group_asset_manager"/>
+
+                    <button name="action_return_to_use"
+                            string="Đưa lại vào SD"
+                            type="object"
+                            class="btn-success"
+                            invisible="state not in ('repair', 'maintenance')"
+                            groups="trasas_asset_management.group_asset_manager"/>
+
+                    <button name="action_liquidate"
+                            string="Thanh lý"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state not in ('in_use', 'repair', 'maintenance') or asset_group == 'nxct'"
+                            groups="trasas_asset_management.group_asset_manager"
+                            confirm="Xác nhận thanh lý tài sản?"/>
+
+                    <!-- === ĐẤT / MẶT BẰNG (NXCT): Cho thuê / Cải tạo / Hết hạn / Kết thúc HĐ === -->
+                    <button name="action_lease"
+                            string="Cho thuê"
+                            type="object"
+                            class="btn-warning"
+                            invisible="state != 'in_use' or asset_group != 'nxct'"
+                            groups="trasas_asset_management.group_asset_manager"/>
+
+                    <button name="action_renovation"
+                            string="Cải tạo"
+                            type="object"
+                            class="btn-warning"
+                            invisible="state != 'in_use' or asset_group != 'nxct'"
+                            groups="trasas_asset_management.group_asset_manager"/>
+
+                    <button name="action_return_from_renovation"
+                            string="Hoàn tất cải tạo"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'renovation'"
+                            groups="trasas_asset_management.group_asset_manager"/>
+
+                    <button name="action_expiring"
+                            string="Sắp hết hạn"
+                            type="object"
+                            class="btn-warning"
+                            invisible="state != 'leased'"
+                            groups="trasas_asset_management.group_asset_manager"/>
+
+                    <button name="action_contract_ended"
+                            string="Kết thúc HĐ"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state not in ('leased', 'expiring')"
+                            groups="trasas_asset_management.group_asset_manager"
+                            confirm="Xác nhận kết thúc hợp đồng?"/>
+
+                    <button name="action_return_to_use_from_lease"
+                            string="Tái sử dụng"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'contract_ended'"
+                            groups="trasas_asset_management.group_asset_manager"/>
+
+                    <!-- === CHUNG: Hoàn thành / Đặt về Mới === -->
+                    <button name="action_completed"
+                            string="Hoàn thành"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state not in ('liquidated', 'contract_ended', 'in_use')"
+                            groups="trasas_asset_management.group_asset_manager"
+                            confirm="Xác nhận hoàn thành tài sản?"/>
+
+                    <button name="action_set_to_draft"
+                            string="Đặt về Mới"
+                            type="object"
+                            invisible="state == 'draft'"
+                            groups="trasas_asset_management.group_asset_manager"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,in_use,completed"/>
+                </header>
+
+                <sheet>
+                    <!-- Smart button -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_legal_documents"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o">
+                            <field name="legal_document_count" widget="statinfo"
+                                   string="Hồ sơ"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Tên tài sản..."/>
+                        </h1>
+                        <h3>
+                            <field name="code" readonly="1"/>
+                        </h3>
+                    </div>
+
+                    <!-- NHÓM 1: THÔNG TIN ĐỊNH DANH + MUA SẮM -->
+                    <group>
+                        <group string="Thông tin định danh">
+                            <field name="asset_group_id"/>
+                            <field name="asset_group" invisible="1"/>
+
+                        </group>
+                        <group string="Mua sắm – Ghi nhận">
+                            <field name="supplier_id"/>
+                            <field name="acquisition_date"/>
+                            <field name="purchase_reference"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Giá trị">
+                            <field name="original_value"/>
+                            <field name="residual_value"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Quản lý sử dụng">
+                            <field name="department_id"/>
+                            <field name="location"/>
+                            <field name="responsible_user_id"/>
+                            <field name="ownership_type"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- TAB 1: Kế toán – Khấu hao -->
+                        <page string="Kế toán – Khấu hao" name="accounting">
+                            <group>
+                                <group string="Khấu hao">
+                                    <field name="depreciation_start_date"/>
+                                    <field name="depreciation_duration"/>
+                                    <field name="depreciation_method"/>
+                                    <field name="depreciation_rate"/>
+                                </group>
+                                <group string="Tài khoản kế toán">
+                                    <field name="account_asset_id"/>
+                                    <field name="account_depreciation_id"/>
+                                    <field name="account_expense_id"/>
+                                    <field name="journal_id"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- TAB 2: Hồ sơ chứng từ đính kèm -->
+                        <page string="Hồ sơ chứng từ" name="documents">
+                            <field name="legal_document_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="document_type"/>
+                                    <field name="name"/>
+                                    <field name="document_date"/>
+                                    <field name="issuing_authority"/>
+                                    <field name="certificate_number"/>
+                                    <field name="validity_date"/>
+                                    <field name="days_to_expire"
+                                           decoration-danger="days_to_expire &lt; 0"
+                                           decoration-warning="days_to_expire &gt;= 0 and days_to_expire &lt;= 30"/>
+                                    <field name="state"
+                                           decoration-success="state == 'active'"
+                                           decoration-warning="state == 'expiring_soon'"
+                                           decoration-danger="state == 'expired'"
+                                           decoration-muted="state == 'revoked'"
+                                           widget="badge"/>
+                                    <field name="attachment_ids" widget="many2many_binary"/>
+                                    <field name="note"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- TAB 3: Trường riêng NXCT -->
+                        <page string="Nhà cửa / Công trình"
+                              name="nxct_details"
+                              invisible="asset_group != 'nxct'">
+                            <group>
+                                <group>
+                                    <field name="building_address"/>
+                                    <field name="building_area"/>
+                                    <field name="building_scale"/>
+                                    <field name="building_category"/>
+                                </group>
+                                <group>
+                                    <field name="construction_date"/>
+                                    <field name="completion_date"/>
+                                </group>
+                            </group>
+                            <group string="Thông tin sở hữu">
+                                <field name="ownership_info" nolabel="1"/>
+                            </group>
+                        </page>
+
+                        <!-- TAB 4: Trường riêng MMTB -->
+                        <page string="Máy móc thiết bị"
+                              name="mmtb_details"
+                              invisible="asset_group != 'mmtb'">
+                            <group>
+                                <group>
+                                    <field name="machine_model"/>
+                                    <field name="serial_number"/>
+                                    <field name="manufacture_year"/>
+                                    <field name="manufacturer"/>
+                                    <field name="origin_country"/>
+                                </group>
+                                <group>
+                                    <field name="safety_inspection_date"/>
+                                </group>
+                            </group>
+                            <group string="Thông số kỹ thuật">
+                                <field name="technical_specs" nolabel="1"/>
+                            </group>
+                            <group string="Lịch bảo trì">
+                                <field name="maintenance_note" nolabel="1"/>
+                            </group>
+                        </page>
+
+                        <!-- TAB 5: Trường riêng TBVP -->
+                        <page string="Thiết bị văn phòng"
+                              name="tbvp_details"
+                              invisible="asset_group != 'tbvp'">
+                            <group>
+                                <group>
+                                    <field name="equipment_serial"/>
+                                    <field name="warranty_expiry_date"/>
+                                    <field name="installation_location"/>
+                                </group>
+                            </group>
+                            <group string="Cấu hình kỹ thuật (IT)">
+                                <field name="it_config" nolabel="1"/>
+                            </group>
+                        </page>
+
+                        <!-- TAB 6: Trường riêng TSVH -->
+                        <page string="Tài sản vô hình"
+                              name="tsvh_details"
+                              invisible="asset_group != 'tsvh'">
+                            <group>
+                                <group>
+                                    <field name="license_key"/>
+                                    <field name="license_provider"/>
+                                    <field name="license_quantity"/>
+                                    <field name="service_contract_ref"/>
+                                </group>
+                                <group>
+                                    <field name="license_start_date"/>
+                                    <field name="license_expiry_date"/>
+                                </group>
+                            </group>
+                            <group string="Điều kiện gia hạn">
+                                <field name="renewal_terms" nolabel="1"/>
+                            </group>
+                        </page>
+
+                        <!-- TAB 7: Mô tả chi tiết -->
+                        <page string="Mô tả chi tiết" name="description">
+                            <field name="description"/>
+                        </page>
+
+                        <!-- TAB 8: Ghi chú -->
+                        <page string="Ghi chú" name="notes">
+                            <field name="note" placeholder="Ghi chú chung..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <!-- Chatter -->
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ LIST VIEW ============ -->
+    <record id="trasas_asset_view_list" model="ir.ui.view">
+        <field name="name">trasas.asset.list</field>
+        <field name="model">trasas.asset</field>
+        <field name="arch" type="xml">
+            <list string="Danh sách tài sản"
+                  decoration-muted="state == 'completed'"
+                  decoration-danger="state in ('liquidated', 'contract_ended')"
+                  decoration-warning="state in ('repair', 'maintenance', 'renovation', 'expiring')">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="asset_group_id"/>
+
+                <field name="ownership_type" optional="show"/>
+                <field name="location"/>
+                <field name="original_value"/>
+                <field name="residual_value" optional="show"/>
+                <field name="acquisition_date"/>
+                <field name="responsible_user_id" widget="many2one_avatar_user"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'in_use'"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state in ('repair', 'maintenance', 'renovation', 'expiring', 'leased')"
+                       decoration-danger="state in ('liquidated', 'contract_ended')"
+                       decoration-muted="state == 'completed'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ SEARCH VIEW ============ -->
+    <record id="trasas_asset_view_search" model="ir.ui.view">
+        <field name="name">trasas.asset.search</field>
+        <field name="model">trasas.asset</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+</odoo>

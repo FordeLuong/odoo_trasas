@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- 1. Email Gửi duyệt (To Approver) -->
+        <record id="email_template_outgoing_to_approve" model="mail.template">
+            <field name="name">Công văn đi: Yêu cầu duyệt</field>
+            <field name="model_id" ref="model_trasas_dispatch_outgoing"/>
+            <field name="subject">Trình duyệt công văn đi: {{ object.subject }}</field>
+            <field name="email_from">{{ (object.drafter_id.email_formatted or user.email_formatted) }}</field>
+            <field name="partner_to">{{ object.approver_id.partner_id.id }}</field>
+            <field name="description">Gửi cho Người duyệt khi văn bản được trình ký</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Kính gửi <t t-out="object.approver_id.name or ''">Sếp</t>,<br/><br/>
+                        Phòng ban <strong><t t-out="object.department_id.name"/></strong> vừa trình ký một công văn đi với nội dung sau:<br/><br/>
+                        <strong>Trích yếu:</strong> <t t-out="object.subject"/><br/>
+                        <strong>Nơi nhận:</strong> <t t-out="object.recipient_id.name"/><br/>
+                        <strong>Người soạn:</strong> <t t-out="object.drafter_id.name"/><br/><br/>
+                        
+                        Vui lòng truy cập hệ thống để xem xét và phê duyệt.<br/><br/>
+                        
+                        <div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.get_base_url() + '/web#id=' + str(object.id) + '&amp;model=trasas.dispatch.outgoing&amp;view_type=form'"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Xem Công văn
+                            </a>
+                        </div>
+                        
+                        Trân trọng,<br/>
+                        Hệ thống Quản lý Công văn TRASAS
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- 2. Email Đã duyệt (To Drafter & HCNS) -->
+        <record id="email_template_outgoing_approved" model="mail.template">
+            <field name="name">Công văn đi: Đã duyệt</field>
+            <field name="model_id" ref="model_trasas_dispatch_outgoing"/>
+            <field name="subject">Đã duyệt công văn: {{ object.subject }}</field>
+            <field name="email_from">{{ (object.approver_id.email_formatted or user.email_formatted) }}</field>
+            <!-- Gửi cho Người soạn. HCNS sẽ được handle trong code (cc hoặc separate email) hoặc add follower -->
+            <field name="partner_to">{{ object.drafter_id.partner_id.id }}</field>
+            <field name="description">Gửi thông báo khi công văn đã được duyệt</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Kính gửi <t t-out="object.drafter_id.name or ''">Người soạn</t> và Bộ phận HCNS,<br/><br/>
+                        Công văn đi với trích yếu <strong>"<t t-out="object.subject"/>"</strong> đã được phê duyệt.<br/><br/>
+                        
+                        <strong>Bước tiếp theo:</strong> Chuyển sang bộ phận HCNS để cấp số và ban hành.<br/><br/>
+                        
+                        <div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.get_base_url() + '/web#id=' + str(object.id) + '&amp;model=trasas.dispatch.outgoing&amp;view_type=form'"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Xem Chi tiết
+                            </a>
+                        </div>
+                        
+                        Trân trọng,<br/>
+                        Hệ thống Quản lý Công văn TRASAS
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- 3. Email Từ chối (To Drafter) -->
+        <record id="email_template_outgoing_rejected" model="mail.template">
+            <field name="name">Công văn đi: Bị từ chối</field>
+            <field name="model_id" ref="model_trasas_dispatch_outgoing"/>
+            <field name="subject">TỪ CHỐI công văn: {{ object.subject }}</field>
+            <field name="email_from">{{ (object.approver_id.email_formatted or user.email_formatted) }}</field>
+            <field name="partner_to">{{ object.drafter_id.partner_id.id }}</field>
+            <field name="description">Gửi thông báo khi công văn bị từ chối</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Kính gửi <t t-out="object.drafter_id.name or ''">Người soạn</t>,<br/><br/>
+                        Công văn đi với trích yếu <strong>"<t t-out="object.subject"/>"</strong> đã bị <strong>TỪ CHỐI</strong>.<br/><br/>
+                        
+                        Vui lòng kiểm tra lại nội dung và chỉnh sửa theo yêu cầu (nếu có) trong phần Ghi chú/Log.<br/><br/>
+                        
+                        <div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.get_base_url() + '/web#id=' + str(object.id) + '&amp;model=trasas.dispatch.outgoing&amp;view_type=form'"
+                                style="background-color: #d9534f; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Xem Công văn
+                            </a>
+                        </div>
+                        
+                        Trân trọng,<br/>
+                        Hệ thống Quản lý Công văn TRASAS
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- 4. Email Đã phát hành (To Drafter/All) -->
+        <record id="email_template_outgoing_released" model="mail.template">
+            <field name="name">Công văn đi: Đã phát hành</field>
+            <field name="model_id" ref="model_trasas_dispatch_outgoing"/>
+            <field name="subject">Đã phát hành công văn số: {{ object.dispatch_number }}</field>
+            <field name="email_from">{{ (user.email_formatted) }}</field>
+            <field name="partner_to">{{ object.drafter_id.partner_id.id }}</field>
+            <field name="description">Gửi thông báo khi công văn đã được cấp số và ban hành</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Kính gửi các bên liên quan,<br/><br/>
+                        Công văn đi đã được HCNS cấp số và ban hành chính thức:<br/><br/>
+                        <strong>Số công văn:</strong> <t t-out="object.dispatch_number"/><br/>
+                        <strong>Ngày ban hành:</strong> <t t-out="object.date_promulgated"/><br/>
+                        <strong>Trích yếu:</strong> <t t-out="object.subject"/><br/><br/>
+                        
+                        File chính thức đã được đính kèm trên hệ thống.<br/><br/>
+                        
+                        <div style="margin: 16px 0px 16px 0px;">
+                            <a t-att-href="object.get_base_url() + '/web#id=' + str(object.id) + '&amp;model=trasas.dispatch.outgoing&amp;view_type=form'"
+                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                                Tải về Công văn
+                            </a>
+                        </div>
+                        
+                        Trân trọng,<br/>
+                        Hệ thống Quản lý Công văn TRASAS
+                    </p>
+                </div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

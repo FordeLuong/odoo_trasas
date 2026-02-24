@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ============================================================
+             CẤU TRÚC TỔ CHỨC TRASAS - 5 NHÂN VIÊN
+             ============================================================
+             
+             1. Ban Giám đốc (1 người):
+                - Trần Văn Minh - Director
+                - Vai trò: Phê duyệt hợp đồng, duyệt công văn đi, tra cứu tài sản
+             
+             2. Phòng Hành chính nhân sự (2 người):
+                - Nguyễn Thị Lan - HR Manager
+                - Phạm Văn Hùng - HR Officer
+                - Vai trò: Tiếp nhận công văn, cấp số lưu trữ, quản lý hồ sơ
+             
+             3. Phòng Vận hành (1 người):
+                - Lê Thị Mai - Operations Officer
+                - Vai trò: Tạo hồ sơ hợp đồng, lấy ý kiến, trình ký
+             
+             4. Phòng Tài chính kế toán (1 người):
+                - Hoàng Văn Nam - Accountant
+                - Vai trò: Hỗ trợ báo cáo, audit (vai trò hỗ trợ)
+        ============================================================ -->
+
+        <!-- ============ EMPLOYEE 1: BAN GIÁM ĐỐC ============ -->
+        <record id="employee_giam_doc" model="hr.employee">
+            <field name="name">Trần Văn Minh</field>
+            <field name="work_email">giamdoc@trasas.com</field>
+            <field name="work_phone">0901000001</field>
+            <field name="department_id" ref="dep_ban_giam_doc"/>
+            <field name="job_title">Director / Giám đốc</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- ============ EMPLOYEE 2: TRƯỞNG PHÒNG HCNS ============ -->
+        <record id="employee_hcns_truong" model="hr.employee">
+            <field name="name">Nguyễn Thị Lan</field>
+            <field name="work_email">hcns.truong@trasas.com</field>
+            <field name="work_phone">0901000002</field>
+            <field name="department_id" ref="dep_hcns"/>
+            <field name="job_title">HR Manager / Trưởng phòng HCNS</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- ============ EMPLOYEE 3: NHÂN VIÊN HCNS ============ -->
+        <record id="employee_hcns_nv" model="hr.employee">
+            <field name="name">Phạm Văn Hùng</field>
+            <field name="work_email">hcns.nv@trasas.com</field>
+            <field name="work_phone">0901000003</field>
+            <field name="department_id" ref="dep_hcns"/>
+            <field name="job_title">HR Officer / Nhân viên HCNS</field>
+            <field name="parent_id" ref="employee_hcns_truong"/>
+            <field name="active">True</field>
+        </record>
+
+        <!-- ============ EMPLOYEE 4: PHÒNG VẬN HÀNH ============ -->
+        <record id="employee_van_hanh" model="hr.employee">
+            <field name="name">Lê Thị Mai</field>
+            <field name="work_email">vanhanh@trasas.com</field>
+            <field name="work_phone">0901000004</field>
+            <field name="department_id" ref="dep_van_hanh"/>
+            <field name="job_title">Operations Officer / Nhân viên Vận hành</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- ============ EMPLOYEE 5: PHÒNG TÀI CHÍNH KẾ TOÁN ============ -->
+        <record id="employee_ke_toan" model="hr.employee">
+            <field name="name">Hoàng Văn Nam</field>
+            <field name="work_email">ketoan@trasas.com</field>
+            <field name="work_phone">0901000005</field>
+            <field name="department_id" ref="dep_tai_chinh"/>
+            <field name="job_title">Accountant / Nhân viên Kế toán</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>
+
