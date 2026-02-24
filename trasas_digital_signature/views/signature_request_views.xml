@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ REQUEST FORM ============ -->
+    <record id="view_signature_request_form" model="ir.ui.view">
+        <field name="name">trasas.signature.request.form</field>
+        <field name="model">trasas.signature.request</field>
+        <field name="arch" type="xml">
+            <form string="Yêu cầu ký số">
+                <header>
+                    <button name="action_send"
+                            string="Gửi yêu cầu ký"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"
+                            groups="trasas_contract_management.group_contract_user"/>
+
+                    <button name="action_check_status"
+                            string="Kiểm tra trạng thái"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state not in ['sent', 'partially_signed']"/>
+
+                    <button name="action_cancel"
+                            string="Hủy"
+                            type="object"
+                            confirm="Bạn có chắc muốn hủy yêu cầu ký này?"
+                            invisible="state in ['completed', 'cancelled', 'draft']"
+                            groups="trasas_contract_management.group_contract_manager"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,sent,partially_signed,completed"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Thông tin yêu cầu">
+                            <field name="contract_id"
+                                   readonly="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                            <field name="provider_id"
+                                   readonly="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                            <field name="signing_flow"
+                                   widget="radio"
+                                   readonly="state != 'draft'"/>
+                            <field name="deadline"
+                                   readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Trạng thái">
+                            <field name="user_id" readonly="1"/>
+                            <field name="sent_date" readonly="1"/>
+                            <field name="completed_date" readonly="1"/>
+                            <field name="provider_document_ref" readonly="1"/>
+                            <field name="callback_token" readonly="1"
+                                   groups="base.group_no_one"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Tài liệu" name="document">
+                            <group>
+                                <field name="document_file"
+                                       filename="document_filename"
+                                       readonly="state != 'draft'"/>
+                                <field name="document_filename" invisible="1"/>
+                            </group>
+                            <group invisible="not signed_document">
+                                <separator string="Tài liệu đã ký"/>
+                                <field name="signed_document"
+                                       filename="signed_document_filename"
+                                       readonly="1"/>
+                                <field name="signed_document_filename"
+                                       invisible="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Người ký" name="signers">
+                            <field name="signer_ids"
+                                   readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="sign_order"/>
+                                    <field name="partner_id"/>
+                                    <field name="role"/>
+                                    <field name="signer_name"/>
+                                    <field name="signer_email"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'signed'"
+                                           decoration-info="state == 'sent'"
+                                           decoration-danger="state == 'refused'"
+                                           readonly="1"/>
+                                    <field name="signed_date" readonly="1"/>
+                                    <field name="signing_url" widget="url"
+                                           readonly="1" optional="hide"/>
+                                </list>
+                            </field>
+
+                            <group>
+                                <div class="alert alert-info" role="alert">
+                                    <p><strong>Hướng dẫn:</strong></p>
+                                    <ul>
+                                        <li>Thứ tự ký xác định ai ký trước, ai ký sau</li>
+                                        <li>Vai trò "Nội bộ" = TRASAS, "Đối tác" = bên ngoài</li>
+                                        <li>Email bắt buộc - link ký sẽ gửi đến email này</li>
+                                    </ul>
+                                </div>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ REQUEST LIST ============ -->
+    <record id="view_signature_request_list" model="ir.ui.view">
+        <field name="name">trasas.signature.request.list</field>
+        <field name="model">trasas.signature.request</field>
+        <field name="arch" type="xml">
+            <list string="Yêu cầu ký số"
+                  decoration-success="state == 'completed'"
+                  decoration-info="state in ['sent', 'partially_signed']"
+                  decoration-danger="state in ['cancelled', 'expired']"
+                  decoration-muted="state == 'draft'">
+                <field name="name"/>
+                <field name="contract_id"/>
+                <field name="provider_id"/>
+                <field name="signing_flow"/>
+                <field name="signer_count" string="Người ký"/>
+                <field name="signed_count" string="Đã ký"/>
+                <field name="sent_date"/>
+                <field name="deadline"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'completed'"
+                       decoration-info="state in ['sent', 'partially_signed']"
+                       decoration-danger="state in ['cancelled', 'expired']"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ REQUEST SEARCH ============ -->
+    <record id="view_signature_request_search" model="ir.ui.view">
+        <field name="name">trasas.signature.request.search</field>
+        <field name="model">trasas.signature.request</field>
+        <field name="arch" type="xml">
+            <search string="Tìm yêu cầu ký">
+                <field name="name"/>
+                <field name="contract_id"/>
+                <field name="provider_id"/>
+                <separator/>
+                <filter string="Của tôi" name="my_requests"
+                        domain="[('user_id', '=', uid)]"/>
+                <filter string="Đang xử lý" name="processing"
+                        domain="[('state', 'in', ['sent', 'partially_signed'])]"/>
+                <filter string="Hoàn tất" name="completed"
+                        domain="[('state', '=', 'completed')]"/>
+                <separator/>
+                <filter string="Hết hạn" name="expired"
+                        domain="[('state', '=', 'expired')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ ACTION ============ -->
+    <record id="action_signature_request" model="ir.actions.act_window">
+        <field name="name">Yêu cầu ký số</field>
+        <field name="res_model">trasas.signature.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo yêu cầu ký số đầu tiên
+            </p>
+            <p>
+                Yêu cầu ký số được tạo từ hợp đồng đã được phê duyệt.
+            </p>
+        </field>
+    </record>
+</odoo>

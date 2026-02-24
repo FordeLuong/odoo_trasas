@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Cron: Kiểm tra trạng thái ký (fallback cho webhook) -->
+        <record id="ir_cron_check_signature_status" model="ir.cron">
+            <field name="name">TRASAS: Kiểm tra trạng thái ký số</field>
+            <field name="model_id" ref="model_trasas_signature_request"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_check_signature_status()</field>
+            <field name="interval_number">4</field>
+            <field name="interval_type">hours</field>
+            <field name="active">True</field>
+            <field name="priority">10</field>
+        </record>
+
+        <!-- Cron: Kiểm tra yêu cầu ký hết hạn -->
+        <record id="ir_cron_check_signature_expiry" model="ir.cron">
+            <field name="name">TRASAS: Kiểm tra yêu cầu ký hết hạn</field>
+            <field name="model_id" ref="model_trasas_signature_request"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_check_signature_expiry()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active">True</field>
+            <field name="priority">10</field>
+        </record>
+    </data>
+</odoo>
