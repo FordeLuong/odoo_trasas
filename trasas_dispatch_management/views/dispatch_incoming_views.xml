@@ -18,7 +18,7 @@
         <field name="name">trasas.dispatch.incoming.kanban</field>
         <field name="model">trasas.dispatch.incoming</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="state" class="o_kanban_small_column">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column">
                 <field name="name"/>
                 <field name="dispatch_number"/>
                 <field name="sender_id"/>
@@ -134,8 +134,8 @@
                             invisible="state == 'draft'"
                             groups="trasas_dispatch_management.group_dispatch_manager"/>
                     
-                    <field name="state" widget="statusbar" 
-                           statusbar_visible="draft,processing,waiting_confirmation,done"/>
+                    <field name="stage_id" widget="statusbar" 
+                           options="{'clickable': 1}"/>
                 </header>
                 <sheet>
                     <widget name="web_ribbon" title="Đã hoàn thành" bg_color="bg-success" invisible="state != 'done'"/>
@@ -222,7 +222,7 @@
         <field name="name">Công văn đến</field>
         <field name="res_model">trasas.dispatch.incoming</field>
         <field name="view_mode">kanban,list,form,activity</field>
-        <field name="context">{'group_by': 'state'}</field>
+        <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Tạo công văn đến mới

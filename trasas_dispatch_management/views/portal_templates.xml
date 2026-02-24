@@ -209,13 +209,14 @@
                             </div>
                         </t>
 
-                        <!-- Attachments -->
+                        <!-- Attachments — Issue 1 Fix: use access_token for portal -->
                         <t t-if="dispatch.attachment_ids">
                             <div class="mb-4">
                                 <h5><i class="fa fa-paperclip me-2"/>File đính kèm</h5>
                                 <t t-foreach="dispatch.attachment_ids" t-as="attachment">
-                                    <a t-attf-href="/web/content/#{attachment.id}?download=true" 
-                                       class="btn btn-outline-primary btn-sm me-2 mb-2">
+                                    <a t-attf-href="/web/content/#{attachment.id}?access_token=#{attachment_tokens.get(attachment.id, '')}&amp;download=true"
+                                       class="btn btn-outline-primary btn-sm me-2 mb-2"
+                                       target="_blank">
                                         <i class="fa fa-download me-1"/>
                                         <t t-esc="attachment.name"/>
                                     </a>
@@ -261,23 +262,67 @@
                             </form>
                         </t>
 
-                        <!-- Response Submitted -->
-                        <t t-if="dispatch.state == 'waiting_confirmation'">
-                            <div class="alert alert-info">
-                                <i class="fa fa-info-circle me-2"/>
-                                <strong>Phản hồi đã được gửi.</strong> Đang chờ HCNS xác nhận.
+                        <!-- Issue 2 Fix: Response Results — visible in waiting_confirmation and done -->
+                        <t t-if="dispatch.state in ('waiting_confirmation', 'done')">
+                            <hr class="my-4"/>
+                            <h5 class="mb-3">
+                                <i class="fa fa-check-square-o me-2"/>Kết quả phản hồi
+                            </h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <strong>Số văn bản phản hồi:</strong>
+                                            <p class="mb-0">
+                                                <t t-if="dispatch.response_dispatch_number"
+                                                   t-esc="dispatch.response_dispatch_number"/>
+                                                <span t-else="" class="text-muted">Chưa có</span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <strong>Ngày phản hồi:</strong>
+                                            <p class="mb-0">
+                                                <t t-if="dispatch.response_date"
+                                                   t-esc="dispatch.response_date"/>
+                                                <span t-else="" class="text-muted">—</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <!-- Response File Download -->
+                                    <t t-if="response_file_url">
+                                        <div class="mt-2 mb-2">
+                                            <strong>File phản hồi:</strong><br/>
+                                            <a t-att-href="response_file_url"
+                                               class="btn btn-outline-success btn-sm mt-1"
+                                               target="_blank">
+                                                <i class="fa fa-download me-1"/>
+                                                <t t-esc="dispatch.response_filename or 'Tải file phản hồi'"/>
+                                            </a>
+                                        </div>
+                                    </t>
+                                    <!-- Response Note -->
+                                    <t t-if="dispatch.response_note">
+                                        <div class="mt-2">
+                                            <strong>Ghi chú:</strong>
+                                            <p class="mb-0 mt-1"><t t-esc="dispatch.response_note"/></p>
+                                        </div>
+                                    </t>
+                                </div>
                             </div>
-                            <t t-if="dispatch.response_dispatch_number">
-                                <p><strong>Số văn bản phản hồi:</strong> <t t-esc="dispatch.response_dispatch_number"/></p>
-                            </t>
-                        </t>
 
-                        <!-- Completed -->
-                        <t t-if="dispatch.state == 'done'">
-                            <div class="alert alert-success">
-                                <i class="fa fa-check-circle me-2"/>
-                                <strong>Công văn đã hoàn thành.</strong>
-                            </div>
+                            <!-- Status Messages -->
+                            <t t-if="dispatch.state == 'waiting_confirmation'">
+                                <div class="alert alert-info mt-3">
+                                    <i class="fa fa-info-circle me-2"/>
+                                    <strong>Phản hồi đã được gửi.</strong> Đang chờ HCNS xác nhận.
+                                </div>
+                            </t>
+                            <t t-if="dispatch.state == 'done'">
+                                <div class="alert alert-success mt-3">
+                                    <i class="fa fa-check-circle me-2"/>
+                                    <strong>Công văn đã hoàn thành.</strong>
+                                </div>
+                            </t>
                         </t>
                     </div>
                 </div>

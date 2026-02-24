@@ -81,16 +81,37 @@ class DispatchPortal(CustomerPortal):
     def portal_dispatch_detail(self, dispatch_id, access_token=None, **kw):
         """Detail view of a dispatch"""
         try:
-            dispatch = request.env["trasas.dispatch.incoming"].sudo().browse(dispatch_id)
+            dispatch = (
+                request.env["trasas.dispatch.incoming"].sudo().browse(dispatch_id)
+            )
 
             # Check access: must be assigned handler
             if request.env.user not in dispatch.handler_ids:
                 return request.redirect("/my")
 
+            # Issue 1 Fix: Generate access tokens for attachments
+            # so portal users can download them
+            attachment_tokens = {}
+            if dispatch.attachment_ids:
+                dispatch.attachment_ids.sudo().generate_access_token()
+                for att in dispatch.attachment_ids:
+                    attachment_tokens[att.id] = att.access_token
+
+            # Also generate token for response_file if it exists
+            response_file_url = False
+            if dispatch.response_file:
+                # Build download URL for binary field
+                response_file_url = (
+                    f"/web/content/{dispatch._name}/{dispatch.id}"
+                    f"/response_file/{dispatch.response_filename or 'response'}?download=true"
+                )
+
             values = {
                 "dispatch": dispatch,
                 "page_name": "dispatch",
                 "user": request.env.user,
+                "attachment_tokens": attachment_tokens,
+                "response_file_url": response_file_url,
             }
             return request.render(
                 "trasas_dispatch_management.portal_dispatch_detail", values
@@ -109,29 +130,28 @@ class DispatchPortal(CustomerPortal):
     def portal_dispatch_submit(self, dispatch_id, **post):
         """Submit response from portal"""
         try:
-            dispatch = request.env["trasas.dispatch.incoming"].sudo().browse(dispatch_id)
+            dispatch = (
+                request.env["trasas.dispatch.incoming"].sudo().browse(dispatch_id)
+            )
 
             # Check access
             if request.env.user not in dispatch.handler_ids:
                 return request.redirect("/my")
 
-            # Handle file upload
+            # Handle file upload — Issue 3 Fix: preserve original filename
             response_file = post.get("response_file")
+            vals = {
+                "response_dispatch_number": post.get("response_dispatch_number"),
+                "response_note": post.get("response_note"),
+            }
             if response_file:
                 import base64
 
-                file_data = base64.b64encode(response_file.read())
-            else:
-                file_data = False
+                vals["response_file"] = base64.b64encode(response_file.read())
+                vals["response_filename"] = response_file.filename  # preserve name
 
             # Update dispatch
-            dispatch.write(
-                {
-                    "response_dispatch_number": post.get("response_dispatch_number"),
-                    "response_note": post.get("response_note"),
-                    "response_file": file_data,
-                }
-            )
+            dispatch.write(vals)
 
             # Call action to change state
             dispatch.action_submit_response()

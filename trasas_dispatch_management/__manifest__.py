@@ -16,8 +16,10 @@
         "security/security.xml",
         "security/ir.model.access.csv",
         "data/dispatch_data.xml",
+        "data/dispatch_stage_data.xml",
         "data/ir_cron_data.xml",
         "data/mail_template_data.xml",
+        "views/dispatch_stage_views.xml",
         "views/dispatch_incoming_views.xml",
         "views/dispatch_type_views.xml",
         "views/menu_views.xml",
@@ -26,4 +28,5 @@
     "installable": True,
     "application": True,
     "license": "LGPL-3",
+    "post_init_hook": "_assign_stages_to_existing",
 }

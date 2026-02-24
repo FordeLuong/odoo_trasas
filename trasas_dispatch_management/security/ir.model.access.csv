@@ -7,3 +7,7 @@ access_dispatch_incoming_hcns,trasas.dispatch.incoming.hcns,model_trasas_dispatc
 access_dispatch_incoming_manager,trasas.dispatch.incoming.manager,model_trasas_dispatch_incoming,trasas_dispatch_management.group_dispatch_manager,1,1,1,1
 access_dispatch_incoming_portal,trasas.dispatch.incoming.portal,model_trasas_dispatch_incoming,base.group_portal,1,1,0,0
 access_dispatch_type_portal,trasas.dispatch.type.portal,model_trasas_dispatch_type,base.group_portal,1,0,0,0
+access_dispatch_stage_user,trasas.dispatch.stage.user,model_trasas_dispatch_stage,trasas_dispatch_management.group_dispatch_user,1,0,0,0
+access_dispatch_stage_hcns,trasas.dispatch.stage.hcns,model_trasas_dispatch_stage,trasas_dispatch_management.group_dispatch_hcns,1,1,1,0
+access_dispatch_stage_manager,trasas.dispatch.stage.manager,model_trasas_dispatch_stage,trasas_dispatch_management.group_dispatch_manager,1,1,1,1
+access_dispatch_stage_portal,trasas.dispatch.stage.portal,model_trasas_dispatch_stage,base.group_portal,1,0,0,0

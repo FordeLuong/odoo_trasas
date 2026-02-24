@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 
 class TrasasDispatchIncoming(models.Model):
@@ -90,7 +90,18 @@ class TrasasDispatchIncoming(models.Model):
 
     response_note = fields.Text(string="Ghi chú kết quả", tracking=True)
 
-    # --- Status ---
+    # --- Stage (Dynamic) ---
+    stage_id = fields.Many2one(
+        "trasas.dispatch.stage",
+        string="Giai đoạn",
+        tracking=True,
+        default=lambda self: self._default_stage_id(),
+        group_expand="_read_group_stage_ids",
+        index=True,
+        copy=False,
+    )
+
+    # Computed state from stage flags (for backward compatibility)
     state = fields.Selection(
         [
             ("draft", "Mới"),
@@ -100,9 +111,9 @@ class TrasasDispatchIncoming(models.Model):
             ("cancel", "Đã hủy"),
         ],
         string="Trạng thái",
-        default="draft",
+        compute="_compute_state",
+        store=True,
         tracking=True,
-        # group_expand="_expand_states",  # Uncomment after server restart
     )
 
     # --- Computed ---
@@ -112,6 +123,48 @@ class TrasasDispatchIncoming(models.Model):
     overdue_days = fields.Integer(
         string="Số ngày quá hạn", compute="_compute_is_overdue"
     )
+
+    def _default_stage_id(self):
+        """Get the default draft stage"""
+        return self.env["trasas.dispatch.stage"].search(
+            [("is_draft", "=", True)], limit=1
+        )
+
+    @api.model
+    def _read_group_stage_ids(self, stages, domain):
+        """Show all stages in kanban view"""
+        return self.env["trasas.dispatch.stage"].search([], order="sequence")
+
+    @api.depends(
+        "stage_id", "stage_id.is_draft", "stage_id.is_done", "stage_id.is_cancel"
+    )
+    def _compute_state(self):
+        """Derive state from stage flags for backward compatibility"""
+        stage_draft = self.env.ref(
+            "trasas_dispatch_management.stage_draft", raise_if_not_found=False
+        )
+        stage_processing = self.env.ref(
+            "trasas_dispatch_management.stage_processing", raise_if_not_found=False
+        )
+        stage_waiting = self.env.ref(
+            "trasas_dispatch_management.stage_waiting", raise_if_not_found=False
+        )
+        for record in self:
+            if not record.stage_id:
+                record.state = "draft"
+            elif record.stage_id.is_cancel:
+                record.state = "cancel"
+            elif record.stage_id.is_done:
+                record.state = "done"
+            elif record.stage_id == stage_waiting:
+                record.state = "waiting_confirmation"
+            elif record.stage_id == stage_draft:
+                record.state = "draft"
+            elif record.stage_id == stage_processing:
+                record.state = "processing"
+            else:
+                # Custom stages default to processing
+                record.state = "processing"
 
     @api.depends("state", "deadline")
     def _compute_is_overdue(self):
@@ -127,11 +180,6 @@ class TrasasDispatchIncoming(models.Model):
             else:
                 record.is_overdue = False
                 record.overdue_days = 0
-
-    @api.model
-    def _expand_states(self, states, domain, *args):
-        """Expand states to show all stages in kanban view"""
-        return [key for key, val in type(self).state.selection]
 
     # --- Constraints ---
     _sql_constraints = [
@@ -172,40 +220,48 @@ class TrasasDispatchIncoming(models.Model):
                 )
         return super().create(vals_list)
 
-    def _expand_states(self, states, domain, order):
-        return [key for key, val in type(self).state.selection]
+    # --- Helper: get stage by XML ID ---
+    def _get_stage(self, xmlid):
+        """Get a stage by its XML ID"""
+        return self.env.ref(
+            f"trasas_dispatch_management.{xmlid}", raise_if_not_found=False
+        )
 
     # --- Actions ---
     def action_confirm(self):
-        """Chuyển sang trạng thái Đang xử lý và gửi thông báo"""
+        """Chuyển sang giai đoạn Đang xử lý và gửi thông báo"""
+        stage_processing = self._get_stage("stage_processing")
+        if not stage_processing:
+            raise UserError("Chưa cấu hình giai đoạn 'Đang xử lý'!")
+
         for record in self:
             if record.response_required and not record.handler_ids:
-                from odoo.exceptions import UserError
-
                 raise UserError(
                     "Vui lòng chọn Người xử lý trước khi tiếp nhận công văn cần phản hồi!"
                 )
 
             # Kiểm tra file đính kèm
             if not record.attachment_ids:
-                from odoo.exceptions import UserError as UE
+                raise UserError("Vui lòng đính kèm file công văn trước khi tiếp nhận!")
 
-                raise UE("Vui lòng đính kèm file công văn trước khi tiếp nhận!")
-
-            record.state = "processing"
+            record.stage_id = stage_processing
 
             # Tạo hoạt động cho người xử lý
             if record.handler_ids:
-                user_ids = record.handler_ids.ids
-
-                # Gửi email template "Phân công xử lý"
-                template = self.env.ref(
-                    "trasas_dispatch_management.email_template_dispatch_assigned",
-                    raise_if_not_found=False,
-                )
-                if template:
+                # Gửi email template nếu stage có cấu hình
+                if stage_processing.mail_template_id:
                     for user in record.handler_ids:
-                        template.send_mail(record.id, force_send=True)
+                        stage_processing.mail_template_id.send_mail(
+                            record.id, force_send=True
+                        )
+                else:
+                    template = self.env.ref(
+                        "trasas_dispatch_management.email_template_dispatch_assigned",
+                        raise_if_not_found=False,
+                    )
+                    if template:
+                        for user in record.handler_ids:
+                            template.send_mail(record.id, force_send=True)
 
                 # Tạo Activity
                 activity_type = self.env.ref(
@@ -214,7 +270,7 @@ class TrasasDispatchIncoming(models.Model):
                 if not activity_type:
                     activity_type = self.env["mail.activity.type"].search([], limit=1)
 
-                for user_id in user_ids:
+                for user_id in record.handler_ids.ids:
                     self.env["mail.activity"].create(
                         {
                             "res_model_id": self.env["ir.model"]._get_id(self._name),
@@ -229,16 +285,17 @@ class TrasasDispatchIncoming(models.Model):
 
     def action_done(self):
         """Hoàn thành công văn (chỉ dùng cho công văn không cần phản hồi)"""
-        for record in self:
-            # Nếu cần phản hồi, phải dùng workflow submit → confirm
-            if record.response_required:
-                from odoo.exceptions import UserError
+        stage_done = self._get_stage("stage_done")
+        if not stage_done:
+            raise UserError("Chưa cấu hình giai đoạn 'Hoàn thành'!")
 
+        for record in self:
+            if record.response_required:
                 raise UserError(
                     "Công văn yêu cầu phản hồi! Vui lòng sử dụng nút 'Gửi phản hồi' để submit văn bản phản hồi."
                 )
 
-            record.state = "done"
+            record.stage_id = stage_done
 
             # Mark done activities
             activity_ids = self.env["mail.activity"].search(
@@ -251,21 +308,33 @@ class TrasasDispatchIncoming(models.Model):
             )
 
     def action_cancel(self):
+        stage_cancel = self._get_stage("stage_cancel")
+        if not stage_cancel:
+            raise UserError("Chưa cấu hình giai đoạn 'Hủy'!")
+
         for record in self:
-            record.state = "cancel"
+            record.stage_id = stage_cancel
             record.message_post(
                 body="Công văn đã bị hủy bỏ.", subtype_xmlid="mail.mt_note"
             )
 
     def action_draft(self):
+        stage_draft = self._get_stage("stage_draft")
+        if not stage_draft:
+            raise UserError("Chưa cấu hình giai đoạn 'Mới'!")
+
         for record in self:
-            record.state = "draft"
+            record.stage_id = stage_draft
             record.message_post(
                 body="Công văn đã được chuyển về nháp.", subtype_xmlid="mail.mt_note"
             )
 
     def action_submit_response(self):
         """Người xử lý submit phản hồi"""
+        stage_waiting = self._get_stage("stage_waiting")
+        if not stage_waiting:
+            raise UserError("Chưa cấu hình giai đoạn 'Chờ xác nhận'!")
+
         for record in self:
             # Auto-generate response number if missing
             if not record.response_dispatch_number:
@@ -275,11 +344,9 @@ class TrasasDispatchIncoming(models.Model):
 
             # Validation
             if not record.response_file:
-                from odoo.exceptions import ValidationError
-
                 raise ValidationError("Vui lòng đính kèm 'File phản hồi'!")
 
-            record.state = "waiting_confirmation"
+            record.stage_id = stage_waiting
             if not record.response_date:
                 record.response_date = fields.Date.today()
 
@@ -300,19 +367,11 @@ class TrasasDispatchIncoming(models.Model):
                 subtype_xmlid="mail.mt_comment",
             )
 
-            # --- Activity cho HCNS ---
-            # Tìm nhóm HCNS (giả sử dùng group_dispatch_user hoặc admin nếu chưa có group riêng)
-            # Tạm thời gửi cho Admin hoặc người tạo nếu không có nhóm cụ thể
-            # hcns_users = record.env.ref("base.group_user").users  # TODO: Thay bằng group HCNS thực tế
-            # Để tránh spam, ở đây lấy người tạo làm đại diện HCNS (nếu người tạo có quyền)
-            # Hoặc tốt nhất là define 1 group HCNS trong XML
-
-            # Gửi email template "Đã có phản hồi"
-            template = self.env.ref(
+            # Gửi email template (từ stage hoặc fallback)
+            template = stage_waiting.mail_template_id or self.env.ref(
                 "trasas_dispatch_management.email_template_dispatch_response_submitted",
                 raise_if_not_found=False,
             )
-            # Gửi cho người tạo (giả định là HCNS tiếp nhận ban đầu)
             if template and record.create_uid.partner_id:
                 template.send_mail(record.id, force_send=True)
 
@@ -327,8 +386,12 @@ class TrasasDispatchIncoming(models.Model):
 
     def action_confirm_response(self):
         """HCNS xác nhận đã nhận phản hồi"""
+        stage_done = self._get_stage("stage_done")
+        if not stage_done:
+            raise UserError("Chưa cấu hình giai đoạn 'Hoàn thành'!")
+
         for record in self:
-            record.state = "done"
+            record.stage_id = stage_done
 
             # Mark done activities
             activity_ids = self.env["mail.activity"].search(
@@ -336,8 +399,8 @@ class TrasasDispatchIncoming(models.Model):
             )
             activity_ids.action_done()
 
-            # Gửi email template "Hoàn thành"
-            template = self.env.ref(
+            # Gửi email
+            template = stage_done.mail_template_id or self.env.ref(
                 "trasas_dispatch_management.email_template_dispatch_completed",
                 raise_if_not_found=False,
             )
@@ -361,7 +424,6 @@ class TrasasDispatchIncoming(models.Model):
     def check_overdue_deadline(self):
         """Cron Job: Kiểm tra công văn quá hạn và gửi cảnh báo"""
         today = fields.Date.today()
-        # Tìm các công văn đang xử lý hoặc chờ xác nhận và quá hạn
         overdue_records = self.search(
             [
                 ("state", "in", ["processing", "waiting_confirmation"]),
@@ -371,8 +433,6 @@ class TrasasDispatchIncoming(models.Model):
         )
 
         for record in overdue_records:
-            # Gửi email cảnh báo
-            # Gửi email template "Cảnh báo quá hạn"
             template = self.env.ref(
                 "trasas_dispatch_management.email_template_dispatch_overdue",
                 raise_if_not_found=False,
