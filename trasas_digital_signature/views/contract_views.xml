@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ INHERIT CONTRACT FORM: Thêm Chữ ký số ============ -->
+    <record id="view_contract_form_inherit_digital_signature" model="ir.ui.view">
+        <field name="name">trasas.contract.form.inherit.digital.signature</field>
+        <field name="model">trasas.contract</field>
+        <field name="inherit_id"
+               ref="trasas_contract_management.view_contract_form"/>
+        <field name="arch" type="xml">
+            <!-- Smart button: Yêu cầu ký số -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_signature_requests"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-file-signature"
+                        invisible="signature_request_count == 0">
+                    <field name="signature_request_count"
+                           widget="statinfo"
+                           string="Chữ ký số"/>
+                </button>
+            </xpath>
+
+            <!-- Button: Tạo yêu cầu ký số (bên cạnh Bắt đầu ký) -->
+            <xpath expr="//button[@name='action_start_signing']" position="after">
+                <button name="action_create_signature_request"
+                        string="Tạo yêu cầu ký số"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state not in ['approved', 'signing']"
+                        groups="trasas_contract_management.group_contract_user"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

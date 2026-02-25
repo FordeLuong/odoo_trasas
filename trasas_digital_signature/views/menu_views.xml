@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menu: Yêu cầu ký số (dưới menu Hợp đồng chính) -->
+    <menuitem id="menu_signature_requests"
+              name="Yêu cầu ký số"
+              parent="trasas_contract_management.menu_contract_main"
+              action="action_signature_request"
+              sequence="50"/>
+
+    <!-- Menu cấu hình: Nhà cung cấp ký số -->
+    <menuitem id="menu_signature_providers"
+              name="Nhà cung cấp ký số"
+              parent="trasas_contract_management.menu_contract_config"
+              action="action_signature_provider"
+              sequence="30"
+              groups="trasas_contract_management.group_contract_manager"/>
+</odoo>

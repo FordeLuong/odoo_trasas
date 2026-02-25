@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ PROVIDER FORM ============ -->
+    <record id="view_signature_provider_form" model="ir.ui.view">
+        <field name="name">trasas.signature.provider.form</field>
+        <field name="model">trasas.signature.provider</field>
+        <field name="arch" type="xml">
+            <form string="Nhà cung cấp chữ ký số">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_requests"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-pencil-square-o">
+                            <field name="request_count" widget="statinfo"
+                                   string="Yêu cầu ký"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Tên nhà cung cấp..."/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Cấu hình">
+                            <field name="provider_type"/>
+                            <field name="api_url"
+                                   placeholder="https://api.provider.com/v1"/>
+                            <field name="api_key" password="True"/>
+                            <field name="api_secret" password="True"/>
+                        </group>
+                        <group string="Tùy chọn">
+                            <field name="test_mode"/>
+                            <field name="active"/>
+                            <field name="sequence"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-info" role="alert">
+                        <button name="action_test_connection"
+                                type="object"
+                                class="btn btn-primary"
+                                string="Test kết nối"/>
+                        <span class="ms-2">
+                            Nhấn để kiểm tra kết nối API với nhà cung cấp.
+                        </span>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ PROVIDER LIST ============ -->
+    <record id="view_signature_provider_list" model="ir.ui.view">
+        <field name="name">trasas.signature.provider.list</field>
+        <field name="model">trasas.signature.provider</field>
+        <field name="arch" type="xml">
+            <list string="Nhà cung cấp chữ ký số">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="provider_type"/>
+                <field name="api_url"/>
+                <field name="test_mode"/>
+                <field name="active"/>
+                <field name="request_count"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ ACTION ============ -->
+    <record id="action_signature_provider" model="ir.actions.act_window">
+        <field name="name">Nhà cung cấp chữ ký số</field>
+        <field name="res_model">trasas.signature.provider</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

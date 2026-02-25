@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Create default dashboard -->
+        <record id="default_docusign_dashboard" model="docusign.dashboard">
+            <field name="name">DocuSign Overview</field>
+        </record>
+    </data>
+</odoo>

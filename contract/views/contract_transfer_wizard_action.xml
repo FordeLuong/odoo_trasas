@@ -1,0 +1,13 @@
+<odoo>
+    <data noupdate="1">
+        <record id="action_subscription_transfer_wizard" model="ir.actions.act_window">
+            <field name="name">Subscription Transfer Wizard</field>
+            <field name="res_model">subscription.transfer.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="model_sale_order"/>
+            <field name="binding_type">action</field>
+            <field name="context">{'default_from_subscription_id': context.get('default_from_subscription_id') or context.get('active_id') or (context.get('active_ids') and context['active_ids'][0])}</field>
+        </record>
+    </data>
+</odoo>

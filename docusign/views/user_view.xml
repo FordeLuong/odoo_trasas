@@ -1,0 +1,42 @@
+<odoo>
+    <record model="ir.ui.view" id="docusign_user_setting">
+        <field name="name">res.users</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook/page" position="after">
+                <page string="Docusign Settings" name="docusign_settings">
+                    <group>
+                        <group>
+                            <field name="record_name"/>
+                            <field name="account_type"/>
+                            <field name="client_id"/>
+                            <field name="client_secret" password="1"/>
+                        </group>
+                        <group>
+                            <div style="width: max-content;">
+                                <h3 class="o_form_label">Docusign Login</h3>
+                                <div class="text-muted">
+                                    Here you can log-in with your Docusign account to get connected with Odoo.
+                                    <field name="login_url" invisible="1"/><br/>
+                                    <field name="code" invisible="1"/><br/>
+                                    <field name="access_token" invisible="1"/>
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt8">
+                                        <button name='get_code' icon="fa-arrow-right" type="object"
+                                                string="Get login with Docusign account" class="btn-link"/>
+                                    </div>
+                                    <div class="mt8">
+                                        <button name='get_access_token' icon="fa-arrow-right" type="object"
+                                                string="Get Access Token" class="btn-link"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

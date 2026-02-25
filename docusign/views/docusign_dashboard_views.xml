@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Dashboard Form View -->
+    <record id="view_docusign_dashboard_form" model="ir.ui.view">
+        <field name="name">docusign.dashboard.form</field>
+        <field name="model">docusign.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="DocuSign Dashboard">
+                <header>
+                    <button name="action_refresh_statistics" string="Refresh Statistics" type="object" class="oe_highlight" icon="fa-refresh"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Dashboard Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Filters">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="responsible_id"/>
+                        </group>
+                        <group string="Quick Stats">
+                            <label for="total_records" string="Total Records"/>
+                            <div>
+                                <field name="total_records" class="oe_inline"/>
+                                <span class="text-muted"> envelopes tracked</span>
+                            </div>
+                            <label for="completion_rate" string="Success Rate"/>
+                            <div>
+                                <field name="completion_rate" widget="percentage" class="oe_inline"/>
+                            </div>
+                            <label for="avg_completion_time" string="Avg. Time"/>
+                            <div>
+                                <field name="avg_completion_time" class="oe_inline"/>
+                                <span class="text-muted"> days</span>
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Status Overview">
+                            <group>
+                                <group string="Envelope Status">
+                                    <button name="action_view_new_records" type="object" class="oe_stat_button" icon="fa-file-o">
+                                        <div class="o_field_widget o_stat_info">
+                                            <span class="o_stat_value">
+                                                <field name="total_new"/>
+                                            </span>
+                                            <span class="o_stat_text">New</span>
+                                        </div>
+                                    </button>
+                                    <button name="action_view_sent_records" type="object" class="oe_stat_button" icon="fa-paper-plane">
+                                        <div class="o_field_widget o_stat_info">
+                                            <span class="o_stat_value">
+                                                <field name="total_sent"/>
+                                            </span>
+                                            <span class="o_stat_text">Sent</span>
+                                        </div>
+                                    </button>
+                                    <button name="action_view_completed_records" type="object" class="oe_stat_button" icon="fa-check-circle">
+                                        <div class="o_field_widget o_stat_info">
+                                            <span class="o_stat_value text-success">
+                                                <field name="total_completed"/>
+                                            </span>
+                                            <span class="o_stat_text">Completed</span>
+                                        </div>
+                                    </button>
+                                </group>
+                                <group string="Recipient Status">
+                                    <label for="total_recipients" string="Total Recipients"/>
+                                    <div>
+                                        <field name="total_recipients" class="oe_inline"/>
+                                        <span class="text-muted"> signers</span>
+                                    </div>
+                                    <button name="action_view_pending_signatures" type="object" class="oe_stat_button" icon="fa-clock-o">
+                                        <div class="o_field_widget o_stat_info">
+                                            <span class="o_stat_value text-warning">
+                                                <field name="recipients_pending"/>
+                                            </span>
+                                            <span class="o_stat_text">Pending Signatures</span>
+                                        </div>
+                                    </button>
+                                    <label for="recipients_completed" string="Signed"/>
+                                    <div>
+                                        <field name="recipients_completed" class="oe_inline text-success"/>
+                                        <span class="text-muted"> completed</span>
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Recent Activity">
+                            <group>
+                                <group string="Last 7 Days">
+                                    <label for="recent_sent" string="Sent"/>
+                                    <div>
+                                        <field name="recent_sent" class="oe_inline"/>
+                                        <span class="text-muted"> envelopes</span>
+                                    </div>
+                                    <label for="recent_completed" string="Completed"/>
+                                    <div>
+                                        <field name="recent_completed" class="oe_inline"/>
+                                        <span class="text-muted"> envelopes</span>
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Dashboard Kanban View -->
+    <record id="view_docusign_dashboard_kanban" model="ir.ui.view">
+        <field name="name">docusign.dashboard.kanban</field>
+        <field name="model">docusign.dashboard</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard" create="false">
+                <field name="name"/>
+                <field name="total_records"/>
+                <field name="total_new"/>
+                <field name="total_sent"/>
+                <field name="total_completed"/>
+                <field name="recipients_pending"/>
+                <field name="completion_rate"/>
+                <field name="avg_completion_time"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_dashboard">
+                            <div class="o_kanban_card_header">
+                                <div class="o_kanban_card_header_title">
+                                    <div class="o_primary">
+                                        <field name="name"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="container o_kanban_card_content">
+                                <div class="row">
+                                    <div class="col-6 o_kanban_primary_left">
+                                        <button class="btn btn-primary" name="action_view_completed_records" type="object">
+                                            <span class="o_value"><t t-esc="record.total_completed.value"/></span>
+                                            <span class="o_label">Completed</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-6 o_kanban_primary_right">
+                                        <button class="btn btn-warning" name="action_view_pending_signatures" type="object">
+                                            <span class="o_value"><t t-esc="record.recipients_pending.value"/></span>
+                                            <span class="o_label">Pending</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-4 text-center">
+                                        <button name="action_view_new_records" type="object" class="btn btn-link">
+                                            <span class="o_value text-muted"><t t-esc="record.total_new.value"/></span>
+                                            <br/>
+                                            <span class="o_label">New</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <button name="action_view_sent_records" type="object" class="btn btn-link">
+                                            <span class="o_value text-info"><t t-esc="record.total_sent.value"/></span>
+                                            <br/>
+                                            <span class="o_label">Sent</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <span class="o_value text-success"><t t-esc="Math.round(record.completion_rate.value * 10) / 10"/>%</span>
+                                        <br/>
+                                        <span class="o_label">Success Rate</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="container o_kanban_card_manage_pane">
+                                <div class="row">
+                                    <div class="col-6 o_kanban_card_manage_section">
+                                        <div class="o_kanban_card_manage_title">
+                                            <span>View Records</span>
+                                        </div>
+                                        <div>
+                                            <a name="action_view_new_records" type="object">New Records</a>
+                                        </div>
+                                        <div>
+                                            <a name="action_view_sent_records" type="object">Sent Records</a>
+                                        </div>
+                                        <div>
+                                            <a name="action_view_completed_records" type="object">Completed Records</a>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 o_kanban_card_manage_section">
+                                        <div class="o_kanban_card_manage_title">
+                                            <span>Actions</span>
+                                        </div>
+                                        <div>
+                                            <a name="action_refresh_statistics" type="object">Refresh Statistics</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Dashboard Action -->
+    <record id="action_docusign_dashboard" model="ir.actions.act_window">
+        <field name="name">DocuSign Dashboard</field>
+        <field name="res_model">docusign.dashboard</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first DocuSign dashboard
+            </p>
+            <p>
+                Monitor your DocuSign envelope statistics, completion rates, and pending signatures.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_docusign_dashboard"
+              name="Dashboard"
+              parent="docusign_menu"
+              action="action_docusign_dashboard"
+              sequence="1"/>
+
+</odoo>

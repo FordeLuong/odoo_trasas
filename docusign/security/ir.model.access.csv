@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_message_wizard,message.wizard,model_message_wizard,base.group_user,1,1,1,1
+
+access_docusign_connector,docusign.connector,model_docusign_connector,base.group_user,1,1,1,1
+access_docusign_connector_lines,docusign.connector.lines,model_docusign_connector_lines,base.group_user,1,1,1,1
+access_docusign_dashboard,docusign.dashboard,model_docusign_dashboard,base.group_user,1,1,1,1

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Email Template: Mời ký tài liệu -->
+        <record id="email_template_signing_invitation" model="mail.template">
+            <field name="name">TRASAS: Mời ký tài liệu số</field>
+            <field name="model_id" ref="model_trasas_signature_request"/>
+            <field name="subject">Yêu cầu ký: {{ object.contract_id.name }} - {{ object.contract_id.title }}</field>
+            <field name="email_to">{{ ctx.get('signer_email', '') }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #008784;">Yêu cầu ký tài liệu</h2>
+
+                    <p>Kính gửi <t t-out="ctx.get('signer_name', 'Quý khách')"/>,</p>
+
+                    <p>Bạn được yêu cầu ký tài liệu hợp đồng:</p>
+
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9; width: 30%;"><strong>Số hợp đồng:</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.contract_id.name"/></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>Tiêu đề:</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.contract_id.title"/></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>Mã yêu cầu:</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;"><t t-out="object.name"/></td>
+                        </tr>
+                    </table>
+
+                    <p>
+                        <a t-att-href="ctx.get('signing_url', '#')"
+                           style="background-color: #008784; color: white; padding: 12px 24px;
+                                  text-decoration: none; border-radius: 5px; display: inline-block;
+                                  font-size: 16px;">
+                            Ký tài liệu ngay
+                        </a>
+                    </p>
+
+                    <t t-if="object.deadline">
+                        <p style="color: #dc3545;">
+                            <strong>Hạn ký:</strong> <t t-out="object.deadline"/>
+                        </p>
+                    </t>
+
+                    <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                        Email này được gửi tự động từ hệ thống chữ ký số TRASAS.<br/>
+                        Nếu bạn không liên quan đến hợp đồng này, vui lòng bỏ qua email.
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- Email Template: Thông báo hoàn tất ký -->
+        <record id="email_template_signing_completed" model="mail.template">
+            <field name="name">TRASAS: Ký tài liệu hoàn tất</field>
+            <field name="model_id" ref="model_trasas_signature_request"/>
+            <field name="subject">Hoàn tất ký: {{ object.contract_id.name }}</field>
+            <field name="email_to">{{ object.user_id.email or '' }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #28a745;">Ký tài liệu hoàn tất</h2>
+
+                    <p>Kính gửi <t t-out="object.user_id.name"/>,</p>
+
+                    <p>
+                        Tất cả người ký đã hoàn tất ký tài liệu cho hợp đồng
+                        <strong><t t-out="object.contract_id.name"/></strong>.
+                    </p>
+
+                    <p>
+                        <a t-attf-href="/web#id={{ object.id }}&amp;model=trasas.signature.request&amp;view_type=form"
+                           style="background-color: #28a745; color: white; padding: 10px 20px;
+                                  text-decoration: none; border-radius: 5px; display: inline-block;">
+                            Xem chi tiết
+                        </a>
+                    </p>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>
