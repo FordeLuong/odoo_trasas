@@ -19,11 +19,7 @@ class DocusignConnector(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Docusign Records'
 
-    user_account_id = fields.Many2one('res.users', string='DocuSign Account', compute='get_current_account')
-    def get_current_account(self):
-        for rec in self:
-            rec.user_account_id = self.env.user.id
-
+    user_account_id = fields.Many2one('res.users', string='DocuSign Account', default=lambda self: self.env.user, readonly=True)
     name = fields.Char(string='Sequence', copy=False, readonly=True, default='New')
     
     @api.model

@@ -1,18 +1,24 @@
 from odoo.exceptions import ValidationError
 import logging
 from odoo import models, fields, api, exceptions, _
-from odoo.http import request
 try:
     from docusign_esign import ApiClient
     api_client = ApiClient()
 except Exception:
-    raise ValidationError(_('Package docusign-esign not found. If you plan to use it, '
-                            'please install the docusign-esign library from https://pypi.org/project/docusign-esign/'))
+    api_client = None
+    _logger = logging.getLogger(__name__)
+    _logger.warning('Package docusign-esign not found. Install python package docusign-esign to enable DocuSign features.')
 _logger = logging.getLogger(__name__)
 import base64, json
-from six import PY3, integer_types, iteritems, text_type
+
+# Odoo 19+ runs on Python 3 only; avoid six dependency
+integer_types = (int,)
+text_type = str
+
+def iteritems(d):
+    return d.items()
 import requests
-PRIMITIVE_TYPES = (float, bool, bytes, text_type) + integer_types
+PRIMITIVE_TYPES = (float, bool, bytes, str, int)
 
 SCOPES = [
     "signature"
@@ -33,7 +39,9 @@ envelope_events = ["Completed", "Declined", "Delivered", "Sent", "Voided"]
 class ResUserCustom(models.Model):
     _inherit = 'res.users'
 
-    record_name = fields.Char(string="Record Name", compute='ds_get_name')
+    record_name = fields.Char(string="Record Name", compute='ds_get_name', store=False)
+
+    @api.depends('name')
     def ds_get_name(self):
         for rec in self:
             if rec.name:
@@ -55,7 +63,7 @@ class ResUserCustom(models.Model):
                 raise ValidationError(_("Account type can't be empty!"))
 
     login_url = fields.Char('Login URL', compute= '_compute_url')
-    redirect_url = fields.Char('Redirect URL', compute= '_get_current_url')
+    redirect_url = fields.Char('Redirect URL', compute='_get_current_url')
     access_token = fields.Char('Access Token')
     refresh_token = fields.Char('Refresh Token')
     token_expires_at = fields.Datetime('Token Expires At')
@@ -64,16 +72,18 @@ class ResUserCustom(models.Model):
     # account_id = fields.Char('Account ID')
 
     @api.depends('client_id')
+    @api.depends_context('uid')
     def _get_current_url(self):
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url', '')
         for rec in self:
-            base_url = request.httprequest.url_root
-            rec.redirect_url = base_url + 'docusign'
-
-    @api.onchange('account_type', 'client_id', 'client_secret')
+            rec.redirect_url = (base_url.rstrip('/') + '/docusign') if base_url else '/docusign'@api.depends('account_type', 'client_id', 'redirect_url')
     def _compute_url(self):
         url_scopes = "+".join(SCOPES)
         for rec in self:
             account_type = rec.account_type if rec.account_type else 'dev'
+            if not api_client:
+                rec.login_url = False
+                continue
             api_client.set_oauth_host_name(oauth_host_name=platform_type[account_type])
             rec.login_url = api_client.get_authorization_uri(rec.client_id, SCOPES, rec.redirect_url, 'code')
 
@@ -208,7 +218,7 @@ class ResUserCustom(models.Model):
             raise ValidationError(_("Not a valid request for user info."))
 
     def sanitize_for_serialization(self, obj):
-        PRIMITIVE_TYPES = (float, bool, bytes, text_type) + integer_types
+        PRIMITIVE_TYPES = (float, bool, bytes, str, int)
         if obj is None:
             return None
         elif isinstance(obj, PRIMITIVE_TYPES):

@@ -32,10 +32,10 @@
     'author': "Techloyce",
     'website': "http://www.techloyce.com",
     'category': 'Sale',
-    'version': '17.0.1.5',
+    'version': '19.0.1.0.0',
     'depends': ['base', 'contacts', 'sale_management', 'purchase', 'account', 'mail'],
     'external_dependencies': {
-        'python': ['jwt', 'cryptography'],
+        'python': ['jwt', 'cryptography', 'docusign_esign', 'requests' ],
     },
     'images': [
         'static/description/banner.jpg',
@@ -54,7 +54,7 @@
         'wizards/wizard.xml',
         'views/template.xml',
     ],
-    'installable': 'True',
-    'application': 'True',
+    'installable': True,
+    'application': True,
     'license': 'OPL-1',
 }
