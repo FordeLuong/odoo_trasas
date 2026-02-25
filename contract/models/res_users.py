@@ -1,17 +1,26 @@
-from odoo.exceptions import ValidationError
+import base64
+import json
 import logging
-from odoo import models, fields, api, exceptions, _
-from odoo.http import request
-try:
-    from docusign_esign import ApiClient
-    api_client = ApiClient()
-except Exception:
-    raise ValidationError(_('Package docusign-esign not found. If you plan to use it, '
-                            'please install the docusign-esign library from https://pypi.org/project/docusign-esign/'))
-_logger = logging.getLogger(__name__)
-import base64, json
-from six import PY3, integer_types, iteritems, text_type
+
 import requests
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
+from odoo.http import request
+
+_logger = logging.getLogger(__name__)
+
+# DocuSign SDK is optional at import time to avoid crashing module loading.
+try:
+    from docusign_esign import ApiClient  # type: ignore
+    api_client = ApiClient()
+except Exception as e:
+    api_client = None
+    _logger.warning("DocuSign SDK (docusign-esign) not available: %s", e)
+
+# Python 3 native equivalents (Odoo 19)
+text_type = str
+integer_types = (int,)
+
 PRIMITIVE_TYPES = (float, bool, bytes, text_type) + integer_types
 
 SCOPES = [
@@ -34,6 +43,7 @@ class ResUserCustom(models.Model):
     _inherit = 'res.users'
 
     record_name = fields.Char(string="Record Name", compute='ds_get_name')
+    @api.depends('name')
     def ds_get_name(self):
         for rec in self:
             if rec.name:
@@ -63,15 +73,20 @@ class ResUserCustom(models.Model):
     account_id = fields.Char('Account ID')
 
     @api.depends('client_id')
-    def _get_current_url(self):
-        for rec in self:
-            base_url = request.httprequest.url_root
-            rec.redirect_url = base_url + 'docusign'
+def _get_current_url(self):
+    """Compute redirect URL safely without depending on an active HTTP request."""
+    base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url', '').rstrip('/')
+    redirect = (base_url + '/docusign') if base_url else ''
+    for rec in self:
+        rec.redirect_url = redirect
 
-    @api.onchange('account_type', 'client_id', 'client_secret')
+    @api.depends('account_type', 'client_id', 'client_secret')
     def _compute_url(self):
         url_scopes = "+".join(SCOPES)
         for rec in self:
+            if not api_client or not rec.client_id or not rec.redirect_url:
+                rec.login_url = ''
+                continue
             account_type = rec.account_type if rec.account_type else 'dev'
             api_client.set_oauth_host_name(oauth_host_name=platform_type[account_type])
             rec.login_url = api_client.get_authorization_uri(rec.client_id, SCOPES, rec.redirect_url, 'code')
@@ -172,11 +187,11 @@ class ResUserCustom(models.Model):
             obj_dict = obj
         else:
             obj_dict = {obj.attribute_map[attr]: getattr(obj, attr)
-                        for attr, _ in iteritems(obj.swagger_types)
+                        for attr, _ in getattr(obj, "swagger_types", {}).items()
                         if getattr(obj, attr) is not None}
 
         return {key: self.sanitize_for_serialization(val)
-                for key, val in iteritems(obj_dict)}
+                for key, val in obj_dict.items()}
 
     def action_of_button(self, message):
         message_id = self.env['message.wizard'].sudo().create({'message': _(message)})
