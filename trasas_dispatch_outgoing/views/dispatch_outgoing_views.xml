@@ -15,7 +15,7 @@
                     <button name="action_release" string="Phát hành" type="object" class="oe_highlight" invisible="state != 'processing'"/>
                     <button name="action_send" string="Gửi đi" type="object" class="oe_highlight" invisible="state != 'released'"/>
                     <button name="action_done" string="Hoàn thành" type="object" class="oe_highlight" invisible="state != 'sent'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,waiting_approval,approved,to_promulgate,processing,released,sent,done"/>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': 1}"/>
                 </header>
                 <sheet>
                     <field name="is_user_approver" invisible="1"/>
@@ -105,7 +105,7 @@
         <field name="name">trasas.dispatch.outgoing.kanban</field>
         <field name="model">trasas.dispatch.outgoing</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="state" class="o_kanban_small_column">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column">
                 <field name="state"/>
                 <field name="name"/>
                 <field name="subject"/>

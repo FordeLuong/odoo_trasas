@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Stage List View -->
+    <record id="view_dispatch_outgoing_stage_list" model="ir.ui.view">
+        <field name="name">trasas.dispatch.outgoing.stage.list</field>
+        <field name="model">trasas.dispatch.outgoing.stage</field>
+        <field name="arch" type="xml">
+            <list string="Giai đoạn công văn đi" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="is_draft"/>
+                <field name="is_done"/>
+                <field name="is_cancel"/>
+                <field name="fold"/>
+                <field name="mail_template_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Stage Form View -->
+    <record id="view_dispatch_outgoing_stage_form" model="ir.ui.view">
+        <field name="name">trasas.dispatch.outgoing.stage.form</field>
+        <field name="model">trasas.dispatch.outgoing.stage</field>
+        <field name="arch" type="xml">
+            <form string="Giai đoạn công văn đi">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="is_draft"/>
+                            <field name="is_done"/>
+                            <field name="is_cancel"/>
+                            <field name="fold"/>
+                        </group>
+                    </group>
+                    <group string="Tự động gửi email">
+                        <field name="mail_template_id"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Stage Action -->
+    <record id="action_dispatch_outgoing_stage" model="ir.actions.act_window">
+        <field name="name">Giai đoạn công văn đi</field>
+        <field name="res_model">trasas.dispatch.outgoing.stage</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
