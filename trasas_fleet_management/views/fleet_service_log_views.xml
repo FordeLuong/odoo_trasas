@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Thêm nút Bắt đầu / Hoàn thành / Hủy vào form Services -->
+    <record id="fleet_vehicle_log_services_view_form_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.log.services.form.trasas.inherit</field>
+        <field name="model">fleet.vehicle.log.services</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_log_services_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='state']" position="before">
+                <button name="action_start" string="Bắt đầu dịch vụ" type="object"
+                        class="oe_highlight" invisible="state != 'new'"/>
+                <button name="action_done" string="Hoàn thành" type="object"
+                        class="oe_highlight" invisible="state != 'running'"/>
+                <button name="action_cancel" string="Hủy" type="object"
+                        invisible="state not in ('new', 'running')"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

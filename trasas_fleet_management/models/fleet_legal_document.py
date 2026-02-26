@@ -171,25 +171,33 @@ class FleetLegalDocument(models.Model):
                 if att_key in synced_att_ids:
                     continue
 
-                # Tạo bản sao attachment cho document
+                # Tạo bản sao attachment (dùng res_model trung lập
+                # để tránh documents_fleet bridge tự tạo document)
                 att_copy = Attachment.create(
                     {
                         "name": att.name,
                         "datas": att.datas,
                         "mimetype": att.mimetype,
-                        "description": att_key,  # Lưu original att id để track
-                        "res_model": "documents.document",
-                        "res_id": 0,
+                        "description": att_key,
+                        "res_model": "fleet.legal.document",
+                        "res_id": rec.id,
                     }
                 )
 
-                # Tạo document với attachment_id (đúng cách Odoo 19)
+                # Tạo document với attachment_id
                 new_doc = Document.create(
                     {
                         "name": rec.name or att.name,
                         "folder_id": folder.id,
                         "attachment_id": att_copy.id,
                         "owner_id": self.env.user.id,
+                    }
+                )
+                # Gắn res_model/res_id để smart button Documents đếm đúng
+                new_doc.write(
+                    {
+                        "res_model": "fleet.vehicle",
+                        "res_id": rec.vehicle_id.id,
                     }
                 )
                 new_docs |= new_doc

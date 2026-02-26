@@ -1,14 +1,24 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 
 
 class FleetVehicleLogServices(models.Model):
     _inherit = "fleet.vehicle.log.services"
 
-    # Odoo fleet.vehicle.log.services already has 'notes' and 'odometer_id'
-    # We ensure they are tracked and possibly add logic if needed.
+    def action_start(self):
+        """New → Running"""
+        for rec in self:
+            if rec.state == "new":
+                rec.state = "running"
 
-    @api.onchange("odometer")
-    def _onchange_odometer_custom(self):
-        # Additional logic when odometer changes during service log entry
-        pass
+    def action_done(self):
+        """Running → Done"""
+        for rec in self:
+            if rec.state == "running":
+                rec.state = "done"
+
+    def action_cancel(self):
+        """Any → Cancelled"""
+        for rec in self:
+            if rec.state in ("new", "running"):
+                rec.state = "cancelled"
