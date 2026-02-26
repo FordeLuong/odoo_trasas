@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Localized Service Types for Vietnam -->
+        <record id="type_service_maintenance" model="fleet.service.type">
+            <field name="name">Bảo dưỡng định kỳ</field>
+            <field name="category">service</field>
+        </record>
+
+        <record id="type_service_repair" model="fleet.service.type">
+            <field name="name">Sửa chữa</field>
+            <field name="category">service</field>
+        </record>
+
+        <record id="type_service_oil_change" model="fleet.service.type">
+            <field name="name">Thay dầu</field>
+            <field name="category">service</field>
+        </record>
+
+        <record id="type_service_tire" model="fleet.service.type">
+            <field name="name">Thay lốp</field>
+            <field name="category">service</field>
+        </record>
+
+        <record id="type_service_inspection" model="fleet.service.type">
+            <field name="name">Đăng kiểm</field>
+            <field name="category">service</field>
+        </record>
+
+        <record id="type_service_insurance" model="fleet.service.type">
+            <field name="name">Bảo hiểm</field>
+            <field name="category">service</field>
+        </record>
+
+        <record id="type_service_wash" model="fleet.service.type">
+            <field name="name">Rửa xe</field>
+            <field name="category">service</field>
+        </record>
+
+        <record id="type_service_accident" model="fleet.service.type">
+            <field name="name">Sửa chữa đột xuất</field>
+            <field name="category">service</field>
+        </record>
+    </data>
+</odoo>

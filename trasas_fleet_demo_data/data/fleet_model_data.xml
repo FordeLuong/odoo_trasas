@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ============ TOYOTA ============ -->
+        <record id="model_toyota_vios" model="fleet.vehicle.model">
+            <field name="name">Vios</field>
+            <field name="brand_id" ref="brand_toyota"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_toyota_innova" model="fleet.vehicle.model">
+            <field name="name">Innova</field>
+            <field name="brand_id" ref="brand_toyota"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">7</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_toyota_fortuner" model="fleet.vehicle.model">
+            <field name="name">Fortuner</field>
+            <field name="brand_id" ref="brand_toyota"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">7</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_toyota_hilux" model="fleet.vehicle.model">
+            <field name="name">Hilux</field>
+            <field name="brand_id" ref="brand_toyota"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_toyota_hiace" model="fleet.vehicle.model">
+            <field name="name">HiAce (Xe khách 16 chỗ)</field>
+            <field name="brand_id" ref="brand_toyota"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">16</field>
+            <field name="doors">4</field>
+        </record>
+
+        <!-- ============ HYUNDAI ============ -->
+        <record id="model_hyundai_accent" model="fleet.vehicle.model">
+            <field name="name">Accent</field>
+            <field name="brand_id" ref="brand_hyundai"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_hyundai_santafe" model="fleet.vehicle.model">
+            <field name="name">Santa Fe</field>
+            <field name="brand_id" ref="brand_hyundai"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">7</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_hyundai_porter" model="fleet.vehicle.model">
+            <field name="name">Porter H150 (Xe tải nhẹ)</field>
+            <field name="brand_id" ref="brand_hyundai"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">3</field>
+            <field name="doors">2</field>
+        </record>
+        <record id="model_hyundai_county" model="fleet.vehicle.model">
+            <field name="name">County (Xe khách 29 chỗ)</field>
+            <field name="brand_id" ref="brand_hyundai"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">29</field>
+            <field name="doors">2</field>
+        </record>
+
+        <!-- ============ KIA ============ -->
+        <record id="model_kia_morning" model="fleet.vehicle.model">
+            <field name="name">Morning</field>
+            <field name="brand_id" ref="brand_kia"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">4</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_kia_seltos" model="fleet.vehicle.model">
+            <field name="name">Seltos</field>
+            <field name="brand_id" ref="brand_kia"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_kia_k2700" model="fleet.vehicle.model">
+            <field name="name">K2700 (Xe tải)</field>
+            <field name="brand_id" ref="brand_kia"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">3</field>
+            <field name="doors">2</field>
+        </record>
+
+        <!-- ============ FORD ============ -->
+        <record id="model_ford_ranger" model="fleet.vehicle.model">
+            <field name="name">Ranger</field>
+            <field name="brand_id" ref="brand_ford"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_ford_transit" model="fleet.vehicle.model">
+            <field name="name">Transit (Xe khách 16 chỗ)</field>
+            <field name="brand_id" ref="brand_ford"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">16</field>
+            <field name="doors">3</field>
+        </record>
+        <record id="model_ford_everest" model="fleet.vehicle.model">
+            <field name="name">Everest</field>
+            <field name="brand_id" ref="brand_ford"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">7</field>
+            <field name="doors">4</field>
+        </record>
+
+        <!-- ============ MITSUBISHI ============ -->
+        <record id="model_mitsubishi_xpander" model="fleet.vehicle.model">
+            <field name="name">Xpander</field>
+            <field name="brand_id" ref="brand_mitsubishi"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">7</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_mitsubishi_triton" model="fleet.vehicle.model">
+            <field name="name">Triton</field>
+            <field name="brand_id" ref="brand_mitsubishi"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+
+        <!-- ============ ISUZU ============ -->
+        <record id="model_isuzu_qkr" model="fleet.vehicle.model">
+            <field name="name">QKR (Xe tải nhẹ 1.9T - 3.5T)</field>
+            <field name="brand_id" ref="brand_isuzu"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">3</field>
+            <field name="doors">2</field>
+        </record>
+        <record id="model_isuzu_fvr" model="fleet.vehicle.model">
+            <field name="name">FVR (Xe tải nặng 9T)</field>
+            <field name="brand_id" ref="brand_isuzu"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">3</field>
+            <field name="doors">2</field>
+        </record>
+        <record id="model_isuzu_dmax" model="fleet.vehicle.model">
+            <field name="name">D-Max</field>
+            <field name="brand_id" ref="brand_isuzu"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+
+        <!-- ============ HINO ============ -->
+        <record id="model_hino_300" model="fleet.vehicle.model">
+            <field name="name">300 Series (Xe tải nhẹ)</field>
+            <field name="brand_id" ref="brand_hino"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">3</field>
+            <field name="doors">2</field>
+        </record>
+        <record id="model_hino_500" model="fleet.vehicle.model">
+            <field name="name">500 Series (Xe tải trung)</field>
+            <field name="brand_id" ref="brand_hino"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">3</field>
+            <field name="doors">2</field>
+        </record>
+
+        <!-- ============ THACO ============ -->
+        <record id="model_thaco_ollin" model="fleet.vehicle.model">
+            <field name="name">Ollin (Xe tải 2.5T - 9.5T)</field>
+            <field name="brand_id" ref="brand_thaco"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">3</field>
+            <field name="doors">2</field>
+        </record>
+        <record id="model_thaco_auman" model="fleet.vehicle.model">
+            <field name="name">Auman (Xe tải nặng 9T - 21T)</field>
+            <field name="brand_id" ref="brand_thaco"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">3</field>
+            <field name="doors">2</field>
+        </record>
+        <record id="model_thaco_town" model="fleet.vehicle.model">
+            <field name="name">Town (Xe tải nhẹ 990kg)</field>
+            <field name="brand_id" ref="brand_thaco"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">3</field>
+            <field name="doors">2</field>
+        </record>
+
+        <!-- ============ SUZUKI ============ -->
+        <record id="model_suzuki_carry" model="fleet.vehicle.model">
+            <field name="name">Carry (Xe tải nhẹ)</field>
+            <field name="brand_id" ref="brand_suzuki"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">2</field>
+            <field name="doors">2</field>
+        </record>
+        <record id="model_suzuki_ertiga" model="fleet.vehicle.model">
+            <field name="name">Ertiga</field>
+            <field name="brand_id" ref="brand_suzuki"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">7</field>
+            <field name="doors">4</field>
+        </record>
+
+        <!-- ============ MAZDA ============ -->
+        <record id="model_mazda_cx5" model="fleet.vehicle.model">
+            <field name="name">CX-5</field>
+            <field name="brand_id" ref="brand_mazda"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_mazda_3" model="fleet.vehicle.model">
+            <field name="name">Mazda3</field>
+            <field name="brand_id" ref="brand_mazda"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+
+        <!-- ============ HONDA ============ -->
+        <record id="model_honda_crv" model="fleet.vehicle.model">
+            <field name="name">CR-V</field>
+            <field name="brand_id" ref="brand_honda"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">7</field>
+            <field name="doors">4</field>
+        </record>
+        <record id="model_honda_city" model="fleet.vehicle.model">
+            <field name="name">City</field>
+            <field name="brand_id" ref="brand_honda"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+
+        <!-- ============ VINFAST ============ -->
+        <record id="model_vinfast_vf8" model="fleet.vehicle.model">
+            <field name="name">VF 8</field>
+            <field name="brand_id" ref="brand_vinfast"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+            <field name="default_fuel_type">electric</field>
+        </record>
+        <record id="model_vinfast_vfe34" model="fleet.vehicle.model">
+            <field name="name">VF e34</field>
+            <field name="brand_id" ref="brand_vinfast"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+            <field name="default_fuel_type">electric</field>
+        </record>
+        <record id="model_vinfast_fadil" model="fleet.vehicle.model">
+            <field name="name">Fadil</field>
+            <field name="brand_id" ref="brand_vinfast"/>
+            <field name="vehicle_type">car</field>
+            <field name="seats">5</field>
+            <field name="doors">4</field>
+        </record>
+    </data>
+</odoo>

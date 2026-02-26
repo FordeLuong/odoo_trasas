@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ============ HÃNG XE PHỔ BIẾN TẠI VIỆT NAM ============ -->
+
+        <record id="brand_toyota" model="fleet.vehicle.model.brand">
+            <field name="name">Toyota</field>
+        </record>
+
+        <record id="brand_hyundai" model="fleet.vehicle.model.brand">
+            <field name="name">Hyundai</field>
+        </record>
+
+        <record id="brand_kia" model="fleet.vehicle.model.brand">
+            <field name="name">Kia</field>
+        </record>
+
+        <record id="brand_ford" model="fleet.vehicle.model.brand">
+            <field name="name">Ford</field>
+        </record>
+
+        <record id="brand_mitsubishi" model="fleet.vehicle.model.brand">
+            <field name="name">Mitsubishi</field>
+        </record>
+
+        <record id="brand_isuzu" model="fleet.vehicle.model.brand">
+            <field name="name">Isuzu</field>
+        </record>
+
+        <record id="brand_hino" model="fleet.vehicle.model.brand">
+            <field name="name">Hino</field>
+        </record>
+
+        <record id="brand_thaco" model="fleet.vehicle.model.brand">
+            <field name="name">Thaco</field>
+        </record>
+
+        <record id="brand_suzuki" model="fleet.vehicle.model.brand">
+            <field name="name">Suzuki</field>
+        </record>
+
+        <record id="brand_mazda" model="fleet.vehicle.model.brand">
+            <field name="name">Mazda</field>
+        </record>
+
+        <record id="brand_honda" model="fleet.vehicle.model.brand">
+            <field name="name">Honda</field>
+        </record>
+
+        <record id="brand_vinfast" model="fleet.vehicle.model.brand">
+            <field name="name">VinFast</field>
+        </record>
+    </data>
+</odoo>

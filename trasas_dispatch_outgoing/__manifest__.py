@@ -11,7 +11,7 @@
         - Quản lý quy trình phê duyệt & ban hành.
         - Lưu trữ và theo dõi trạng thái gửi.
     """,
-    "author": "TRASAS",
+    "author": "LiemPhong",
     "depends": [
         "base",
         "mail",
