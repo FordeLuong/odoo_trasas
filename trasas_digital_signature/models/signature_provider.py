@@ -119,19 +119,35 @@ class TrasasSignatureProvider(models.Model):
         self.ensure_one()
         try:
             result = self._provider_test_connection()
-            if result:
-                return {
-                    "type": "ir.actions.client",
-                    "tag": "display_notification",
-                    "params": {
-                        "title": _("Thành công"),
-                        "message": _("Kết nối thành công với %s!") % self.name,
-                        "type": "success",
-                        "sticky": False,
-                    },
-                }
+        except UserError:
+            raise
+        except requests.RequestException as e:
+            raise UserError(
+                _("Lỗi mạng khi kết nối với %s:\n%s") % (self.name, str(e))
+            )
         except Exception as e:
             raise UserError(_("Lỗi kết nối với %s:\n%s") % (self.name, str(e)))
+
+        ok = True
+        message = _("Kết nối thành công với %s!") % self.name
+        if isinstance(result, dict):
+            ok = bool(result.get("ok", True))
+            message = result.get("message") or message
+        else:
+            ok = bool(result)
+            if not ok:
+                message = _("Không xác nhận được kết nối với %s.") % self.name
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Thành công") if ok else _("Thất bại"),
+                "message": message,
+                "type": "success" if ok else "danger",
+                "sticky": not ok,
+            },
+        }
 
     # ------------------------------------------------------------------
     # Abstract provider dispatch
@@ -293,11 +309,32 @@ class TrasasSignatureProvider(models.Model):
             )
 
     def _vnpt_smartca_test_connection(self):
-        """Validate SP credentials are present."""
+        """Validate credentials + basic reachability of the gateway."""
         self.ensure_one()
         if not self.api_key or not self.api_secret:
             raise UserError(_("Thiếu SP ID / SP Password (API Key/Secret)."))
-        return True
+
+        base_url = self._vnpt_smartca_base_url().rstrip("/") + "/"
+        try:
+            resp = requests.request("GET", base_url, timeout=10)
+        except requests.RequestException as e:
+            raise UserError(
+                _("Không kết nối được đến gateway: %s\n%s")
+                % (base_url, str(e))
+            )
+
+        if resp.status_code >= 500:
+            return {
+                "ok": False,
+                "message": _("Gateway phản hồi lỗi (%s) tại %s")
+                % (resp.status_code, base_url),
+            }
+
+        return {
+            "ok": True,
+            "message": _("Gateway reachable (%s) tại %s")
+            % (resp.status_code, base_url),
+        }
 
     def _vnpt_smartca_send_document(self, request):
         """Create SmartCA signing transaction per signer (hash signing)."""
@@ -398,7 +435,7 @@ class TrasasSignatureProvider(models.Model):
                 continue
 
             data = self._vnpt_smartca_post(
-                f"/v1/sigatures/singn/{tran}/status",
+                f"/v1/signatures/sign/{tran}/status",
                 {
                     "sp_id": self.api_key,
                     "sp_password": self.api_secret,
