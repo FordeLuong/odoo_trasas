@@ -51,7 +51,7 @@
         Sau khi install module này, bạn có thể đăng nhập bằng các tài khoản trên
         để test quy trình quản lý hợp đồng và các quy trình vận hành khác.
     """,
-    "author": "TRASAS",
+    "author": "LiemPhong",
     "website": "https://trasas.com",
     "depends": [
         "base",

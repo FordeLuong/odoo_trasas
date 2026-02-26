@@ -123,9 +123,7 @@ class TrasasSignatureProvider(models.Model):
                     },
                 }
         except Exception as e:
-            raise UserError(
-                _("Lỗi kết nối với %s:\n%s") % (self.name, str(e))
-            )
+            raise UserError(_("Lỗi kết nối với %s:\n%s") % (self.name, str(e)))
 
     # ------------------------------------------------------------------
     # Abstract provider dispatch
@@ -201,9 +199,7 @@ class TrasasSignatureProvider(models.Model):
         return True
 
     def _demo_send_document(self, request):
-        base_url = (
-            self.env["ir.config_parameter"].sudo().get_param("web.base.url")
-        )
+        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
         result = {
             "provider_document_ref": f"DEMO-{uuid.uuid4().hex[:8].upper()}",
             "signers": [],
@@ -246,7 +242,8 @@ class TrasasSignatureProvider(models.Model):
 
     def _demo_cancel(self, request):
         return True
-# ==================================================================
+
+    # ==================================================================
     # DOCUSIGN PROVIDER IMPLEMENTATION
     # ==================================================================
 
@@ -254,11 +251,11 @@ class TrasasSignatureProvider(models.Model):
         """Kiểm tra kết nối tới DocuSign"""
         headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
         # Endpoint lấy thông tin user để test token
-        url = f"{self.api_url}/v2.1/accounts" 
-        
+        url = f"{self.api_url}/v2.1/accounts"
+
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
             raise UserError(_("Kết nối DocuSign thất bại: %s") % response.text)
@@ -269,74 +266,78 @@ class TrasasSignatureProvider(models.Model):
         Gửi tài liệu lên DocuSign thông qua Envelopes API.
         """
         self.ensure_one()
-        
+
         # 1. Chuẩn bị Headers (Sử dụng api_key làm Access Token)
         headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
-        
+
         # URL tạo Envelope
         url = f"{self.api_url}/envelopes"
 
         # 2. Chuẩn bị danh sách người ký (Signers) cho DocuSign
         docusign_signers = []
         for signer in request.signer_ids:
-            docusign_signers.append({
-                "email": signer.signer_email,
-                "name": signer.signer_name,
-                "recipientId": str(signer.id), # Dùng ID của Odoo làm mã nhận diện
-                "routingOrder": str(signer.sign_order),
-                # Nếu bạn muốn cấu hình tọa độ ký trên PDF, sẽ thêm phần "tabs" ở đây. 
-                # Tạm thời để trống để DocuSign tự sinh trang ký cuối file.
-            })
+            docusign_signers.append(
+                {
+                    "email": signer.signer_email,
+                    "name": signer.signer_name,
+                    "recipientId": str(signer.id),  # Dùng ID của Odoo làm mã nhận diện
+                    "routingOrder": str(signer.sign_order),
+                    # Nếu bạn muốn cấu hình tọa độ ký trên PDF, sẽ thêm phần "tabs" ở đây.
+                    # Tạm thời để trống để DocuSign tự sinh trang ký cuối file.
+                }
+            )
 
         # 3. Chuẩn bị cấu trúc dữ liệu gửi đi (Payload)
         payload = {
             "emailSubject": f"Yêu cầu ký số: {request.name}",
             "documents": [
                 {
-                    "documentBase64": request.document_file.decode('utf-8'), # File PDF từ Odoo
+                    "documentBase64": request.document_file.decode(
+                        "utf-8"
+                    ),  # File PDF từ Odoo
                     "name": request.document_filename or "Document.pdf",
                     "fileExtension": "pdf",
-                    "documentId": "1"
+                    "documentId": "1",
                 }
             ],
-            "recipients": {
-                "signers": docusign_signers
-            },
+            "recipients": {"signers": docusign_signers},
             # Trạng thái "sent" sẽ báo DocuSign gửi email ngay lập tức cho người ký đầu tiên
-            "status": "sent" 
+            "status": "sent",
         }
 
         # 4. Gửi Request POST
         try:
             response = requests.post(url, headers=headers, data=json.dumps(payload))
             response_data = response.json()
-            
+
             if response.status_code not in (200, 201):
                 _logger.error("DocuSign API Error: %s", response_data)
-                raise UserError(_("Lỗi từ DocuSign: %s") % response_data.get('message', 'Không rõ lỗi'))
-                
+                raise UserError(
+                    _("Lỗi từ DocuSign: %s")
+                    % response_data.get("message", "Không rõ lỗi")
+                )
+
         except requests.exceptions.RequestException as e:
             raise UserError(_("Lỗi kết nối mạng khi gọi API DocuSign: %s") % str(e))
 
         # 5. Xử lý kết quả trả về để map với cấu trúc Odoo của bạn
         envelope_id = response_data.get("envelopeId")
-        
-        result = {
-            "provider_document_ref": envelope_id,
-            "signers": []
-        }
-        
+
+        result = {"provider_document_ref": envelope_id, "signers": []}
+
         # Map lại thông tin cho từng người ký
         for signer in request.signer_ids:
-            result["signers"].append({
-                "signer_id": signer.id,
-                # DocuSign sẽ tự gửi email, nên chúng ta có thể để URL rỗng hoặc link tới Odoo Portal
-                "signing_url": "", 
-                "provider_signer_ref": str(signer.id), # Ghi nhận lại ID người ký
-            })
+            result["signers"].append(
+                {
+                    "signer_id": signer.id,
+                    # DocuSign sẽ tự gửi email, nên chúng ta có thể để URL rỗng hoặc link tới Odoo Portal
+                    "signing_url": "",
+                    "provider_signer_ref": str(signer.id),  # Ghi nhận lại ID người ký
+                }
+            )
 
         return result
 

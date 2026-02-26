@@ -18,7 +18,7 @@
         - Cảnh báo hết hạn (Cron + Email + Activity)
         - Phân quyền HCNS (toàn quyền) / BGĐ (chỉ xem)
     """,
-    "author": "TRASAS",
+    "author": "LiemPhong",
     "website": "https://trasas.com",
     "depends": [
         "base",
