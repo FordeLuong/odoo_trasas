@@ -8,7 +8,7 @@ class TestContractDashboard(TransactionCase):
     """Test cases for Contract Dashboard functionality"""
     
     def setUp(self):
-        super(TestContractDashboard, self).setUp()
+        super().setUp()
         
         # Create test partner
         self.partner = self.env['res.partner'].create({

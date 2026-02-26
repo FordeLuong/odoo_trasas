@@ -564,7 +564,7 @@ class ContractAddendum(models.Model):
 
     def _compute_access_url(self):
         """Compute portal URL for addendum records."""
-        super(ContractAddendum, self)._compute_access_url()
+        super()._compute_access_url()
         for addendum in self:
             addendum.access_url = '/my/contract/addendum/%s' % addendum.id
     

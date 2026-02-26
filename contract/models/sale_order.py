@@ -1297,7 +1297,7 @@ class SaleSubscription(models.Model):
             if is_upsell:
                 _logger.info("[Addendum] Upsell detected via UUID for order %s - will create addendum after confirmation", self.name)
             
-            # res = super(SaleSubscription, self).action_confirm()
+            # res = super().action_confirm()
             res = self.action_update_sub_data()
             _logger.info("[UUID] action_update_sub_data() completed for order %s", self.name)
             
@@ -1371,7 +1371,7 @@ class SaleSubscription(models.Model):
 #        authenticated = self.authenicate_jwt()
 #        if authenticated:
 #            # Confirm the order first for all subscriptions
-#            res = super(SaleSubscription, self).action_confirm()
+#            res = super().action_confirm()
 #            _logger.info("[DEBUG] Super action_confirm completed for order %s", self.name)
 #            
 #            if self.is_subscription or self.subscription_state == '7_upsell':

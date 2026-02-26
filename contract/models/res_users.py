@@ -73,12 +73,12 @@ class ResUserCustom(models.Model):
     account_id = fields.Char('Account ID')
 
     @api.depends('client_id')
-def _get_current_url(self):
-    """Compute redirect URL safely without depending on an active HTTP request."""
-    base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url', '').rstrip('/')
-    redirect = (base_url + '/docusign') if base_url else ''
-    for rec in self:
-        rec.redirect_url = redirect
+    def _get_current_url(self):
+        """Compute redirect URL safely without depending on an active HTTP request."""
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url', '').rstrip('/')
+        redirect = (base_url + '/docusign') if base_url else ''
+        for rec in self:
+            rec.redirect_url = redirect
 
     @api.depends('account_type', 'client_id', 'client_secret')
     def _compute_url(self):

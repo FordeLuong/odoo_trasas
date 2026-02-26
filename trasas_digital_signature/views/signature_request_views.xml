@@ -67,6 +67,9 @@
                                        filename="document_filename"
                                        readonly="state != 'draft'"/>
                                 <field name="document_filename" invisible="1"/>
+                                <field name="hash_algo"/>
+                                <field name="hash_hex" readonly="1" placeholder="Tự sinh khi gửi yêu cầu"/>
+
                             </group>
                             <group invisible="not signed_document">
                                 <separator string="Tài liệu đã ký"/>
@@ -87,6 +90,9 @@
                                     <field name="role"/>
                                     <field name="signer_name"/>
                                     <field name="signer_email"/>
+                                    <field name="id_number" placeholder="CCCD/MST"/>
+                                    <field name="vnpt_tran_code" invisible="1"/>
+                                    <field name="vnpt_last_status" invisible="1"/>
                                     <field name="state" widget="badge"
                                            decoration-success="state == 'signed'"
                                            decoration-info="state == 'sent'"
