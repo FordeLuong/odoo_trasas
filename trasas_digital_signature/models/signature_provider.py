@@ -43,11 +43,13 @@ class TrasasSignatureProvider(models.Model):
         help="Địa chỉ endpoint API của nhà cung cấp",
     )
     api_key = fields.Char(
-        string="API Key",
+        string="API Key ",
+        help="sp_id của nhà cung cấp",
         groups="trasas_contract_management.group_contract_manager",
     )
     api_secret = fields.Char(
         string="API Secret",
+        help="sp_password của nhà cung cấp",
         groups="trasas_contract_management.group_contract_manager",
     )
     test_mode = fields.Boolean(
@@ -396,7 +398,7 @@ class TrasasSignatureProvider(models.Model):
                 continue
 
             data = self._vnpt_smartca_post(
-                f"/v1/signatures/sign/{tran}/status",
+                f"/v1/sigatures/singn/{tran}/status",
                 {
                     "sp_id": self.api_key,
                     "sp_password": self.api_secret,

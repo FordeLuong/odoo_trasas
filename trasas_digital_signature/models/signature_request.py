@@ -309,6 +309,14 @@ class TrasasSignatureRequest(models.Model):
         if self.state not in ("sent", "partially_signed"):
             return
         result = self.provider_id._provider_get_status(self)
+        if not isinstance(result, dict):
+            _logger.warning(
+                "Provider %s returned invalid status payload for %s: %r",
+                self.provider_id.display_name,
+                self.display_name,
+                result,
+            )
+            return
         self._process_status_update(result)
 
     # ------------------------------------------------------------------
@@ -320,15 +328,18 @@ class TrasasSignatureRequest(models.Model):
         self.ensure_one()
 
         for signer_data in status_data.get("signers", []):
+            provider_signer_ref = signer_data.get("provider_signer_ref")
+            if not provider_signer_ref:
+                continue
             signer = self.signer_ids.filtered(
-                lambda s, ref=signer_data[
-                    "provider_signer_ref"
-                ]: s.provider_signer_ref == ref
+                lambda s, ref=provider_signer_ref: s.provider_signer_ref == ref
             )
             if not signer:
                 continue
 
-            new_status = signer_data["status"]
+            new_status = signer_data.get("status")
+            if not new_status:
+                continue
             if new_status == "signed" and signer.state != "signed":
                 signer.write(
                     {
