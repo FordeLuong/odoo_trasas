@@ -1,4 +1,5 @@
 from . import models
+from . import wizard
 
 
 def _assign_outgoing_stages(env):

@@ -32,6 +32,7 @@
         "security/ir.model.access.csv",
         # Data
         "data/ir_sequence_data.xml",
+        "data/asset_stage_data.xml",
         "data/asset_type_data.xml",
         "data/mail_template_data.xml",
         "data/ir_cron_data.xml",

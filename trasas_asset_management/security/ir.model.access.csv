@@ -5,3 +5,5 @@ access_asset_type_manager,access.trasas.asset.type.manager,model_trasas_asset_ty
 access_asset_type_director,access.trasas.asset.type.director,model_trasas_asset_type,group_asset_director,1,0,0,0
 access_legal_doc_manager,access.trasas.asset.legal.document.manager,model_trasas_asset_legal_document,group_asset_manager,1,1,1,1
 access_legal_doc_director,access.trasas.asset.legal.document.director,model_trasas_asset_legal_document,group_asset_director,1,0,0,0
+access_asset_stage_manager,access.trasas.asset.stage.manager,model_trasas_asset_stage,group_asset_manager,1,1,1,1
+access_asset_stage_director,access.trasas.asset.stage.director,model_trasas_asset_stage,group_asset_director,1,0,0,0

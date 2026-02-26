@@ -296,29 +296,16 @@ class TrasasDispatchOutgoing(models.Model):
             record.stage_id = stage_approved
 
     def action_reject(self):
-        stage_draft = self._get_stage("outgoing_stage_draft")
-        if not stage_draft:
-            raise UserError("Chưa cấu hình giai đoạn 'Dự thảo'!")
-
-        for record in self:
-            # Cancel activity when rejected
-            activity_type_id = self.env.ref("mail.mail_activity_data_todo").id
-            record.activity_ids.filtered(
-                lambda a: (
-                    a.activity_type_id.id == activity_type_id
-                    and a.user_id.id == record.approver_id.id
-                )
-            ).unlink()
-
-            # Gửi email template "Bị từ chối"
-            template = self.env.ref(
-                "trasas_dispatch_outgoing.email_template_outgoing_rejected",
-                raise_if_not_found=False,
-            )
-            if template:
-                template.send_mail(record.id, force_send=True)
-
-            record.stage_id = stage_draft
+        """Mở wizard nhập lý do từ chối"""
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Lý do từ chối",
+            "res_model": "trasas.dispatch.outgoing.reject.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {"default_dispatch_id": self.id},
+        }
 
     def action_send_to_hcns(self):
         """Gửi cho bộ phận HCNS để ban hành"""

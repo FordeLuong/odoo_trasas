@@ -5,3 +5,4 @@ access_dispatch_outgoing_manager,trasas.dispatch.outgoing.manager,model_trasas_d
 access_dispatch_outgoing_stage_user,trasas.dispatch.outgoing.stage.user,model_trasas_dispatch_outgoing_stage,base.group_user,1,0,0,0
 access_dispatch_outgoing_stage_hcns,trasas.dispatch.outgoing.stage.hcns,model_trasas_dispatch_outgoing_stage,trasas_dispatch_management.group_dispatch_hcns,1,1,1,0
 access_dispatch_outgoing_stage_manager,trasas.dispatch.outgoing.stage.manager,model_trasas_dispatch_outgoing_stage,trasas_dispatch_management.group_dispatch_manager,1,1,1,1
+access_dispatch_outgoing_reject_wizard,trasas.dispatch.outgoing.reject.wizard.user,model_trasas_dispatch_outgoing_reject_wizard,base.group_user,1,1,1,1

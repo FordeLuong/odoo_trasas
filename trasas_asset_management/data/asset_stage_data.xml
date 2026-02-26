@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="stage_draft" model="trasas.asset.stage">
+            <field name="name">Mới</field>
+            <field name="sequence">1</field>
+            <field name="state">draft</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Đang chuẩn bị</field>
+            <field name="legend_blocked">Thiếu thông tin</field>
+            <field name="legend_done">Sẵn sàng kích hoạt</field>
+        </record>
+
+        <record id="stage_in_use" model="trasas.asset.stage">
+            <field name="name">Đang sử dụng</field>
+            <field name="sequence">2</field>
+            <field name="state">in_use</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Đang sử dụng</field>
+            <field name="legend_blocked">Cần bảo trì</field>
+            <field name="legend_done">Hoạt động tốt</field>
+        </record>
+
+        <record id="stage_leased" model="trasas.asset.stage">
+            <field name="name">Cho thuê</field>
+            <field name="sequence">3</field>
+            <field name="state">leased</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Đang cho thuê</field>
+            <field name="legend_blocked">Vấn đề hợp đồng</field>
+            <field name="legend_done">HĐ thuê ổn định</field>
+        </record>
+
+        <record id="stage_lease_in" model="trasas.asset.stage">
+            <field name="name">Thuê ngoài</field>
+            <field name="sequence">4</field>
+            <field name="state">lease_in</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Đang thuê ngoài</field>
+            <field name="legend_blocked">Vấn đề hợp đồng</field>
+            <field name="legend_done">HĐ thuê ổn định</field>
+        </record>
+
+        <record id="stage_repair" model="trasas.asset.stage">
+            <field name="name">Sửa chữa</field>
+            <field name="sequence">5</field>
+            <field name="state">repair</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Đang sửa chữa</field>
+            <field name="legend_blocked">Chờ linh kiện</field>
+            <field name="legend_done">Sửa xong</field>
+        </record>
+
+        <record id="stage_maintenance" model="trasas.asset.stage">
+            <field name="name">Bảo trì định kỳ</field>
+            <field name="sequence">6</field>
+            <field name="state">maintenance</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Đang bảo trì</field>
+            <field name="legend_blocked">Chờ xử lý</field>
+            <field name="legend_done">Bảo trì xong</field>
+        </record>
+
+        <record id="stage_renovation" model="trasas.asset.stage">
+            <field name="name">Cải tạo</field>
+            <field name="sequence">7</field>
+            <field name="state">renovation</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">Đang cải tạo</field>
+            <field name="legend_blocked">Chờ vật tư</field>
+            <field name="legend_done">Cải tạo xong</field>
+        </record>
+
+        <record id="stage_expiring" model="trasas.asset.stage">
+            <field name="name">Sắp hết hạn</field>
+            <field name="sequence">8</field>
+            <field name="state">expiring</field>
+            <field name="fold" eval="False"/>
+            <field name="legend_normal">HĐ sắp hết hạn</field>
+            <field name="legend_blocked">Cần gia hạn gấp</field>
+            <field name="legend_done">Đã gia hạn</field>
+        </record>
+
+        <record id="stage_contract_ended" model="trasas.asset.stage">
+            <field name="name">Kết thúc HĐ</field>
+            <field name="sequence">9</field>
+            <field name="state">contract_ended</field>
+            <field name="fold" eval="True"/>
+            <field name="legend_normal">HĐ thuê đã kết thúc</field>
+            <field name="legend_blocked">Chờ xử lý</field>
+            <field name="legend_done">Đã xử lý xong</field>
+        </record>
+
+        <record id="stage_liquidated" model="trasas.asset.stage">
+            <field name="name">Thanh lý</field>
+            <field name="sequence">10</field>
+            <field name="state">liquidated</field>
+            <field name="fold" eval="True"/>
+            <field name="legend_normal">Đã thanh lý</field>
+            <field name="legend_blocked">Chờ thủ tục</field>
+            <field name="legend_done">Thanh lý xong</field>
+        </record>
+
+        <record id="stage_completed" model="trasas.asset.stage">
+            <field name="name">Hoàn thành</field>
+            <field name="sequence">11</field>
+            <field name="state">completed</field>
+            <field name="fold" eval="True"/>
+            <field name="legend_normal">Đã hoàn thành</field>
+            <field name="legend_blocked">Không áp dụng</field>
+            <field name="legend_done">Không áp dụng</field>
+        </record>
+    </data>
+</odoo>

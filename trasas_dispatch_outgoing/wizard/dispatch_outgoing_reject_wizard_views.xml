@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_dispatch_outgoing_reject_wizard_form" model="ir.ui.view">
+        <field name="name">trasas.dispatch.outgoing.reject.wizard.form</field>
+        <field name="model">trasas.dispatch.outgoing.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Lý do từ chối">
+                <group>
+                    <field name="dispatch_id" invisible="1"/>
+                    <field name="reason" placeholder="Nhập lý do từ chối..."/>
+                </group>
+                <footer>
+                    <button string="Xác nhận từ chối" 
+                            name="action_reject" 
+                            type="object" 
+                            class="btn-danger"/>
+                    <button string="Hủy" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

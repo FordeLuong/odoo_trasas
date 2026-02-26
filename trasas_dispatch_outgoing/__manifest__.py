@@ -25,6 +25,7 @@
         "data/dispatch_data.xml",
         "data/dispatch_outgoing_stage_data.xml",
         "data/mail_template_data.xml",
+        "wizard/dispatch_outgoing_reject_wizard_views.xml",
         "views/dispatch_outgoing_stage_views.xml",
         "views/dispatch_outgoing_views.xml",
         "views/menu_views.xml",

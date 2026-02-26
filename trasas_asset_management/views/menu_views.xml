@@ -6,7 +6,7 @@
     <record id="action_trasas_asset" model="ir.actions.act_window">
         <field name="name">Tài sản</field>
         <field name="res_model">trasas.asset</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="trasas_asset_view_search"/>
         <field name="context">{}</field>
         <field name="help" type="html">

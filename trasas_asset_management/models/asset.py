@@ -55,6 +55,17 @@ class TrasasAsset(models.Model):
         help="Dùng để ẩn/hiện trường riêng theo nhóm",
     )
 
+    asset_classification = fields.Selection(
+        [
+            ("internal", "Sử dụng nội bộ"),
+            ("lease_out", "Cho thuê"),
+            ("lease_in", "Thuê ngoài"),
+        ],
+        string="Phân loại",
+        tracking=True,
+        help="Phân loại tài sản: chỉ áp dụng cho nhóm Nhà cửa/CT và Máy móc TB SX",
+    )
+
     description = fields.Html(
         string="Mô tả chi tiết",
     )
@@ -188,6 +199,7 @@ class TrasasAsset(models.Model):
             ("liquidated", "Thanh lý"),
             # --- Đất / Mặt bằng (NXCT) ---
             ("leased", "Cho thuê"),
+            ("lease_in", "Thuê ngoài"),
             ("renovation", "Cải tạo"),
             ("expiring", "Sắp hết hạn (thuê)"),
             ("contract_ended", "Kết thúc HĐ thuê"),
@@ -199,6 +211,107 @@ class TrasasAsset(models.Model):
         required=True,
         tracking=True,
     )
+
+    # ============ KANBAN STAGE ============
+    stage_id = fields.Many2one(
+        "trasas.asset.stage",
+        string="Giai đoạn",
+        tracking=True,
+        index=True,
+        copy=False,
+        group_expand="_read_group_stage_ids",
+        default=lambda self: self.env.ref(
+            "trasas_asset_management.stage_draft",
+            raise_if_not_found=False,
+        ),
+    )
+
+    kanban_state = fields.Selection(
+        [
+            ("normal", "Bình thường"),
+            ("done", "Hoàn tất"),
+            ("blocked", "Bị chặn"),
+        ],
+        string="Trạng thái Kanban",
+        default="normal",
+    )
+
+    color = fields.Integer(string="Màu", default=0)
+
+    priority = fields.Selection(
+        [
+            ("0", "Bình thường"),
+            ("1", "Quan trọng"),
+            ("2", "Rất quan trọng"),
+        ],
+        string="Mức ưu tiên",
+        default="0",
+    )
+
+    legend_normal = fields.Char(
+        related="stage_id.legend_normal",
+        string="Kanban: Bình thường",
+        readonly=True,
+    )
+    legend_blocked = fields.Char(
+        related="stage_id.legend_blocked",
+        string="Kanban: Bị chặn",
+        readonly=True,
+    )
+    legend_done = fields.Char(
+        related="stage_id.legend_done",
+        string="Kanban: Hoàn tất",
+        readonly=True,
+    )
+
+    @api.model
+    def _read_group_stage_ids(self, stages, domain):
+        """Hiển thị tất cả stage trong Kanban kể cả khi trống"""
+        return self.env["trasas.asset.stage"].search([], order="sequence")
+
+    def _sync_stage_from_state(self):
+        """Đồng bộ stage_id khi state thay đổi"""
+        Stage = self.env["trasas.asset.stage"]
+        for rec in self:
+            stage = Stage.search([("state", "=", rec.state)], limit=1)
+            if stage and rec.stage_id != stage:
+                rec.stage_id = stage
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "state" in vals:
+            self._sync_stage_from_state()
+        return res
+
+    def init(self):
+        """Gán stage cho tài sản cũ chưa có stage_id (chạy khi upgrade)"""
+        state_to_xmlid = {
+            "draft": "stage_draft",
+            "in_use": "stage_in_use",
+            "repair": "stage_repair",
+            "maintenance": "stage_maintenance",
+            "liquidated": "stage_liquidated",
+            "leased": "stage_leased",
+            "lease_in": "stage_lease_in",
+            "renovation": "stage_renovation",
+            "expiring": "stage_expiring",
+            "contract_ended": "stage_contract_ended",
+            "completed": "stage_completed",
+        }
+        for state, xmlid in state_to_xmlid.items():
+            stage = self.env.ref(
+                f"trasas_asset_management.{xmlid}",
+                raise_if_not_found=False,
+            )
+            if stage:
+                self.env.cr.execute(
+                    """
+                    UPDATE trasas_asset
+                    SET stage_id = %s
+                    WHERE state = %s AND (stage_id IS NULL)
+                    """,
+                    (stage.id, state),
+                )
 
     # =====================================================================
     # 5. HỒ SƠ CHỨNG TỪ ĐÍNH KÈM (notebook lines)
@@ -508,6 +621,32 @@ class TrasasAsset(models.Model):
             rec.message_post(
                 body=_("🏠 Tài sản đã cho thuê."),
                 subject=_("Cho thuê tài sản"),
+            )
+            rec._send_state_change_notification()
+
+    def action_lease_direct(self):
+        """Mới → Cho thuê (từ phân loại Cho thuê)"""
+        for rec in self:
+            if rec.state != "draft":
+                raise UserError(_("Chỉ tài sản trạng thái Mới!"))
+            rec.write({"state": "leased"})
+            rec._close_activities()
+            rec.message_post(
+                body=_("🏠 Tài sản đã cho thuê."),
+                subject=_("Cho thuê tài sản"),
+            )
+            rec._send_state_change_notification()
+
+    def action_lease_in(self):
+        """Mới → Thuê ngoài (từ phân loại Thuê ngoài)"""
+        for rec in self:
+            if rec.state != "draft":
+                raise UserError(_("Chỉ tài sản trạng thái Mới!"))
+            rec.write({"state": "lease_in"})
+            rec._close_activities()
+            rec.message_post(
+                body=_("📋 Tài sản thuê ngoài đã kích hoạt."),
+                subject=_("Thuê ngoài tài sản"),
             )
             rec._send_state_change_notification()
 

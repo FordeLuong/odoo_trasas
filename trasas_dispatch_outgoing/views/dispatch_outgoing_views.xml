@@ -21,7 +21,7 @@
                     <field name="is_user_approver" invisible="1"/>
                     <div class="oe_title">
                         <div class="d-flex">
-                            <div class="me-5">
+                            <div class="me-5" invisible="state in ('processing', 'released', 'sent', 'done')">
                                 <label for="name" class="oe_edit_only"/>
                                 <h1>
                                     <field name="name" readonly="1"/>
