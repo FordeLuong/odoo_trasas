@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import json
 import logging
+
+from markupsafe import escape
 
 from odoo import http
 from odoo.http import request
@@ -18,7 +21,7 @@ class SignatureWebhookController(http.Controller):
 
     @http.route(
         "/trasas/signature/callback/<string:token>",
-        type="json",
+        type="http",
         auth="public",
         methods=["POST"],
         csrf=False,
@@ -35,22 +38,30 @@ class SignatureWebhookController(http.Controller):
 
         if not sig_request:
             _logger.warning("Signature callback: invalid token %s", token)
-            return {"status": "error", "message": "Invalid token"}
+            return request.make_json_response(
+                {"status": "error", "message": "Invalid token"}, status=404
+            )
 
-        if sig_request.state in ("completed", "cancelled"):
-            return {"status": "ok", "message": "Request already finalized"}
+        if sig_request.state in ("completed", "cancelled", "expired"):
+            return request.make_json_response(
+                {"status": "ok", "message": "Request already finalized"}
+            )
 
         try:
             payload = request.jsonrequest
+            if payload is None:
+                raw = request.httprequest.data or b""
+                payload = json.loads(raw.decode("utf-8") or "{}")
             sig_request._process_callback(payload)
-            return {"status": "ok"}
-        except Exception as e:
-            _logger.error(
-                "Error processing signature callback for %s: %s",
+            return request.make_json_response({"status": "ok"})
+        except Exception:
+            _logger.exception(
+                "Error processing signature callback for %s",
                 sig_request.name,
-                e,
             )
-            return {"status": "error", "message": str(e)}
+            return request.make_json_response(
+                {"status": "error", "message": "Internal error"}, status=500
+            )
 
     @http.route(
         "/trasas/signature/demo/<string:token>/<int:signer_id>",
@@ -101,11 +112,12 @@ class SignatureWebhookController(http.Controller):
         # Process demo signing
         sig_request._process_callback({"signer_id": signer_id})
 
+        safe_signer_name = escape(signer.signer_name or "")
         return request.make_response(
             "<html><body>"
             "<h2 style='color: green;'>Ky thanh cong! (Demo)</h2>"
             "<p>Cam on <strong>%s</strong> da ky tai lieu.</p>"
             "<p>Ban co the dong tab nay.</p>"
-            "</body></html>" % signer.signer_name,
+            "</body></html>" % safe_signer_name,
             headers=[("Content-Type", "text/html; charset=utf-8")],
         )
