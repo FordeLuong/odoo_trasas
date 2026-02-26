@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- ============ TRASAS Vehicle States ============ -->
+        <!--
+            Thứ tự hiển thị mong muốn:
+            1. Phương tiện mới (ID gốc: fleet.fleet_vehicle_state_new_request) -> Seq 1
+            2. Đăng kiểm (ID mới: fleet_vehicle_state_trasas_registration) -> Seq 10
+            3. Sẵn sàng sử dụng (ID mới: fleet_vehicle_state_trasas_ready) -> Seq 20
+            4. Đang sử dụng (ID gốc: fleet.fleet_vehicle_state_registered) -> Seq 30
+            5. Bảo dưỡng định kỳ (ID mới: fleet_vehicle_state_trasas_maintenance) -> Seq 40
+            6. Sửa chữa (ID mới: fleet_vehicle_state_trasas_repair) -> Seq 50
+            7. Hết hạn giấy tờ (ID mới: fleet_vehicle_state_trasas_expired) -> Seq 60
+            8. Tạm ngưng sử dụng (ID mới: fleet_vehicle_state_trasas_suspended) -> Seq 70
+            9. Đã thanh lý (ID mới: fleet_vehicle_state_trasas_liquidated) -> Seq 80
+        -->
+
+        <record id="fleet_vehicle_state_trasas_registration" model="fleet.vehicle.state">
+            <field name="name">Đăng kiểm</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="fleet_vehicle_state_trasas_ready" model="fleet.vehicle.state">
+            <field name="name">Sẵn sàng sử dụng</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="fleet_vehicle_state_trasas_expired" model="fleet.vehicle.state">
+            <field name="name">Hết hạn giấy tờ</field>
+            <field name="sequence">60</field>
+        </record>
+
+        <record id="fleet_vehicle_state_trasas_suspended" model="fleet.vehicle.state">
+            <field name="name">Tạm ngưng sử dụng</field>
+            <field name="sequence">70</field>
+        </record>
+
+        <record id="fleet_vehicle_state_trasas_liquidated" model="fleet.vehicle.state">
+            <field name="name">Đã thanh lý</field>
+            <field name="sequence">80</field>
+            <field name="fold" eval="True"/>
+        </record>
+    </data>
+
+    <!-- Đồng bộ state gốc (Phương tiện mới, Đang sử dụng) mỗi lần upgrade -->
+    <function model="fleet.vehicle" name="_trasas_sync_standard_states"/>
+</odoo>

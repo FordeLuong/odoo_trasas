@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="fleet_vehicle_view_form_trasas_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.trasas.inherit</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Chỉnh sửa Header: Thay thế bằng các nút của TRASAS -->
+            <xpath expr="//header" position="replace">
+                <header>
+                    <button name="action_to_registration" string="Đưa vào đăng kiểm" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_set_ready" string="Sẵn sàng sử dụng" type="object" class="oe_highlight" invisible="state != 'registration'"/>
+                    <button name="action_start_using" string="Bắt đầu sử dụng" type="object" class="oe_highlight" invisible="state != 'ready'"/>
+                    <button name="action_suspend" string="Tạm ngưng sử dụng" type="object" invisible="state in ['draft', 'ready', 'suspended', 'liquidated']"/>
+                    <button name="action_liquidate" string="Thanh lý" type="object" class="btn-danger" invisible="state != 'suspended'"/>
+                    <field name="state" invisible="1"/>
+                    <field name="state_id" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+            </xpath>
+
+            <!-- Thêm mã phương tiện trước biển số -->
+            <xpath expr="//field[@name='license_plate']" position="before">
+                <field name="vehicle_code"/>
+            </xpath>
+
+            <!-- Ẩn "Make Vehicle Available" (car) -->
+            <xpath expr="//label[@for='plan_to_change_car']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='plan_to_change_car']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Ẩn "Make Vehicle Available" (bike) -->
+            <xpath expr="//label[@for='plan_to_change_bike']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='plan_to_change_bike']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Thông tin sử dụng nội bộ sau nhóm đầu -->
+            <xpath expr="//group" position="after">
+                <group string="Thông tin sử dụng nội bộ" invisible="state == 'draft'">
+                    <group>
+                        <field name="start_use_date" required="state == 'in_use'"/>
+                        <field name="maintenance_type" required="state == 'in_use'"/>
+                        <field name="next_maintenance_date" readonly="1"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- Ẩn tab Tax Info -->
+            <xpath expr="//page[@name='page_tax_info']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Thêm tab Giấy tờ hồ sơ vào notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Giấy tờ hồ sơ" name="documents">
+                    <field name="legal_document_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="document_type"/>
+                            <field name="name"/>
+                            <field name="document_date"/>
+                            <field name="validity_date"/>
+                            <field name="days_to_expire"
+                                   decoration-danger="days_to_expire &lt; 0"
+                                   decoration-warning="days_to_expire &gt;= 0 and days_to_expire &lt;= 30"/>
+                            <field name="state"
+                                   decoration-success="state == 'active'"
+                                   decoration-warning="state == 'expiring_soon'"
+                                   decoration-danger="state == 'expired'"
+                                   decoration-muted="state == 'revoked'"
+                                   widget="badge"/>
+                            <field name="upload_date" string="Thời gian upload" widget="datetime" readonly="1" force_save="1"/>
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                            <field name="note"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="fleet_vehicle_view_list_trasas_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.list.trasas.inherit</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='license_plate']" position="before">
+                <field name="vehicle_code"/>
+            </xpath>
+            <xpath expr="//field[@name='state_id']" position="after">
+                <field name="state" widget="badge" decoration-info="state == 'ready'" decoration-success="state == 'in_use'" decoration-warning="state == 'registration'" decoration-danger="state in ['expired', 'suspended']"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
