@@ -10,7 +10,7 @@
         Quản lý toàn bộ quy trình công văn đến từ tiếp nhận, phân loại,
         chỉ đạo, xử lý cho đến lưu trữ.
     """,
-    "author": "TRASAS",
+    "author": "LiemPhong",
     "depends": ["base", "mail", "contacts", "portal", "portal_custom"],
     "data": [
         "security/security.xml",

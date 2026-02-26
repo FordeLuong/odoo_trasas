@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
 from odoo import models, fields, api
+
+_logger = logging.getLogger(__name__)
 
 
 class FleetLegalDocument(models.Model):
@@ -92,6 +95,14 @@ class FleetLegalDocument(models.Model):
         help="Nơi lưu bản cứng, thông tin thế chấp...",
     )
     company_id = fields.Many2one("res.company", default=lambda self: self.env.company)
+    synced_document_ids = fields.Many2many(
+        "documents.document",
+        "fleet_legal_doc_synced_rel",
+        "legal_doc_id",
+        "document_id",
+        string="Synced Documents",
+        copy=False,
+    )
 
     @api.depends("validity_date")
     def _compute_days_to_expire(self):
@@ -113,29 +124,85 @@ class FleetLegalDocument(models.Model):
                 self.name = type_label
 
     # -------------------------------------------------------------------------
-    # CRUD: Sync attachments to vehicle for Documents smart button
+    # CRUD: Sync attachments to Documents module
     # -------------------------------------------------------------------------
 
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
-        records._sync_attachments_to_vehicle()
+        records._sync_attachments_to_documents()
         return records
 
     def write(self, vals):
         res = super().write(vals)
         if "attachment_ids" in vals or "vehicle_id" in vals:
-            self._sync_attachments_to_vehicle()
+            self._sync_attachments_to_documents()
         return res
 
-    def _sync_attachments_to_vehicle(self):
-        """Cập nhật res_model/res_id của attachment để trỏ về fleet.vehicle,
-        giúp hiển thị trong nút Documents trên form xe."""
+    def unlink(self):
+        # Xóa documents.document đã sync khi xóa legal document
         for rec in self:
-            if rec.vehicle_id and rec.attachment_ids:
-                rec.attachment_ids.sudo().write(
+            if rec.synced_document_ids:
+                rec.synced_document_ids.sudo().unlink()
+        return super().unlink()
+
+    def _sync_attachments_to_documents(self):
+        """Tạo documents.document cho mỗi attachment chưa đồng bộ,
+        đặt vào folder riêng của xe trong Documents."""
+        Document = self.env["documents.document"].sudo()
+        Attachment = self.env["ir.attachment"].sudo()
+        for rec in self:
+            if not rec.vehicle_id or not rec.attachment_ids:
+                continue
+
+            folder = rec.vehicle_id._get_or_create_document_folder()
+
+            # Thu thập attachment IDs đã sync (qua attachment_id trên document)
+            synced_att_ids = set()
+            for doc in rec.synced_document_ids:
+                if doc.attachment_id:
+                    # Lấy original att id từ description
+                    synced_att_ids.add(doc.attachment_id.description or "")
+
+            new_docs = Document
+            for att in rec.attachment_ids:
+                # Dùng att.id làm key để tránh duplicate
+                att_key = str(att.id)
+                if att_key in synced_att_ids:
+                    continue
+
+                # Tạo bản sao attachment cho document
+                att_copy = Attachment.create(
                     {
-                        "res_model": "fleet.vehicle",
-                        "res_id": rec.vehicle_id.id,
+                        "name": att.name,
+                        "datas": att.datas,
+                        "mimetype": att.mimetype,
+                        "description": att_key,  # Lưu original att id để track
+                        "res_model": "documents.document",
+                        "res_id": 0,
+                    }
+                )
+
+                # Tạo document với attachment_id (đúng cách Odoo 19)
+                new_doc = Document.create(
+                    {
+                        "name": rec.name or att.name,
+                        "folder_id": folder.id,
+                        "attachment_id": att_copy.id,
+                        "owner_id": self.env.user.id,
+                    }
+                )
+                new_docs |= new_doc
+                _logger.info(
+                    ">>> Created document %s in folder %s for att %s",
+                    new_doc.id,
+                    folder.id,
+                    att.id,
+                )
+
+            if new_docs:
+                rec.sudo().write(
+                    {
+                        "synced_document_ids": [(4, doc.id) for doc in new_docs],
                     }
                 )

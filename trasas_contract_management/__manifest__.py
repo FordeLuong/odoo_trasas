@@ -26,7 +26,7 @@
         6. HCNS đóng dấu và upload bản scan cuối cùng
         7. Hệ thống tự động nhắc nhở khi sắp hết hạn
     """,
-    "author": "TRASAS",
+    "author": "LiemPhong",
     "website": "https://trasas.com",
     "depends": [
         "base",

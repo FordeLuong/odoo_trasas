@@ -12,7 +12,7 @@
     """,
     "author": "TRASAS",
     "category": "Fleet",
-    "depends": ["fleet", "mail"],
+    "depends": ["fleet", "mail", "documents"],
     "data": [
         "security/ir.model.access.csv",
         "data/ir_sequence_data.xml",

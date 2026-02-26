@@ -129,9 +129,7 @@ class TrasasSignatureProvider(models.Model):
                     },
                 }
         except Exception as e:
-            raise UserError(
-                _("Lỗi kết nối với %s:\n%s") % (self.name, str(e))
-            )
+            raise UserError(_("Lỗi kết nối với %s:\n%s") % (self.name, str(e)))
 
     # ------------------------------------------------------------------
     # Abstract provider dispatch

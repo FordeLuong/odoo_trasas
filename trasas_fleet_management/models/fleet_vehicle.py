@@ -50,6 +50,49 @@ class FleetVehicle(models.Model):
         "fleet.legal.document", "vehicle_id", string="Hồ sơ pháp lý"
     )
 
+    document_folder_id = fields.Many2one(
+        "documents.document",
+        string="Folder tài liệu",
+        domain="[('type', '=', 'folder')]",
+        readonly=True,
+        copy=False,
+    )
+
+    def _get_or_create_document_folder(self):
+        """Lấy hoặc tạo sub-folder trong Documents cho xe này."""
+        self.ensure_one()
+        if self.document_folder_id:
+            return self.document_folder_id
+
+        # Tìm folder "Vehicles" (folder type trong documents.document)
+        Document = self.env["documents.document"]
+        vehicles_folder = Document.search(
+            [
+                ("name", "=", "Vehicles"),
+                ("type", "=", "folder"),
+            ],
+            limit=1,
+        )
+        if not vehicles_folder:
+            # Nếu chưa có folder Vehicles, tạo mới ở root
+            vehicles_folder = Document.create(
+                {
+                    "name": "Vehicles",
+                    "type": "folder",
+                }
+            )
+
+        # Tạo sub-folder cho xe
+        vehicle_folder = Document.create(
+            {
+                "name": self.display_name,
+                "type": "folder",
+                "folder_id": vehicles_folder.id,
+            }
+        )
+        self.document_folder_id = vehicle_folder
+        return vehicle_folder
+
     # -------------------------------------------------------------------------
     # STATE SYNC: state (Selection) ↔ state_id (Many2one)
     # -------------------------------------------------------------------------
