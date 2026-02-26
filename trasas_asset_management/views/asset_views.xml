@@ -83,13 +83,6 @@
                             invisible="state != 'renovation'"
                             groups="trasas_asset_management.group_asset_manager"/>
 
-                    <button name="action_expiring"
-                            string="Sắp hết hạn"
-                            type="object"
-                            class="btn-warning"
-                            invisible="state != 'leased'"
-                            groups="trasas_asset_management.group_asset_manager"/>
-
                     <button name="action_contract_ended"
                             string="Kết thúc HĐ"
                             type="object"
@@ -312,6 +305,30 @@
                         <page string="Ghi chú" name="notes">
                             <field name="note" placeholder="Ghi chú chung..."/>
                         </page>
+
+                        <!-- TAB 9: Chi phí cải tạo (Chỉ dành cho NXCT) -->
+                        <page string="Chi phí cải tạo"
+                              name="renovation_costs"
+                              invisible="asset_group != 'nxct'">
+                            <field name="renovation_cost_ids">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="name"/>
+                                    <field name="amount" sum="Tổng tiền"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="note"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="date"/>
+                                        <field name="amount" widget="monetary"/>
+                                        <field name="currency_id"/>
+                                        <field name="note"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
 
@@ -354,6 +371,17 @@
                                         <field name="name"/>
                                     </strong>
                                 </div>
+                                
+                                <!-- Trạng thái Badge -->
+                                <div class="ms-2">
+                                    <field name="state" widget="badge" 
+                                        decoration-success="state == 'in_use'"
+                                        decoration-info="state == 'draft'"
+                                        decoration-warning="state in ('repair', 'maintenance', 'renovation', 'expiring', 'leased', 'lease_in')"
+                                        decoration-danger="state in ('liquidated', 'contract_ended')"
+                                        decoration-muted="state == 'completed'"/>
+                                </div>
+
                                 <div class="o_dropdown_kanban dropdown">
                                     <a role="button" class="dropdown-toggle o-no-caret btn"
                                        data-bs-toggle="dropdown" href="#">
@@ -371,7 +399,10 @@
                             <div class="o_kanban_record_body">
                                 <field name="code" class="text-muted"/>
                                 <field name="asset_group_id" class="d-block"/>
-                                <field name="location" class="text-muted"
+                                <div class="text-muted mt-1" invisible="not acquisition_date">
+                                    <i class="fa fa-calendar me-1"/> <field name="acquisition_date"/>
+                                </div>
+                                <field name="location" class="text-muted d-block"
                                        invisible="not location"/>
                             </div>
                             <div class="o_kanban_record_bottom">
@@ -429,6 +460,10 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="code"/>
+                <field name="asset_group_id"/>
+                <separator/>
+                <filter name="group_by_asset_group" string="Nhóm tài sản" context="{'group_by':'asset_group_id'}"/>
             </search>
         </field>
     </record>

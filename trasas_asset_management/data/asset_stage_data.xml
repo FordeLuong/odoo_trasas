@@ -22,7 +22,7 @@
         </record>
 
         <record id="stage_leased" model="trasas.asset.stage">
-            <field name="name">Cho thuê</field>
+            <field name="name">Đang cho thuê</field>
             <field name="sequence">3</field>
             <field name="state">leased</field>
             <field name="fold" eval="False"/>
@@ -62,7 +62,7 @@
         </record>
 
         <record id="stage_renovation" model="trasas.asset.stage">
-            <field name="name">Cải tạo</field>
+            <field name="name">Đang cải tạo</field>
             <field name="sequence">7</field>
             <field name="state">renovation</field>
             <field name="fold" eval="False"/>

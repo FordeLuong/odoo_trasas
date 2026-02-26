@@ -198,17 +198,16 @@ class TrasasAsset(models.Model):
             ("maintenance", "Bảo trì định kỳ"),
             ("liquidated", "Thanh lý"),
             # --- Đất / Mặt bằng (NXCT) ---
-            ("leased", "Cho thuê"),
+            ("leased", "Đang cho thuê"),
             ("lease_in", "Thuê ngoài"),
-            ("renovation", "Cải tạo"),
-            ("expiring", "Sắp hết hạn (thuê)"),
-            ("contract_ended", "Kết thúc HĐ thuê"),
+            ("renovation", "Đang cải tạo"),
+            ("expiring", "Sắp hết hạn"),
+            ("contract_ended", "Kết thúc HĐ"),
             # --- Chung ---
             ("completed", "Hoàn thành"),
         ],
         string="Tình trạng",
         default="draft",
-        required=True,
         tracking=True,
     )
 
@@ -326,6 +325,28 @@ class TrasasAsset(models.Model):
         string="Số hồ sơ",
         compute="_compute_legal_document_count",
     )
+
+    # =====================================================================
+    # 6. CHI PHÍ CẢI TẠO (notebook lines - NXCT)
+    # =====================================================================
+
+    renovation_cost_ids = fields.One2many(
+        "trasas.asset.renovation.cost",
+        "asset_id",
+        string="Chi phí cải tạo",
+    )
+
+    total_renovation_cost = fields.Monetary(
+        string="Tổng chi phí cải tạo",
+        compute="_compute_total_renovation_cost",
+        currency_field="currency_id",
+        store=True,
+    )
+
+    @api.depends("renovation_cost_ids.amount", "renovation_cost_ids.currency_id")
+    def _compute_total_renovation_cost(self):
+        for rec in self:
+            rec.total_renovation_cost = sum(rec.renovation_cost_ids.mapped("amount"))
 
     # =====================================================================
     # TRƯỜNG RIÊNG: NHÓM NXCT (Nhà cửa / Công trình)
@@ -676,20 +697,6 @@ class TrasasAsset(models.Model):
             )
             rec._send_state_change_notification()
 
-    def action_expiring(self):
-        """Cho thuê → Sắp hết hạn (thuê)"""
-        for rec in self:
-            if rec.state != "leased":
-                raise UserError(
-                    _("Chỉ tài sản Cho thuê mới có thể đánh dấu Sắp hết hạn!")
-                )
-            rec.write({"state": "expiring"})
-            rec.message_post(
-                body=_("⚠️ Hợp đồng thuê sắp hết hạn."),
-                subject=_("Sắp hết hạn thuê"),
-            )
-            rec._send_state_change_notification()
-
     def action_contract_ended(self):
         """Cho thuê / Sắp hết hạn → Kết thúc HĐ thuê"""
         for rec in self:
@@ -699,7 +706,7 @@ class TrasasAsset(models.Model):
                 )
             rec.write({"state": "contract_ended"})
             rec.message_post(
-                body=_("📋 Hợp đồng thuê đã kết thúc."),
+                body=_("Hợp đồng thuê đã kết thúc."),
                 subject=_("Kết thúc HĐ thuê"),
             )
             rec._send_state_change_notification()
@@ -713,7 +720,7 @@ class TrasasAsset(models.Model):
                 )
             rec.write({"state": "in_use"})
             rec.message_post(
-                body=_("✅ Tài sản tái sử dụng sau khi kết thúc HĐ thuê."),
+                body=_("Tài sản tái sử dụng sau khi kết thúc HĐ thuê."),
                 subject=_("Tái sử dụng tài sản"),
             )
             rec._send_state_change_notification()
