@@ -90,7 +90,7 @@ class SubscriptionClosureWizard(models.TransientModel):
 
     @api.model
     def default_get(self, fields):
-        res = super(SubscriptionClosureWizard, self).default_get(fields)
+        res = super().default_get(fields)
         if self.env.context.get('subscription_id'):
             res['subscription_id'] = self.env.context['subscription_id']
         return res

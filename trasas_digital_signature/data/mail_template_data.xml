@@ -30,6 +30,7 @@
                         </tr>
                     </table>
 
+                    <t t-if="ctx.get('signing_url')">
                     <p>
                         <a t-att-href="ctx.get('signing_url', '#')"
                            style="background-color: #008784; color: white; padding: 12px 24px;
@@ -38,6 +39,17 @@
                             Ký tài liệu ngay
                         </a>
                     </p>
+                    </t>
+                    <t t-else="">
+                        <div style="padding: 12px 16px; border: 1px solid #ddd; border-radius: 6px; background: #f9f9f9;">
+                            <p style="margin: 0 0 6px 0;"><strong>Hướng dẫn ký (VNPT SmartCA):</strong></p>
+                            <ol style="margin: 0; padding-left: 18px;">
+                                <li>Mở ứng dụng <strong>VNPT SmartCA</strong> trên điện thoại.</li>
+                                <li>Vào mục <strong>Giao dịch chờ ký</strong> và tìm giao dịch liên quan đến <strong>Mã yêu cầu: <t t-out="object.name"/></strong>.</li>
+                                <li>Thực hiện xác thực/OTP và phê duyệt ký.</li>
+                            </ol>
+                        </div>
+                    </t>
 
                     <t t-if="object.deadline">
                         <p style="color: #dc3545;">

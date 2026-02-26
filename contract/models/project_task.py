@@ -8,13 +8,13 @@ class ProjectTask(models.Model):
     @api.model
     def create(self, vals):
         """Override create to check if installation task is being scheduled"""
-        task = super(ProjectTask, self).create(vals)
+        task = super().create(vals)
         task._check_installation_scheduled()
         return task
 
     def write(self, vals):
         """Override write to check if installation task is being scheduled"""
-        res = super(ProjectTask, self).write(vals)
+        res = super().write(vals)
         # Only check if planned_date_begin is being SET (not just changed)
         # This prevents triggering on reschedules
         if 'planned_date_begin' in vals and vals.get('planned_date_begin'):

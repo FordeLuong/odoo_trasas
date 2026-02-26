@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
 import uuid
-import json
 import requests
+import base64
+import hashlib
+import json
+import io
+import zipfile
+from datetime import datetime
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -15,8 +20,8 @@ class TrasasSignatureProvider(models.Model):
     Nhà cung cấp chữ ký số - Cấu hình kết nối API
 
     Abstract provider pattern: mỗi provider_type implement
-    _{type}_send_document(), _{type}_get_status(),
-    _{type}_download_signed(), _{type}_cancel()
+    _{type}_test_connection(), _{type}_send_document(),
+    _{type}_get_status(), _{type}_download_signed(), _{type}_cancel()
     """
 
     _name = "trasas.signature.provider"
@@ -26,7 +31,7 @@ class TrasasSignatureProvider(models.Model):
     name = fields.Char(
         string="Tên nhà cung cấp",
         required=True,
-        help="Tên hiển thị, VD: FPT.eSign, VNPT-CA",
+        help="Tên hiển thị, VD: VNPT SmartCA",
     )
     provider_type = fields.Selection(
         selection="_get_provider_types",
@@ -74,6 +79,7 @@ class TrasasSignatureProvider(models.Model):
         """
         return [
             ("demo", "Demo (Mô phỏng)"),
+            ("vnpt_smartca", "VNPT SmartCA (ký số từ xa)"),
         ]
 
     # ------------------------------------------------------------------
@@ -176,7 +182,7 @@ class TrasasSignatureProvider(models.Model):
         return self._call_provider("get_status", request)
 
     def _provider_download_signed(self, request):
-        """Tải tài liệu đã ký. Returns: base64 encoded PDF."""
+        """Tải tài liệu đã ký. Returns: base64 encoded file."""
         return self._call_provider("download_signed", request)
 
     def _provider_cancel(self, request):
@@ -199,7 +205,11 @@ class TrasasSignatureProvider(models.Model):
         return True
 
     def _demo_send_document(self, request):
-        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+        base_url = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("web.base.url")
+        )
         result = {
             "provider_document_ref": f"DEMO-{uuid.uuid4().hex[:8].upper()}",
             "signers": [],
@@ -244,111 +254,283 @@ class TrasasSignatureProvider(models.Model):
         return True
 
     # ==================================================================
-    # DOCUSIGN PROVIDER IMPLEMENTATION
+    # VNPT SMARTCA PROVIDER IMPLEMENTATION (HASH SIGNING)
     # ==================================================================
 
-    def _docusign_test_connection(self):
-        """Kiểm tra kết nối tới DocuSign"""
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-        # Endpoint lấy thông tin user để test token
-        url = f"{self.api_url}/v2.1/accounts"
+    def _vnpt_smartca_base_url(self):
+        """Return SmartCA gateway base URL."""
+        self.ensure_one()
+        if self.api_url:
+            return self.api_url.rstrip("/")
+        if self.test_mode:
+            return "https://rmgateway.vnptit.vn/sca/sp769"
+        return "https://gwsca.vnpt.vn/sca/sp769"
 
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            raise UserError(_("Kết nối DocuSign thất bại: %s") % response.text)
+    def _vnpt_smartca_headers(self):
+        return {"Content-Type": "application/json"}
+
+    def _vnpt_smartca_post(self, path, payload, timeout=30):
+        self.ensure_one()
+        url = f"{self._vnpt_smartca_base_url()}{path}"
+        _logger.info("SmartCA POST %s", url)
+        resp = requests.post(
+            url,
+            headers=self._vnpt_smartca_headers(),
+            json=payload,
+            timeout=timeout,
+        )
+        if resp.status_code >= 400:
+            raise UserError(
+                _("SmartCA HTTP %s: %s") % (resp.status_code, resp.text)
+            )
+        try:
+            return resp.json()
+        except Exception:
+            raise UserError(
+                _("SmartCA response is not JSON: %s") % resp.text
+            )
+
+    def _vnpt_smartca_test_connection(self):
+        """Validate SP credentials are present."""
+        self.ensure_one()
+        if not self.api_key or not self.api_secret:
+            raise UserError(_("Thiếu SP ID / SP Password (API Key/Secret)."))
         return True
 
-    def _docusign_send_document(self, request):
-        """
-        Gửi tài liệu lên DocuSign thông qua Envelopes API.
-        """
+    def _vnpt_smartca_send_document(self, request):
+        """Create SmartCA signing transaction per signer (hash signing)."""
         self.ensure_one()
+        base_url = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("web.base.url")
+            .rstrip("/")
+        )
+        callback_url = (
+            f"{base_url}/trasas/signature/callback/{request.callback_token}"
+        )
 
-        # 1. Chuẩn bị Headers (Sử dụng api_key làm Access Token)
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
+        if not request.hash_hex:
+            request._prepare_hash_for_signing()
 
-        # URL tạo Envelope
-        url = f"{self.api_url}/envelopes"
+        batch_ref = f"SMARTCA-{uuid.uuid4().hex[:10].upper()}"
+        result = {"provider_document_ref": batch_ref, "signers": []}
 
-        # 2. Chuẩn bị danh sách người ký (Signers) cho DocuSign
-        docusign_signers = []
-        for signer in request.signer_ids:
-            docusign_signers.append(
+        for signer in request.signer_ids.sorted("sign_order"):
+            if not signer.id_number:
+                raise UserError(
+                    _(
+                        "Thiếu 'Định danh ký (CCCD/MST)' cho người ký: %s"
+                    )
+                    % (signer.signer_name or signer.id)
+                )
+
+            transaction_id = (
+                f"{request.name}-{signer.id}-{uuid.uuid4().hex[:6]}"
+            )
+            doc_id = f"{request.name}:{signer.id}"
+
+            payload = {
+                "sp_id": self.api_key,
+                "sp_password": self.api_secret,
+                "user_id": signer.id_number,
+                "transaction_id": transaction_id,
+                "callback_url": callback_url,
+                "sign_files": [
+                    {
+                        "doc_id": doc_id,
+                        "file_type": "pdf",
+                        "sign_type": "hash",
+                        "data_to_be_signed": request.hash_hex,
+                    }
+                ],
+            }
+
+            data = self._vnpt_smartca_post("/v1/signatures/sign", payload)
+
+            tran_code = (
+                data.get("tran_code")
+                or data.get("tranId")
+                or data.get("transaction_code")
+                or ""
+            )
+            if not tran_code:
+                _logger.warning(
+                    "SmartCA sign: missing tran_code. Response=%s", data
+                )
+
+            signer.write(
                 {
-                    "email": signer.signer_email,
-                    "name": signer.signer_name,
-                    "recipientId": str(signer.id),  # Dùng ID của Odoo làm mã nhận diện
-                    "routingOrder": str(signer.sign_order),
-                    # Nếu bạn muốn cấu hình tọa độ ký trên PDF, sẽ thêm phần "tabs" ở đây.
-                    # Tạm thời để trống để DocuSign tự sinh trang ký cuối file.
+                    "vnpt_transaction_id": transaction_id,
+                    "vnpt_tran_code": tran_code,
+                    "provider_signer_ref": tran_code or transaction_id,
+                    "vnpt_last_status": str(
+                        data.get("status_code")
+                        or data.get("status")
+                        or "PENDING"
+                    ),
                 }
             )
 
-        # 3. Chuẩn bị cấu trúc dữ liệu gửi đi (Payload)
-        payload = {
-            "emailSubject": f"Yêu cầu ký số: {request.name}",
-            "documents": [
-                {
-                    "documentBase64": request.document_file.decode(
-                        "utf-8"
-                    ),  # File PDF từ Odoo
-                    "name": request.document_filename or "Document.pdf",
-                    "fileExtension": "pdf",
-                    "documentId": "1",
-                }
-            ],
-            "recipients": {"signers": docusign_signers},
-            # Trạng thái "sent" sẽ báo DocuSign gửi email ngay lập tức cho người ký đầu tiên
-            "status": "sent",
-        }
-
-        # 4. Gửi Request POST
-        try:
-            response = requests.post(url, headers=headers, data=json.dumps(payload))
-            response_data = response.json()
-
-            if response.status_code not in (200, 201):
-                _logger.error("DocuSign API Error: %s", response_data)
-                raise UserError(
-                    _("Lỗi từ DocuSign: %s")
-                    % response_data.get("message", "Không rõ lỗi")
-                )
-
-        except requests.exceptions.RequestException as e:
-            raise UserError(_("Lỗi kết nối mạng khi gọi API DocuSign: %s") % str(e))
-
-        # 5. Xử lý kết quả trả về để map với cấu trúc Odoo của bạn
-        envelope_id = response_data.get("envelopeId")
-
-        result = {"provider_document_ref": envelope_id, "signers": []}
-
-        # Map lại thông tin cho từng người ký
-        for signer in request.signer_ids:
             result["signers"].append(
                 {
                     "signer_id": signer.id,
-                    # DocuSign sẽ tự gửi email, nên chúng ta có thể để URL rỗng hoặc link tới Odoo Portal
                     "signing_url": "",
-                    "provider_signer_ref": str(signer.id),  # Ghi nhận lại ID người ký
+                    "provider_signer_ref": signer.provider_signer_ref,
                 }
             )
 
         return result
 
-    def _docusign_get_status(self, request):
-        """(Sẽ làm ở Bước sau - Kiểm tra trạng thái)"""
-        pass
+    def _vnpt_smartca_get_status(self, request):
+        """Poll status per signer using tran_code."""
+        self.ensure_one()
+        res = {"request_status": "pending", "signers": []}
+        all_signed = True
+        any_refused = False
 
-    def _docusign_download_signed(self, request):
-        """(Sẽ làm ở Bước sau - Tải file đã ký)"""
-        pass
+        for signer in request.signer_ids:
+            tran = signer.vnpt_tran_code or signer.provider_signer_ref
+            if not tran:
+                all_signed = False
+                continue
 
-    def _docusign_cancel(self, request):
-        """(Sẽ làm ở Bước sau - Hủy phong bì)"""
-        pass
+            data = self._vnpt_smartca_post(
+                f"/v1/signatures/sign/{tran}/status",
+                {
+                    "sp_id": self.api_key,
+                    "sp_password": self.api_secret,
+                    "user_id": signer.id_number or "",
+                },
+            )
+
+            status_code = (
+                data.get("status_code")
+                or data.get("status")
+                or data.get("state")
+            )
+            status_str = (
+                str(status_code).lower() if status_code is not None else ""
+            )
+            signed_files = (
+                data.get("signatures") or data.get("signed_files") or []
+            )
+            sig_val = None
+            ts_sig = None
+            if signed_files and isinstance(signed_files, list):
+                first = signed_files[0] or {}
+                sig_val = first.get("signature_value") or first.get(
+                    "signature"
+                )
+                ts_sig = first.get("timestamp_signature") or first.get(
+                    "sign_time"
+                )
+
+            mapped = "waiting"
+            signed_date = False
+            if "signed" in status_str or status_str in (
+                "1",
+                "success",
+                "completed",
+                "done",
+            ):
+                mapped = "signed"
+                signed_date = fields.Datetime.now()
+            elif "refus" in status_str or status_str in (
+                "2",
+                "rejected",
+                "cancelled",
+                "canceled",
+                "fail",
+                "failed",
+            ):
+                mapped = "refused"
+
+            signer.write(
+                {
+                    "vnpt_last_status": str(status_code),
+                    "vnpt_signature_value": sig_val
+                    or signer.vnpt_signature_value,
+                    "vnpt_timestamp_signature": ts_sig
+                    or signer.vnpt_timestamp_signature,
+                }
+            )
+
+            if mapped != "signed":
+                all_signed = False
+            if mapped == "refused":
+                any_refused = True
+
+            res["signers"].append(
+                {
+                    "provider_signer_ref": signer.provider_signer_ref,
+                    "status": mapped,
+                    "signed_date": signed_date,
+                }
+            )
+
+        if any_refused:
+            res["request_status"] = "cancelled"
+        elif all_signed and request.signer_ids:
+            res["request_status"] = "completed"
+        return res
+
+    def _vnpt_smartca_download_signed(self, request):
+        """Return ZIP package (pdf + signatures.json) for hash signing."""
+        self.ensure_one()
+        pdf_bytes = base64.b64decode(request.document_file or b"")
+        audit = {
+            "provider": "VNPT SmartCA",
+            "provider_type": "vnpt_smartca",
+            "request": request.name,
+            "contract": (
+                request.contract_id.name if request.contract_id else None
+            ),
+            "hash_algo": request.hash_algo,
+            "hash_hex": request.hash_hex,
+            "generated_at": datetime.utcnow().isoformat() + "Z",
+            "signers": [],
+        }
+        for s in request.signer_ids.sorted("sign_order"):
+            audit["signers"].append(
+                {
+                    "name": s.signer_name,
+                    "email": s.signer_email,
+                    "role": s.role,
+                    "id_number": s.id_number,
+                    "serial_number": s.vnpt_serial_number,
+                    "tran_code": s.vnpt_tran_code,
+                    "transaction_id": s.vnpt_transaction_id,
+                    "status": s.state,
+                    "signed_date": (
+                        s.signed_date.isoformat() if s.signed_date else None
+                    ),
+                    "signature_value": s.vnpt_signature_value,
+                    "timestamp_signature": s.vnpt_timestamp_signature,
+                    "last_status": s.vnpt_last_status,
+                }
+            )
+
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as z:
+            z.writestr(
+                request.document_filename or "document.pdf", pdf_bytes
+            )
+            z.writestr(
+                "signatures.json",
+                json.dumps(audit, ensure_ascii=False, indent=2),
+            )
+
+        package_b64 = base64.b64encode(buf.getvalue())
+        request.sudo().write(
+            {
+                "signed_package_info": json.dumps(
+                    audit, ensure_ascii=False
+                )
+            }
+        )
+        return package_b64
+
+    def _vnpt_smartca_cancel(self, request):
+        """SmartCA does not have a cancel API - just return True."""
+        return True

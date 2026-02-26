@@ -49,6 +49,17 @@ class TrasasSignatureSigner(models.Model):
     )
     signing_url = fields.Char(string="Link ký", readonly=True, copy=False)
     signed_date = fields.Datetime(string="Ngày ký", readonly=True)
+    id_number = fields.Char(
+        string="Định danh ký (CCCD/MST)",
+        help="Định danh thuê bao chữ ký số tại NCC (VD: CCCD/CMND/Hộ chiếu/MST).",
+    )
+    vnpt_serial_number = fields.Char(string="Serial chứng thư", readonly=True, copy=False)
+    vnpt_tran_code = fields.Char(string="Mã giao dịch (tran_code)", readonly=True, copy=False)
+    vnpt_transaction_id = fields.Char(string="Transaction ID", readonly=True, copy=False)
+    vnpt_signature_value = fields.Text(string="Giá trị chữ ký (signature_value)", readonly=True, copy=False)
+    vnpt_timestamp_signature = fields.Char(string="Timestamp chữ ký", readonly=True, copy=False)
+    vnpt_last_status = fields.Char(string="Trạng thái SmartCA", readonly=True, copy=False)
+
     provider_signer_ref = fields.Char(
         string="Mã NCC",
         readonly=True,

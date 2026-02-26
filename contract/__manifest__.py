@@ -1,11 +1,12 @@
 {
     'name': 'Cabal Contract Management',
     'author': 'Redes Litorales SA de CV',
-        "version": "17.0.8.4.0",
+        "version": "19.0.1.0.0",
     'category': 'Sales Management',
     'sequence': -100,
     'summary': 'Contract Management',
     'description': """contract_management""",
+    'external_dependencies': {'python': ['requests', 'jwt', 'docusign_esign']},
     'depends': ['base', 'account', 'contacts', 'sale', 'crm', 'odoo_docusign', 'portal'],
     'data': [
         'security/contract_management_security.xml',

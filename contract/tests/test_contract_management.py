@@ -8,7 +8,7 @@ class TestContractManagementSecurity(TransactionCase):
     """Test security fixes in contract management"""
     
     def setUp(self):
-        super(TestContractManagementSecurity, self).setUp()
+        super().setUp()
         self.config = self.env['ir.config_parameter'].sudo()
     
     def test_no_hardcoded_credentials(self):

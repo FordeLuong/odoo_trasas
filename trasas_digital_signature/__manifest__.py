@@ -10,7 +10,7 @@
 
         Tính năng chính:
         - Tích hợp API nhà cung cấp chữ ký số (configurable provider)
-        - Hỗ trợ nhiều nhà cung cấp: FPT.eSign, VNPT-CA, Viettel-CA, v.v.
+        - Nhà cung cấp: VNPT-CA
         - Luồng ký linh hoạt: TRASAS ký trước hoặc Đối tác ký trước
         - Tự động gửi email mời ký kèm link
         - Webhook callback nhận kết quả ký từ nhà cung cấp

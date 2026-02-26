@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 import uuid
+import base64
+import hashlib
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -50,6 +52,24 @@ class TrasasSignatureRequest(models.Model):
         attachment=True,
     )
     document_filename = fields.Char(string="Tên file")
+    hash_algo = fields.Selection(
+        [("sha256", "SHA-256"), ("sha1", "SHA-1")],
+        string="Thuật toán hash",
+        default="sha256",
+        tracking=True,
+    )
+    hash_hex = fields.Char(
+        string="Hash HEX",
+        readonly=True,
+        copy=False,
+        help="Giá trị hash (hex) của file cần ký (dùng cho NCC ký hash).",
+    )
+    signed_package_info = fields.Text(
+        string="Thông tin gói ký",
+        readonly=True,
+        copy=False,
+        help="Thông tin kỹ thuật/nhật ký ký số (JSON).",
+    )
 
     # Signing flow
     signing_flow = fields.Selection(
@@ -169,6 +189,20 @@ class TrasasSignatureRequest(models.Model):
                 vals["callback_token"] = uuid.uuid4().hex
         return super().create(vals_list)
 
+    def _prepare_hash_for_signing(self):
+        """Compute hash (hex) for the current document_file."""
+        self.ensure_one()
+        if not self.document_file:
+            return
+        raw = base64.b64decode(self.document_file)
+        algo = (self.hash_algo or "sha256").lower()
+        if algo == "sha1":
+            h = hashlib.sha1(raw).hexdigest()
+        else:
+            h = hashlib.sha256(raw).hexdigest()
+        self.hash_hex = h
+        return h
+
     # ------------------------------------------------------------------
     # Actions
     # ------------------------------------------------------------------
@@ -181,7 +215,7 @@ class TrasasSignatureRequest(models.Model):
         2. Call provider API
         3. Update signers (signing_url, provider_signer_ref)
         4. Email first signer
-        5. Move contract to 'signing' if needed
+        5. Chuyển hợp đồng sang 'signing' qua action_start_signing()
         """
         self.ensure_one()
 
@@ -197,6 +231,9 @@ class TrasasSignatureRequest(models.Model):
         if not self.callback_token:
             self.callback_token = uuid.uuid4().hex
 
+        # Prepare hash (for hash-sign providers like VNPT SmartCA)
+        self._prepare_hash_for_signing()
+
         # Call provider
         result = self.provider_id._provider_send_document(self)
 
@@ -208,7 +245,7 @@ class TrasasSignatureRequest(models.Model):
             }
         )
 
-        # Update signers
+        # Update signers with provider data
         for signer_data in result.get("signers", []):
             signer = self.env["trasas.signature.signer"].browse(
                 signer_data["signer_id"]
@@ -223,19 +260,19 @@ class TrasasSignatureRequest(models.Model):
                     }
                 )
 
-        # Send to first signer
+        # Send invitation to first signer
         self._send_to_next_signer()
 
-        # Transition contract
+        # Transition contract: approved → signing
+        # Gọi action_start_signing() thay vì ghi trực tiếp state
+        # để đảm bảo activities và messages được tạo đúng workflow
         contract = self.contract_id
         if contract.state == "approved":
-            contract.write({"state": "signing"})
-            contract.message_post(
-                body=_(
-                    "Yêu cầu ký số %s đã được gửi. "
-                    "Hợp đồng chuyển sang trạng thái Đang ký."
-                )
-                % self.name,
+            contract.action_start_signing()
+            _logger.info(
+                "Contract %s transitioned to signing via "
+                "action_start_signing (digital signature).",
+                contract.name,
             )
 
         self.message_post(
@@ -303,6 +340,8 @@ class TrasasSignatureRequest(models.Model):
                 self.message_post(
                     body=_("%s đã ký thành công.") % signer.signer_name
                 )
+                # Sync: cập nhật hợp đồng ngay khi signer hoàn tất
+                self._update_contract_on_signer_signed(signer)
                 self._send_to_next_signer()
 
             elif new_status == "refused" and signer.state != "refused":
@@ -338,10 +377,142 @@ class TrasasSignatureRequest(models.Model):
                         body=_("%s đã ký thành công (Demo).")
                         % signer.signer_name
                     )
+                    # Sync: cập nhật hợp đồng ngay khi signer hoàn tất
+                    self._update_contract_on_signer_signed(signer)
                     self._send_to_next_signer()
                     self._check_completion()
         else:
             self.action_check_status()
+
+    # ------------------------------------------------------------------
+    # Contract synchronization
+    # ------------------------------------------------------------------
+
+    def _update_contract_on_signer_signed(self, signer):
+        """
+        Đồng bộ hợp đồng: cập nhật ngay khi một người ký hoàn tất.
+
+        Maps digital signature roles to contract signing steps:
+        - internal signer → contract.internal_sign_date (B11/B15)
+        - external signer → contract.partner_sign_date (B13/B14)
+        """
+        self.ensure_one()
+        contract = self.contract_id
+        if not contract or contract.state != "signing":
+            return
+
+        if signer.role == "internal" and not contract.internal_sign_date:
+            contract.write(
+                {
+                    "internal_sign_date": (
+                        signer.signed_date or fields.Datetime.now()
+                    ),
+                }
+            )
+            b_code = (
+                "B11" if contract.signing_flow == "trasas_first" else "B15"
+            )
+            contract.message_post(
+                body=_(
+                    "[%s] TRASAS đã ký số hợp đồng (chữ ký số - %s)"
+                ) % (b_code, self.provider_id.name),
+            )
+
+        elif signer.role == "external" and not contract.partner_sign_date:
+            contract.write(
+                {"partner_sign_date": fields.Date.context_today(self)}
+            )
+            b_code = (
+                "B13" if contract.signing_flow == "trasas_first" else "B14"
+            )
+            contract.message_post(
+                body=_(
+                    "[%s] Đối tác đã ký số hợp đồng (chữ ký số - %s)"
+                ) % (b_code, self.provider_id.name),
+            )
+
+    def _finalize_contract(self):
+        """
+        Hoàn tất đồng bộ hợp đồng khi tất cả chữ ký đã thu thập.
+
+        1. Fallback: đảm bảo internal_sign_date, partner_sign_date đã set
+        2. Đính kèm tài liệu đã ký vào contract.final_scan_file
+        3. Đóng activities trên hợp đồng
+        4. Gọi contract._complete_signing() nếu đủ điều kiện
+        """
+        self.ensure_one()
+        contract = self.contract_id
+        if not contract or contract.state != "signing":
+            return
+
+        vals = {}
+
+        # Fallback: ensure signing dates are set
+        internal_signer = self.signer_ids.filtered(
+            lambda s: s.role == "internal" and s.state == "signed"
+        )
+        external_signer = self.signer_ids.filtered(
+            lambda s: s.role == "external" and s.state == "signed"
+        )
+
+        if internal_signer and not contract.internal_sign_date:
+            vals["internal_sign_date"] = (
+                internal_signer[0].signed_date or fields.Datetime.now()
+            )
+        if external_signer and not contract.partner_sign_date:
+            vals["partner_sign_date"] = fields.Date.context_today(self)
+
+        # Attach signed document as final_scan_file
+        if self.signed_document and not contract.final_scan_file:
+            vals["final_scan_file"] = self.signed_document
+            vals["final_scan_filename"] = (
+                self.signed_document_filename
+                or f"signed_{contract.name}.pdf"
+            )
+
+        if vals:
+            contract.write(vals)
+
+        # Close pending activities on contract
+        try:
+            contract._close_activities()
+        except Exception:
+            _logger.debug(
+                "No activities to close on contract %s", contract.name
+            )
+
+        # Complete signing if conditions met
+        # _complete_signing() requires: state=signing, internal_sign_date,
+        # final_scan_file
+        if (
+            contract.state == "signing"
+            and contract.internal_sign_date
+            and contract.final_scan_file
+        ):
+            try:
+                contract._complete_signing()
+                _logger.info(
+                    "Contract %s auto-completed via digital signature.",
+                    contract.name,
+                )
+            except Exception as e:
+                _logger.warning(
+                    "Cannot auto-complete contract %s: %s. "
+                    "Manual completion may be required.",
+                    contract.name,
+                    e,
+                )
+                contract.message_post(
+                    body=_(
+                        "Ký số hoàn tất nhưng chưa thể tự động chuyển "
+                        "trạng thái hợp đồng. "
+                        "Vui lòng kiểm tra và hoàn tất thủ công."
+                    )
+                )
+
+    # ------------------------------------------------------------------
+    # Signer management
+    # ------------------------------------------------------------------
 
     def _send_to_next_signer(self):
         """
@@ -392,7 +563,7 @@ class TrasasSignatureRequest(models.Model):
             ).send_mail(self.id, force_send=True)
 
     def _check_completion(self):
-        """Kiểm tra tất cả người ký đã ký → hoàn tất + cập nhật hợp đồng."""
+        """Kiểm tra tất cả người ký đã ký → hoàn tất + đồng bộ hợp đồng."""
         self.ensure_one()
 
         all_signed = all(s.state == "signed" for s in self.signer_ids)
@@ -406,17 +577,24 @@ class TrasasSignatureRequest(models.Model):
             return
 
         if all_signed and self.signer_ids:
-            # Download signed document
+            # Download signed document from provider
             try:
-                signed_doc = self.provider_id._provider_download_signed(self)
+                signed_doc = (
+                    self.provider_id._provider_download_signed(self)
+                )
+                fname = self.document_filename or "document.pdf"
+                if self.provider_id.provider_type == "vnpt_smartca":
+                    signed_fname = (
+                        f"signed_{fname.rsplit('.', 1)[0]}.zip"
+                    )
+                else:
+                    signed_fname = f"signed_{fname}"
                 self.write(
                     {
                         "state": "completed",
                         "completed_date": fields.Datetime.now(),
                         "signed_document": signed_doc,
-                        "signed_document_filename": (
-                            f"signed_{self.document_filename or 'document.pdf'}"
-                        ),
+                        "signed_document_filename": signed_fname,
                     }
                 )
             except Exception as e:
@@ -436,45 +614,21 @@ class TrasasSignatureRequest(models.Model):
                     "Yêu cầu ký đã hoàn thành!"
                 )
             )
-            self._update_contract_on_completion()
 
-    def _update_contract_on_completion(self):
-        """Cập nhật hợp đồng khi tất cả chữ ký đã thu thập."""
-        self.ensure_one()
-        contract = self.contract_id
+            # Send completion notification
+            self._send_completion_notification()
 
-        internal_signer = self.signer_ids.filtered(
-            lambda s: s.role == "internal" and s.state == "signed"
+            # Sync contract: finalize signing flow
+            self._finalize_contract()
+
+    def _send_completion_notification(self):
+        """Gửi email thông báo hoàn tất ký."""
+        template = self.env.ref(
+            "trasas_digital_signature.email_template_signing_completed",
+            raise_if_not_found=False,
         )
-        external_signer = self.signer_ids.filtered(
-            lambda s: s.role == "external" and s.state == "signed"
-        )
-
-        vals = {}
-        if internal_signer and not contract.internal_sign_date:
-            vals["internal_sign_date"] = internal_signer[0].signed_date
-        if external_signer and not contract.partner_sign_date:
-            vals["partner_sign_date"] = fields.Date.context_today(self)
-
-        # Attach signed PDF
-        if self.signed_document and not contract.final_scan_file:
-            vals["final_scan_file"] = self.signed_document
-            vals["final_scan_filename"] = (
-                self.signed_document_filename
-                or f"signed_{contract.name}.pdf"
-            )
-
-        if vals:
-            contract.write(vals)
-
-        # Complete signing if both parties signed
-        if (
-            contract.internal_sign_date
-            and contract.partner_sign_date
-            and contract.final_scan_file
-            and contract.state == "signing"
-        ):
-            contract._complete_signing()
+        if template:
+            template.send_mail(self.id, force_send=True)
 
     # ------------------------------------------------------------------
     # Cron

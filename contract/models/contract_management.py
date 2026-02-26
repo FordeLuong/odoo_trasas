@@ -753,7 +753,7 @@ class ContractManagement(models.Model):
     
     def _compute_access_url(self):
         """Compute portal URL for contract records."""
-        super(ContractManagement, self)._compute_access_url()
+        super()._compute_access_url()
         for contract in self:
             contract.access_url = '/my/contract/%s' % contract.id
     
@@ -1345,7 +1345,7 @@ class ContractClause(models.Model):
         if existing_clauses:
             # Set the version to the next version number
             vals['version'] = max(existing_clauses.mapped('version')) + 1
-        return super(ContractClause, self).create(vals)
+        return super().create(vals)
 
     @api.model
     def get_applicable_clauses(self, contract_template_id):
