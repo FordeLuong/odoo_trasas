@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SEARCH VIEW cho Hồ sơ pháp lý -->
+    <record id="trasas_asset_legal_document_view_search" model="ir.ui.view">
+        <field name="name">trasas.asset.legal.document.search</field>
+        <field name="model">trasas.asset.legal.document</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm Hồ sơ pháp lý">
+                <field name="name"/>
+                <field name="asset_id"/>
+                <field name="certificate_number"/>
+                
+                <separator/>
+                <filter string="Hiệu lực" name="filter_active" domain="[('state', '=', 'active')]"/>
+                <filter string="Sắp hết hạn" name="filter_expiring_soon" domain="[('state', '=', 'expiring_soon')]"/>
+                <filter string="Đã hết hạn" name="filter_expired" domain="[('state', '=', 'expired')]"/>
+                
+                <separator/>
+                <filter string="Nhóm tài sản" name="group_by_asset_group" context="{'group_by':'asset_group_id'}"/>
+                <filter string="Tài sản" name="group_by_asset" context="{'group_by':'asset_id'}"/>
+                <filter string="Trạng thái" name="group_by_state" context="{'group_by':'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- LIST VIEW cho Hồ sơ pháp lý -->
+    <record id="trasas_asset_legal_document_view_list" model="ir.ui.view">
+        <field name="name">trasas.asset.legal.document.list</field>
+        <field name="model">trasas.asset.legal.document</field>
+        <field name="arch" type="xml">
+            <list string="Hồ sơ Pháp lý" 
+                  decoration-danger="state == 'expired'" 
+                  decoration-warning="state == 'expiring_soon'"
+                  decoration-success="state == 'active'">
+                <field name="sequence" widget="handle"/>
+                <field name="asset_group_id" column_invisible="1"/>
+                <field name="asset_group" column_invisible="1"/>
+                <field name="asset_id"/>
+                <field name="document_type"/>
+                <field name="name"/>
+                <field name="document_date"/>
+                <field name="issuing_authority"/>
+                <field name="certificate_number"/>
+                <field name="validity_date" class="fw-bold" decoration-danger="state == 'expired'" decoration-warning="state == 'expiring_soon'"/>
+                <field name="days_to_expire" class="fw-bold" decoration-danger="state == 'expired'" decoration-warning="state == 'expiring_soon'"/>
+                <field name="attachment_ids" widget="many2many_binary"/>
+                <field name="state" widget="badge" 
+                       decoration-success="state == 'active'" 
+                       decoration-warning="state == 'expiring_soon'" 
+                       decoration-danger="state == 'expired'" 
+                       decoration-muted="state == 'revoked'"/>
+            </list>
+        </field>
+    </record>
+</odoo>

@@ -64,6 +64,13 @@ class TrasasAssetLegalDocument(models.Model):
         ondelete="cascade",
         index=True,
     )
+    asset_group_id = fields.Many2one(
+        "trasas.asset.type",
+        related="asset_id.asset_group_id",
+        string="Loại nhóm tài sản",
+        store=True,
+        help="Dùng để gom nhóm và xuất báo cáo chuẩn tên",
+    )
     asset_group = fields.Selection(
         related="asset_id.asset_group",
         string="Nhóm TS",

@@ -24,6 +24,7 @@
         <field name="name">Hồ sơ Pháp lý</field>
         <field name="res_model">trasas.asset.legal.document</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_group_by_asset_group': 1, 'search_default_group_by_asset': 1, 'search_default_group_by_state': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Chưa có hồ sơ pháp lý
@@ -45,6 +46,32 @@
             </p>
             <p>
                 Cấu hình danh mục loại tài sản: BĐS, Xe, Máy móc...
+            </p>
+        </field>
+    </record>
+
+    <!-- ============ BÁO CÁO (REPORTS) ============ -->
+    <record id="action_trasas_asset_report" model="ir.actions.act_window">
+        <field name="name">Báo cáo tài sản</field>
+        <field name="res_model">trasas.asset</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="trasas_asset_view_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Báo cáo danh sách tài sản
+            </p>
+        </field>
+    </record>
+
+    <record id="action_trasas_legal_document_report" model="ir.actions.act_window">
+        <field name="name">Báo cáo chứng từ</field>
+        <field name="res_model">trasas.asset.legal.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_group_by_asset_group': 1, 'search_default_group_by_asset': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Báo cáo danh sách chứng từ
             </p>
         </field>
     </record>
@@ -83,4 +110,22 @@
               parent="menu_trasas_asset_config"
               action="action_trasas_asset_type"
               sequence="10"/>
+
+    <!-- Báo cáo -->
+    <menuitem id="menu_trasas_asset_reporting"
+              name="Báo cáo"
+              parent="menu_trasas_asset_root"
+              sequence="50"/>
+
+    <menuitem id="menu_trasas_asset_report_list"
+              name="Danh sách tài sản"
+              parent="menu_trasas_asset_reporting"
+              action="action_trasas_asset_report"
+              sequence="10"/>
+
+    <menuitem id="menu_trasas_legal_document_report"
+              name="Danh sách chứng từ"
+              parent="menu_trasas_asset_reporting"
+              action="action_trasas_legal_document_report"
+              sequence="20"/>
 </odoo>

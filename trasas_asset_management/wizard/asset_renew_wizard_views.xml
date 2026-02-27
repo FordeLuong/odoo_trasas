@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_asset_renew_wizard_form" model="ir.ui.view">
+        <field name="name">trasas.asset.renew.wizard.form</field>
+        <field name="model">trasas.asset.renew.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Tái ký Hợp đồng">
+                <group>
+                    <group>
+                        <field name="asset_id" invisible="1"/>
+                        <field name="sign_date"/>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                    </group>
+                    <group>
+                        <field name="attachment_ids" widget="many2many_binary"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="note" placeholder="Nhập ghi chú tái ký..."/>
+                </group>
+                <footer>
+                    <button string="Xác nhận Tái ký" 
+                            name="action_confirm_renew" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Hủy" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_asset_renew_wizard" model="ir.actions.act_window">
+        <field name="name">Tái ký Hợp đồng</field>
+        <field name="res_model">trasas.asset.renew.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

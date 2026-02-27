@@ -92,7 +92,7 @@
         </record>
 
         <record id="stage_liquidated" model="trasas.asset.stage">
-            <field name="name">Thanh lý</field>
+            <field name="name">Đã thanh lý</field>
             <field name="sequence">10</field>
             <field name="state">liquidated</field>
             <field name="fold" eval="True"/>

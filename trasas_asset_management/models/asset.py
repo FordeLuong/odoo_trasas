@@ -196,7 +196,7 @@ class TrasasAsset(models.Model):
             # --- Thiết bị (MMTB, TBVP, TSVH) ---
             ("repair", "Sửa chữa"),
             ("maintenance", "Bảo trì định kỳ"),
-            ("liquidated", "Thanh lý"),
+            ("liquidated", "Đã thanh lý"),
             # --- Đất / Mặt bằng (NXCT) ---
             ("leased", "Đang cho thuê"),
             ("lease_in", "Thuê ngoài"),
@@ -327,7 +327,7 @@ class TrasasAsset(models.Model):
     )
 
     # =====================================================================
-    # 6. CHI PHÍ CẢI TẠO (notebook lines - NXCT)
+    # 6. CHI PHÍ CẢI TẠO VÀ LỊCH SỬ HỢP ĐỒNG (notebook lines - NXCT)
     # =====================================================================
 
     renovation_cost_ids = fields.One2many(
@@ -341,6 +341,12 @@ class TrasasAsset(models.Model):
         compute="_compute_total_renovation_cost",
         currency_field="currency_id",
         store=True,
+    )
+
+    contract_history_ids = fields.One2many(
+        "trasas.asset.contract.history",
+        "asset_id",
+        string="Lịch sử hợp đồng",
     )
 
     @api.depends("renovation_cost_ids.amount", "renovation_cost_ids.currency_id")
@@ -712,18 +718,20 @@ class TrasasAsset(models.Model):
             rec._send_state_change_notification()
 
     def action_return_to_use_from_lease(self):
-        """Kết thúc HĐ thuê → Đang sử dụng (tái sử dụng)"""
-        for rec in self:
-            if rec.state != "contract_ended":
-                raise UserError(
-                    _("Chỉ tài sản Kết thúc HĐ mới có thể đưa lại vào sử dụng!")
-                )
-            rec.write({"state": "in_use"})
-            rec.message_post(
-                body=_("Tài sản tái sử dụng sau khi kết thúc HĐ thuê."),
-                subject=_("Tái sử dụng tài sản"),
+        """Hoàn thành → Tái sử dụng (mở Wizard)"""
+        self.ensure_one()
+        if self.state != "completed":
+            raise UserError(
+                _("Chỉ tài sản trạng thái Hoàn thành mới có thể tái sử dụng!")
             )
-            rec._send_state_change_notification()
+        return {
+            "name": _("Tái sử dụng Tài sản"),
+            "type": "ir.actions.act_window",
+            "res_model": "trasas.asset.reuse.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {"default_asset_id": self.id},
+        }
 
     # =====================================================================
     # ACTIVITY SCHEDULING
@@ -872,9 +880,21 @@ class TrasasAsset(models.Model):
         for doc in expired_docs:
             doc.write({"state": "expired"})
             asset = doc.asset_id
+            if asset.responsible_user_id:
+                asset.activity_schedule(
+                    "mail.mail_activity_data_todo",
+                    user_id=asset.responsible_user_id.id,
+                    summary=_('Hồ sơ pháp lý đã hết hạn: "%s"') % doc.name,
+                    note=_("Số GCN: %s\nHết hạn: %s\nVui lòng kiểm tra và cập nhật.")
+                    % (
+                        doc.certificate_number or "N/A",
+                        doc.validity_date,
+                    ),
+                    date_deadline=today,
+                )
             asset._send_expired_document_notification(doc)
             asset.message_post(
-                body=_('❌ Giấy tờ "%s" (GCN: %s) đã hết hiệu lực!')
+                body=_('Giấy tờ "%s" (GCN: %s) đã hết hiệu lực!')
                 % (doc.name, doc.certificate_number or "N/A"),
             )
 

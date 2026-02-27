@@ -91,11 +91,11 @@
                             groups="trasas_asset_management.group_asset_manager"
                             confirm="Xác nhận kết thúc hợp đồng?"/>
 
-                    <button name="action_return_to_use_from_lease"
-                            string="Tái sử dụng"
-                            type="object"
-                            class="btn-success"
-                            invisible="state != 'contract_ended'"
+                    <button name="%(trasas_asset_management.action_asset_renew_wizard)d"
+                            string="Tái ký"
+                            type="action"
+                            class="btn-primary"
+                            invisible="state not in ('contract_ended', 'expiring') or asset_group != 'nxct'"
                             groups="trasas_asset_management.group_asset_manager"/>
 
                     <!-- === CHUNG: Hoàn thành / Đặt về Mới === -->
@@ -103,18 +103,29 @@
                             string="Hoàn thành"
                             type="object"
                             class="btn-primary"
-                            invisible="state not in ('liquidated', 'contract_ended', 'in_use')"
+                            invisible="state not in ('contract_ended', 'in_use')"
                             groups="trasas_asset_management.group_asset_manager"
                             confirm="Xác nhận hoàn thành tài sản?"/>
+
+                    <button name="action_return_to_use_from_lease"
+                            string="Tái sử dụng"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'completed' or asset_group != 'nxct'"
+                            groups="trasas_asset_management.group_asset_manager"/>
 
                     <button name="action_set_to_draft"
                             string="Đặt về Mới"
                             type="object"
-                            invisible="state == 'draft'"
+                            invisible="1"
                             groups="trasas_asset_management.group_asset_manager"/>
 
                     <field name="state" widget="statusbar"
-                           statusbar_visible="draft,in_use,completed"/>
+                           statusbar_visible="draft,in_use,completed"
+                           invisible="asset_group != 'nxct'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,in_use"
+                           invisible="asset_group == 'nxct'"/>
                 </header>
 
                 <sheet>
@@ -324,6 +335,33 @@
                                         <field name="date"/>
                                         <field name="amount" widget="monetary"/>
                                         <field name="currency_id"/>
+                                        <field name="note"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <!-- TAB 10: Lịch sử hợp đồng (Chỉ dành cho NXCT) -->
+                        <page string="Lịch sử hợp đồng"
+                              name="contract_history"
+                              invisible="asset_group != 'nxct'">
+                            <field name="contract_history_ids" readonly="1">
+                                <list>
+                                    <field name="sign_date"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="note"/>
+                                    <field name="attachment_ids" widget="many2many_binary"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <field name="sign_date"/>
+                                        <field name="start_date"/>
+                                        <field name="end_date"/>
+                                    </group>
+                                    <group>
+                                        <field name="attachment_ids" widget="many2many_binary"/>
+                                    </group>
+                                    <group>
                                         <field name="note"/>
                                     </group>
                                 </form>
