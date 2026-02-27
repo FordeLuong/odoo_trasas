@@ -174,8 +174,13 @@
                         <group string="Quản lý sử dụng">
                             <field name="department_id"/>
                             <field name="location"/>
-                            <field name="responsible_user_id"/>
+                            <field name="responsible_user_id" widget="many2one_avatar_user"/>
                             <field name="ownership_type"/>
+                        </group>
+                        
+                        <group string="Kế hoạch bảo trì" invisible="asset_group not in ('mmtb', 'tbvp')">
+                            <field name="maintenance_frequency"/>
+                            <field name="next_maintenance_date"/>
                         </group>
                     </group>
 

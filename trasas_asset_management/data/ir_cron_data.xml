@@ -12,4 +12,18 @@
         <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 01:00:00')"/>
         <field name="priority">5</field>
     </record>
+
+        <!-- CRON: Tự động cảnh báo và chuyển trạng thái Bảo trì định kỳ (Chạy mỗi ngày lúc 1h00 AM) -->
+        <record id="ir_cron_auto_maintenance" model="ir.cron">
+            <field name="name">Tài sản: Tự động cảnh báo &amp; chuyển trạng thái Bảo trì</field>
+            <field name="model_id" ref="model_trasas_asset"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_auto_maintenance()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="active" eval="True"/>
+            <field name="nextcall" eval="(DateTime.now() + relativedelta(days=1)).strftime('%Y-%m-%d 01:00:00')"/>
+        </record>
 </odoo>

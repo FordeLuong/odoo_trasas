@@ -175,6 +175,24 @@ class TrasasAsset(models.Model):
         default=lambda self: self.env.user,
         tracking=True,
     )
+
+    # --- Thông tin Bảo trì tự động ---
+    maintenance_frequency = fields.Selection(
+        [
+            ("3", "3 Tháng"),
+            ("6", "6 Tháng"),
+            ("12", "12 Tháng"),
+        ],
+        string="Chu kỳ bảo trì",
+        tracking=True,
+        help="Chu kỳ bảo trì định kỳ cho thiết bị",
+    )
+    next_maintenance_date = fields.Date(
+        string="Ngày bảo trì tiếp theo",
+        tracking=True,
+        help="Hệ thống sẽ cảnh báo trước 7 ngày và tự chuyển sang trạng thái Bảo trì khi đến hạn.",
+    )
+
     ownership_type = fields.Selection(
         [
             ("personal", "Cá nhân"),
@@ -612,9 +630,25 @@ class TrasasAsset(models.Model):
                         "Chỉ tài sản đang Sửa chữa hoặc Bảo trì mới có thể đưa lại vào sử dụng!"
                     )
                 )
-            rec.write({"state": "in_use"})
+
+            update_vals = {"state": "in_use"}
+            today = fields.Date.context_today(rec)
+            msg_appendix = ""
+
+            # Check if returning from maintenance and has frequency set
+            if rec.state == "maintenance" and rec.maintenance_frequency:
+                months = int(rec.maintenance_frequency)
+                from dateutil.relativedelta import relativedelta
+
+                next_date = today + relativedelta(months=months)
+                update_vals["next_maintenance_date"] = next_date
+                msg_appendix = _(
+                    " Tự động lùi ngày bảo trì tiếp theo thành %s."
+                ) % next_date.strftime("%d/%m/%Y")
+
+            rec.write(update_vals)
             rec.message_post(
-                body=_("✅ Tài sản đã đưa lại vào sử dụng."),
+                body=_("✅ Tài sản đã đưa lại vào sử dụng.") + msg_appendix,
                 subject=_("Hoàn tất sửa chữa / bảo trì"),
             )
             rec._send_state_change_notification()
@@ -897,6 +931,57 @@ class TrasasAsset(models.Model):
                 body=_('Giấy tờ "%s" (GCN: %s) đã hết hiệu lực!')
                 % (doc.name, doc.certificate_number or "N/A"),
             )
+
+    @api.model
+    def _cron_auto_maintenance(self):
+        """Tự động cảnh báo & đổi trạng thái bảo trì cho MMTB, TBVP"""
+        today = fields.Date.context_today(self)
+        warning_date = today + timedelta(days=7)
+
+        # Lọc các tài sản đang sử dụng, thuộc nhóm MMTB, TBVP, có set ngày bảo trì
+        assets = self.search(
+            [
+                ("state", "=", "in_use"),
+                ("asset_group", "in", ["mmtb", "tbvp"]),
+                ("next_maintenance_date", "!=", False),
+            ]
+        )
+
+        for rec in assets:
+            if not rec.responsible_user_id:
+                continue
+
+            # 1. Cảnh báo trước 7 ngày
+            if rec.next_maintenance_date == warning_date:
+                rec.activity_schedule(
+                    "mail.mail_activity_data_todo",
+                    user_id=rec.responsible_user_id.id,
+                    note=_(
+                        "Tài sản (máy móc/thiết bị) sắp đến hạn bảo trì định kỳ vào ngày %s. Vui lòng chuẩn bị."
+                    )
+                    % rec.next_maintenance_date.strftime("%d/%m/%Y"),
+                    summary=_("Sắp đến hạn bảo trì: %s") % rec.name,
+                )
+
+            # 2. Đến hạn (hoặc quá hạn) -> Tự nhảy state
+            elif rec.next_maintenance_date <= today:
+                rec.write({"state": "maintenance"})
+                rec.message_post(
+                    body=_(
+                        "🔧 Hệ thống tự động chuyển sang **Bảo trì định kỳ** do đã đến hạn (%s)."
+                    )
+                    % rec.next_maintenance_date.strftime("%d/%m/%Y"),
+                    subject=_("Đến hạn bảo trì"),
+                )
+                # Đóng các activity cũ (nếu có)
+                activities = self.env["mail.activity"].search(
+                    [
+                        ("res_model", "=", "trasas.asset"),
+                        ("res_id", "=", rec.id),
+                        ("summary", "ilike", "Sắp đến hạn bảo trì"),
+                    ]
+                )
+                activities.action_done()
 
     # =====================================================================
     # SMART BUTTONS
