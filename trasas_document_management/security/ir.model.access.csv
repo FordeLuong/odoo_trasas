@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_doc_access_request_user,trasas.doc.access.request.user,model_trasas_doc_access_request,group_doc_user,1,1,1,0
+access_doc_access_request_manager,trasas.doc.access.request.manager,model_trasas_doc_access_request,group_doc_manager,1,1,1,1
+access_doc_access_request_director,trasas.doc.access.request.director,model_trasas_doc_access_request,group_doc_director,1,0,0,0
+access_doc_access_log_manager,trasas.doc.access.log.manager,model_trasas_doc_access_log,group_doc_manager,1,1,1,1
+access_doc_access_log_director,trasas.doc.access.log.director,model_trasas_doc_access_log,group_doc_director,1,0,0,0

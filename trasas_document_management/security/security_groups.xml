@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Danh mục Module -->
+    <record id="module_category_document_management" model="ir.module.category">
+        <field name="name">Quản lý Hồ sơ &amp; Tài liệu</field>
+        <field name="sequence">25</field>
+    </record>
+
+    <!-- Nhóm quyền: Nhân viên -->
+    <record id="group_doc_user" model="res.groups">
+        <field name="name">Nhân viên</field>
+        <field name="category_id" ref="module_category_document_management"/>
+        <field name="comment">Có thể xem tài liệu được cấp quyền, tạo yêu cầu truy cập</field>
+    </record>
+
+    <!-- Nhóm quyền: HCNS Manager -->
+    <record id="group_doc_manager" model="res.groups">
+        <field name="name">Quản lý HCNS</field>
+        <field name="category_id" ref="module_category_document_management"/>
+        <field name="implied_ids" eval="[(4, ref('group_doc_user'))]"/>
+        <field name="comment">CRUD tất cả tài liệu, Duyệt yêu cầu, Quản lý thư mục</field>
+    </record>
+
+    <!-- Nhóm quyền: Ban Giám đốc -->
+    <record id="group_doc_director" model="res.groups">
+        <field name="name">Ban Giám đốc</field>
+        <field name="category_id" ref="module_category_document_management"/>
+        <field name="implied_ids" eval="[(4, ref('group_doc_user'))]"/>
+        <field name="comment">Xem tất cả tài liệu, Không cần gửi yêu cầu - Bypass phê duyệt</field>
+    </record>
+</odoo>

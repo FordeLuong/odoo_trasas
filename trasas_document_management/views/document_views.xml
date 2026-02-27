@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Form View cho documents.document — Thêm thông tin cơ bản -->
+    <record id="documents_document_view_form_inherit" model="ir.ui.view">
+        <field name="name">documents.document.form.inherit.trasas</field>
+        <field name="model">documents.document</field>
+        <field name="inherit_id" ref="documents.document_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group" position="inside">
+                <group string="Thông tin hồ sơ TRASAS" invisible="type == 'folder'">
+                    <group>
+                        <field name="document_type"/>
+                        <field name="document_number"/>
+                        <field name="issuing_authority"/>
+                        <field name="issue_date"/>
+                    </group>
+                    <group>
+                        <field name="validity_date"/>
+                        <field name="days_to_expire"/>
+                        <field name="confidential_level"/>
+                        <field name="doc_state" widget="badge" 
+                               decoration-success="doc_state == 'active'" 
+                               decoration-warning="doc_state == 'expiring_soon'" 
+                               decoration-danger="doc_state == 'expired'" 
+                               decoration-muted="doc_state == 'revoked'"/>
+                    </group>
+                    <group>
+                        <field name="department_id"/>
+                        <field name="responsible_user_id" widget="many2one_avatar_user"/>
+                    </group>
+                </group>
+            </xpath>
+            <!-- Nút Thu hồi / Kích hoạt lại -->
+            <xpath expr="//header" position="inside">
+                <button name="action_revoke_document" 
+                        string="Thu hồi" 
+                        type="object" 
+                        class="btn-danger"
+                        invisible="type == 'folder' or doc_state in ('revoked', 'expired')"
+                        groups="trasas_document_management.group_doc_manager"/>
+                <button name="action_reactivate_document" 
+                        string="Kích hoạt lại" 
+                        type="object" 
+                        class="btn-success"
+                        invisible="type == 'folder' or doc_state not in ('revoked', 'expired')"
+                        groups="trasas_document_management.group_doc_manager"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Search View bổ sung cho documents.document -->
+    <record id="documents_document_view_search_inherit" model="ir.ui.view">
+        <field name="name">documents.document.search.inherit.trasas</field>
+        <field name="model">documents.document</field>
+        <field name="inherit_id" ref="documents.documents_document_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter string="Hiệu lực" name="filter_doc_active" domain="[('doc_state', '=', 'active')]"/>
+                <filter string="Sắp hết hạn" name="filter_doc_expiring" domain="[('doc_state', '=', 'expiring_soon')]"/>
+                <filter string="Hết hiệu lực" name="filter_doc_expired" domain="[('doc_state', '=', 'expired')]"/>
+                <filter string="Đã thu hồi" name="filter_doc_revoked" domain="[('doc_state', '=', 'revoked')]"/>
+                <separator/>
+                <filter string="Loại hồ sơ" name="group_by_doc_type" context="{'group_by':'document_type'}"/>
+                <filter string="Phòng ban" name="group_by_department" context="{'group_by':'department_id'}"/>
+                <filter string="Trạng thái hiệu lực" name="group_by_doc_state" context="{'group_by':'doc_state'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
