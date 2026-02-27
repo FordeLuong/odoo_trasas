@@ -538,19 +538,23 @@ class TrasasSignatureRequest(models.Model):
         if not next_signers:
             return
 
-        next_signer = next_signers[0]
+        target_order = next_signers[0].sign_order
 
         # Check prior signers are all signed
         prior_signers = self.signer_ids.filtered(
-            lambda s, order=next_signer.sign_order: s.sign_order < order
+            lambda s, order=target_order: s.sign_order < order
         )
         if prior_signers and any(
             s.state != "signed" for s in prior_signers
         ):
             return
 
-        next_signer.write({"state": "sent"})
-        self._send_signing_invitation(next_signer)
+        batch_signers = next_signers.filtered(
+            lambda s, order=target_order: s.sign_order == order
+        )
+        batch_signers.write({"state": "sent"})
+        for signer in batch_signers:
+            self._send_signing_invitation(signer)
 
         # Update partial state
         if self.state == "sent":
@@ -590,34 +594,39 @@ class TrasasSignatureRequest(models.Model):
         if all_signed and self.signer_ids:
             # Download signed document from provider
             try:
-                signed_doc = (
-                    self.provider_id._provider_download_signed(self)
-                )
-                fname = self.document_filename or "document.pdf"
-                if self.provider_id.provider_type == "vnpt_smartca":
-                    signed_fname = (
-                        f"signed_{fname.rsplit('.', 1)[0]}.zip"
-                    )
-                else:
-                    signed_fname = f"signed_{fname}"
-                self.write(
-                    {
-                        "state": "completed",
-                        "completed_date": fields.Datetime.now(),
-                        "signed_document": signed_doc,
-                        "signed_document_filename": signed_fname,
-                    }
+                signed_doc = self.provider_id._provider_download_signed(
+                    self
                 )
             except Exception as e:
                 _logger.error(
                     "Failed to download signed document: %s", e
                 )
-                self.write(
-                    {
-                        "state": "completed",
-                        "completed_date": fields.Datetime.now(),
-                    }
-                )
+                if not self.env.context.get(
+                    "skip_download_error_message"
+                ):
+                    self.message_post(
+                        body=_(
+                            "Tất cả người ký đã hoàn tất 
+                            "nhưng không thể tải tài liệu đã ký. 
+                            "Vui lòng thử lại hoặc liên hệ quản trị."
+                        )
+                    )
+                return
+
+            fname = self.document_filename or "document.pdf"
+            if self.provider_id.provider_type == "vnpt_smartca":
+                signed_fname = f"signed_{fname.rsplit('.', 1)[0]}.zip"
+            else:
+                signed_fname = f"signed_{fname}"
+
+            self.write(
+                {
+                    "state": "completed",
+                    "completed_date": fields.Datetime.now(),
+                    "signed_document": signed_doc,
+                    "signed_document_filename": signed_fname,
+                }
+            )
 
             self.message_post(
                 body=_(
@@ -653,7 +662,9 @@ class TrasasSignatureRequest(models.Model):
         )
         for req in requests:
             try:
-                req.action_check_status()
+                req.with_context(
+                    skip_download_error_message=True
+                ).action_check_status()
             except Exception as e:
                 _logger.error(
                     "Error checking signature status for %s: %s",

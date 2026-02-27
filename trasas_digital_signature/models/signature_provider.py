@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import uuid
+import re
 import requests
 import base64
 import hashlib
@@ -275,17 +276,75 @@ class TrasasSignatureProvider(models.Model):
     # VNPT SMARTCA PROVIDER IMPLEMENTATION (HASH SIGNING)
     # ==================================================================
 
+    def _vnpt_smartca_sp_path(self):
+        sp_id = (self.api_key or "").strip()
+        if not sp_id:
+            return "sp769"
+        if sp_id.lower().startswith("sp"):
+            return sp_id
+        return f"sp{sp_id}"
+
+    def _vnpt_smartca_payload_sp_id(self):
+        return (self.api_key or "").strip()
+
+    def _vnpt_smartca_is_legacy_sp_id(self):
+        sp_id = (self.api_key or "").strip().lower()
+        if not sp_id:
+            return True
+        return bool(re.fullmatch(r"sp?\d+", sp_id))
+
     def _vnpt_smartca_base_url(self):
         """Return SmartCA gateway base URL."""
         self.ensure_one()
-        if self.api_url:
-            return self.api_url.rstrip("/")
-        if self.test_mode:
-            return "https://rmgateway.vnptit.vn/sca/sp769"
-        return "https://gwsca.vnpt.vn/sca/sp769"
+        base_url = self.api_url or (
+            "https://rmgateway.vnptit.vn"
+            if self.test_mode
+            else "https://gwsca.vnpt.vn"
+        )
+        base_url = base_url.rstrip("/")
+        if base_url.endswith("/v1"):
+            base_url = base_url[:-3]
+
+        if not self._vnpt_smartca_is_legacy_sp_id():
+            return base_url
+
+        sp_path = self._vnpt_smartca_sp_path()
+        if "/sca/" in base_url:
+            if base_url.rstrip("/").endswith("/sca"):
+                base_url = f"{base_url}/{sp_path}"
+            return base_url
+
+        if base_url.rstrip("/").endswith("/sca"):
+            return f"{base_url}/{sp_path}"
+        return f"{base_url}/sca/{sp_path}"
+
+    def _vnpt_smartca_safe_code(self, value, max_len=64):
+        raw = str(value or "")
+        safe = re.sub(r"[^A-Za-z0-9._-]", "-", raw)
+        safe = re.sub(r"-{2,}", "-", safe).strip("-")
+        if not safe:
+            safe = uuid.uuid4().hex
+        return safe[:max_len]
 
     def _vnpt_smartca_headers(self):
         return {"Content-Type": "application/json"}
+
+    def _vnpt_smartca_sanitize_payload(self, payload):
+        safe = dict(payload or {})
+        if "sp_password" in safe:
+            safe["sp_password"] = "***"
+        if "sign_files" in safe and isinstance(safe["sign_files"], list):
+            safe_files = []
+            for item in safe["sign_files"]:
+                if not isinstance(item, dict):
+                    safe_files.append(item)
+                    continue
+                masked = dict(item)
+                if "data_to_be_signed" in masked:
+                    masked["data_to_be_signed"] = "<redacted>"
+                safe_files.append(masked)
+            safe["sign_files"] = safe_files
+        return safe
 
     def _vnpt_smartca_post(self, path, payload, timeout=30):
         self.ensure_one()
@@ -298,8 +357,14 @@ class TrasasSignatureProvider(models.Model):
             timeout=timeout,
         )
         if resp.status_code >= 400:
+            _logger.warning(
+                "SmartCA error %s. Payload=%s",
+                resp.status_code,
+                self._vnpt_smartca_sanitize_payload(payload),
+            )
             raise UserError(
-                _("SmartCA HTTP %s: %s") % (resp.status_code, resp.text)
+                _("SmartCA HTTP %s: %s (URL: %s)")
+                % (resp.status_code, resp.text, url)
             )
         try:
             return resp.json()
@@ -307,6 +372,29 @@ class TrasasSignatureProvider(models.Model):
             raise UserError(
                 _("SmartCA response is not JSON: %s") % resp.text
             )
+
+    def _vnpt_smartca_get_certificate(self, signer, transaction_id):
+        """Fetch certificate info to derive serial_number when missing."""
+        self.ensure_one()
+        payload = {
+            "sp_id": self._vnpt_smartca_payload_sp_id(),
+            "sp_password": self.api_secret,
+            "user_id": signer.id_number or "",
+            "serial_number": signer.vnpt_serial_number or "",
+            "transaction_id": transaction_id,
+        }
+        data = self._vnpt_smartca_post(
+            "/v1/credentials/get_certificate", payload
+        )
+        serial = (
+            data.get("serial_number")
+            or data.get("serialNumber")
+            or data.get("cert_serial")
+            or ""
+        )
+        if serial:
+            signer.write({"vnpt_serial_number": serial})
+        return data
 
     def _vnpt_smartca_test_connection(self):
         """Validate credentials + basic reachability of the gateway."""
@@ -339,6 +427,8 @@ class TrasasSignatureProvider(models.Model):
     def _vnpt_smartca_send_document(self, request):
         """Create SmartCA signing transaction per signer (hash signing)."""
         self.ensure_one()
+        if not self.api_key or not self.api_secret:
+            raise UserError(_("Thiếu SP ID / SP Password (API Key/Secret)."))
         base_url = (
             self.env["ir.config_parameter"]
             .sudo()
@@ -364,17 +454,39 @@ class TrasasSignatureProvider(models.Model):
                     % (signer.signer_name or signer.id)
                 )
 
-            transaction_id = (
-                f"{request.name}-{signer.id}-{uuid.uuid4().hex[:6]}"
+            transaction_id = self._vnpt_smartca_safe_code(
+                f"{request.name}-{signer.id}-{uuid.uuid4().hex[:6]}",
+                max_len=64,
             )
-            doc_id = f"{request.name}:{signer.id}"
+            doc_id = self._vnpt_smartca_safe_code(
+                f"{request.name}-{signer.id}",
+                max_len=64,
+            )
+
+            if not signer.vnpt_serial_number:
+                try:
+                    self._vnpt_smartca_get_certificate(
+                        signer, transaction_id
+                    )
+                except Exception as e:
+                    _logger.warning(
+                        "SmartCA get_certificate failed for %s: %s",
+                        signer.signer_name or signer.id,
+                        e,
+                    )
 
             payload = {
-                "sp_id": self.api_key,
+                "sp_id": self._vnpt_smartca_payload_sp_id(),
                 "sp_password": self.api_secret,
                 "user_id": signer.id_number,
                 "transaction_id": transaction_id,
                 "callback_url": callback_url,
+                "transaction_desc": (
+                    request.contract_id.name
+                    if request.contract_id
+                    else request.name
+                ),
+                "time_stamp": datetime.utcnow().strftime("%Y%m%d%H%M%SZ"),
                 "sign_files": [
                     {
                         "doc_id": doc_id,
@@ -384,6 +496,8 @@ class TrasasSignatureProvider(models.Model):
                     }
                 ],
             }
+            if signer.vnpt_serial_number:
+                payload["serial_number"] = signer.vnpt_serial_number
 
             data = self._vnpt_smartca_post("/v1/signatures/sign", payload)
 
@@ -437,7 +551,7 @@ class TrasasSignatureProvider(models.Model):
             data = self._vnpt_smartca_post(
                 f"/v1/signatures/sign/{tran}/status",
                 {
-                    "sp_id": self.api_key,
+                    "sp_id": self._vnpt_smartca_payload_sp_id(),
                     "sp_password": self.api_secret,
                     "user_id": signer.id_number or "",
                 },
