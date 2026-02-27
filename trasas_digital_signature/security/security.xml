@@ -17,7 +17,7 @@
         <field name="model_id" ref="model_trasas_signature_request"/>
         <field name="domain_force">[('user_id', '=', user.id)]</field>
         <field name="groups" eval="[(4, ref('trasas_contract_management.group_contract_user'))]"/>
-        <field name="perm_read" eval="True"/>
+        <field name="perm_read" eval="False"/>
         <field name="perm_write" eval="True"/>
         <field name="perm_create" eval="True"/>
         <field name="perm_unlink" eval="True"/>

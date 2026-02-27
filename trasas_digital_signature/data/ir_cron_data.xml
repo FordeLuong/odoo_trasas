@@ -7,7 +7,7 @@
             <field name="model_id" ref="model_trasas_signature_request"/>
             <field name="state">code</field>
             <field name="code">model._cron_check_signature_status()</field>
-            <field name="interval_number">4</field>
+            <field name="interval_number">1</field>
             <field name="interval_type">hours</field>
             <field name="active">True</field>
             <field name="priority">10</field>

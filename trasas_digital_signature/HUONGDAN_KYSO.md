@@ -199,7 +199,7 @@ flowchart LR
 
 | Nhóm | Quyền trên Chữ ký số |
 |---|---|
-| **Contract User** | Tạo, xem yêu cầu ký của mình |
+| **Contract User** | Tạo/sửa yêu cầu của mình, xem tất cả yêu cầu ký |
 | **Contract Approver** | Xem, sửa tất cả yêu cầu ký |
 | **Contract Manager** | Full quyền + cấu hình nhà cung cấp + hủy yêu cầu |
 
