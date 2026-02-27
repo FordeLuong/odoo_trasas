@@ -17,7 +17,6 @@
             <field name="code">model._cron_document_expiry_check()</field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
-            <field name="numbercall">-1</field>
             <field name="active" eval="True"/>
         </record>
 
@@ -29,7 +28,6 @@
             <field name="code">model._cron_revoke_expired_access()</field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
-            <field name="numbercall">-1</field>
             <field name="active" eval="True"/>
         </record>
     </data>
