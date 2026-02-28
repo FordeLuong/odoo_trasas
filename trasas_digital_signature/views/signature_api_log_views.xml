@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ API LOG LIST ============ -->
+    <record id="view_signature_api_log_list" model="ir.ui.view">
+        <field name="name">trasas.signature.api.log.list</field>
+        <field name="model">trasas.signature.api.log</field>
+        <field name="arch" type="xml">
+            <list string="Nhật ký API ký số">
+                <field name="create_date"/>
+                <field name="provider_id"/>
+                <field name="request_id"/>
+                <field name="signer_id"/>
+                <field name="operation"/>
+                <field name="method"/>
+                <field name="endpoint"/>
+                <field name="status_code"/>
+                <field name="success"/>
+                <field name="duration_ms"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ API LOG FORM ============ -->
+    <record id="view_signature_api_log_form" model="ir.ui.view">
+        <field name="name">trasas.signature.api.log.form</field>
+        <field name="model">trasas.signature.api.log</field>
+        <field name="arch" type="xml">
+            <form string="Nhật ký API ký số">
+                <sheet>
+                    <group>
+                        <group string="Thông tin">
+                            <field name="create_date" readonly="1"/>
+                            <field name="provider_id" readonly="1"/>
+                            <field name="provider_type" readonly="1"/>
+                            <field name="request_id" readonly="1"/>
+                            <field name="signer_id" readonly="1"/>
+                            <field name="operation" readonly="1"/>
+                            <field name="method" readonly="1"/>
+                            <field name="endpoint" readonly="1"/>
+                            <field name="url" readonly="1"/>
+                        </group>
+                        <group string="Kết quả">
+                            <field name="status_code" readonly="1"/>
+                            <field name="success" readonly="1"/>
+                            <field name="duration_ms" readonly="1"/>
+                            <field name="error_message" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Request">
+                            <field name="request_payload" readonly="1" widget="text"/>
+                        </page>
+                        <page string="Response">
+                            <field name="response_payload" readonly="1" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ ACTION ============ -->
+    <record id="action_signature_api_log" model="ir.actions.act_window">
+        <field name="name">Nhật ký API ký số</field>
+        <field name="res_model">trasas.signature.api.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

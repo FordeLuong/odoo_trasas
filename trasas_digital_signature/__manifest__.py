@@ -36,6 +36,7 @@
         # Views
         "views/signature_provider_views.xml",
         "views/signature_request_views.xml",
+        "views/signature_api_log_views.xml",
         "views/contract_views.xml",
         "views/menu_views.xml",
     ],
