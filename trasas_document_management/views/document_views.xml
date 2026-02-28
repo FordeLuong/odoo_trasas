@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- FORM VIEW MỚI cho documents.document (Odoo 19 không có sẵn) -->
+    <!-- ============================================================ -->
+    <record id="documents_document_view_form_trasas" model="ir.ui.view">
+        <field name="name">documents.document.form.trasas</field>
+        <field name="model">documents.document</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <form string="Chi tiết Tài liệu">
+                <header>
+                    <button name="action_revoke_document" 
+                            string="Thu hồi" 
+                            type="object" 
+                            class="btn-danger"
+                            invisible="type == 'folder' or doc_state in ('revoked', 'expired')"
+                            groups="trasas_document_management.group_doc_manager"/>
+                    <button name="action_reactivate_document" 
+                            string="Kích hoạt lại" 
+                            type="object" 
+                            class="btn-success"
+                            invisible="type == 'folder' or doc_state not in ('revoked', 'expired')"
+                            groups="trasas_document_management.group_doc_manager"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Tên tài liệu"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Thông tin chung">
+                            <field name="type" invisible="1"/>
+                            <field name="folder_id" string="Thư mục" domain="[('type', '=', 'folder')]"/>
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                            <field name="partner_id"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="File đính kèm">
+                            <field name="datas" filename="name"/>
+                            <field name="mimetype" readonly="1"/>
+                            <field name="file_size" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Thông tin hồ sơ TRASAS (B2b) -->
+                    <group string="Thông tin hồ sơ TRASAS" invisible="type == 'folder'">
+                        <group>
+                            <field name="document_type"/>
+                            <field name="document_number"/>
+                            <field name="issuing_authority"/>
+                            <field name="issue_date"/>
+                        </group>
+                        <group>
+                            <field name="validity_date"/>
+                            <field name="days_to_expire"/>
+                            <field name="confidential_level"/>
+                            <field name="doc_state" widget="badge" 
+                                   decoration-success="doc_state == 'active'" 
+                                   decoration-warning="doc_state == 'expiring_soon'" 
+                                   decoration-danger="doc_state == 'expired'" 
+                                   decoration-muted="doc_state == 'revoked'"/>
+                        </group>
+                        <group>
+                            <field name="department_id"/>
+                            <field name="responsible_user_id" widget="many2one_avatar_user"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Inherit Search View — ID đúng của Odoo 19 -->
+    <record id="documents_document_view_search_inherit" model="ir.ui.view">
+        <field name="name">documents.document.search.inherit.trasas</field>
+        <field name="model">documents.document</field>
+        <field name="inherit_id" ref="documents.document_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter string="Hiệu lực" name="filter_doc_active" domain="[('doc_state', '=', 'active')]"/>
+                <filter string="Sắp hết hạn" name="filter_doc_expiring" domain="[('doc_state', '=', 'expiring_soon')]"/>
+                <filter string="Hết hiệu lực" name="filter_doc_expired" domain="[('doc_state', '=', 'expired')]"/>
+                <filter string="Đã thu hồi" name="filter_doc_revoked" domain="[('doc_state', '=', 'revoked')]"/>
+                <separator/>
+                <filter string="Loại hồ sơ" name="group_by_doc_type" context="{'group_by':'document_type'}"/>
+                <filter string="Phòng ban" name="group_by_department" context="{'group_by':'department_id'}"/>
+                <filter string="Trạng thái hiệu lực" name="group_by_doc_state" context="{'group_by':'doc_state'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit List View — thêm cột TRASAS -->
+    <record id="documents_document_view_list_inherit" model="ir.ui.view">
+        <field name="name">documents.document.list.inherit.trasas</field>
+        <field name="model">documents.document</field>
+        <field name="inherit_id" ref="documents.documents_view_list_main"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='file_size']" position="after">
+                <field name="document_type" optional="hide"/>
+                <field name="validity_date" optional="hide"/>
+                <field name="doc_state" widget="badge" optional="hide"
+                       decoration-success="doc_state == 'active'" 
+                       decoration-warning="doc_state == 'expiring_soon'" 
+                       decoration-danger="doc_state == 'expired'" 
+                       decoration-muted="doc_state == 'revoked'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

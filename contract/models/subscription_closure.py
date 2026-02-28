@@ -331,7 +331,6 @@ class PauseSubscriptionWizard(models.TransientModel):
                 'state': 'code',
                 'code': f'model.browse({subscription.id}).disable_onu()',
                 'nextcall': self.pause_start_date,
-                'numbercall': 1,
             })
 
         # Schedule the enable_onu method on the pause start date
@@ -342,7 +341,6 @@ class PauseSubscriptionWizard(models.TransientModel):
                 'state': 'code',
                 'code': f'model.browse({subscription.id}).enable_onu()',
                 'nextcall': subscription.next_invoice_date,
-                'numbercall': 1,
             })
         return {'type': 'ir.actions.act_window_close'}
 
@@ -353,7 +351,6 @@ class PauseSubscriptionWizard(models.TransientModel):
             'state': 'code',
             'code': f'model.browse({subscription.id})._create_invoice()',
             'nextcall': subscription.next_invoice_date,
-            'numbercall': 1,
         })
 
 
@@ -386,7 +383,6 @@ class ReactivateSubscriptionWizard(models.TransientModel):
                 'state': 'code',
                 'code': f"model.browse({subscription.id}).sudo().reactivate_subscription_now()",
                 'nextcall': self.reactivation_date,
-                'numbercall': 1,
             })
 
         # Log the activity

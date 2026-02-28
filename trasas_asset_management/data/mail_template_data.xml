@@ -53,11 +53,11 @@
     <record id="email_template_document_expiring" model="mail.template">
         <field name="name">TRASAS: Giấy tờ pháp lý sắp hết hạn</field>
         <field name="model_id" ref="model_trasas_asset"/>
-        <field name="subject">⚠️ Giấy tờ sắp hết hạn: {{ object.code }} - {{ object.name }}</field>
+        <field name="subject">Giấy tờ sắp hết hạn: {{ object.code }} - {{ object.name }}</field>
         <field name="email_to">{{ object.responsible_user_id.email or '' }}</field>
         <field name="body_html" type="html">
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #ff9800;">⚠️ Cảnh báo giấy tờ sắp hết hạn</h2>
+                <h2 style="color: #ff9800;">Cảnh báo giấy tờ sắp hết hạn</h2>
                 
                 <p>Kính gửi <t t-out="object.responsible_user_id.name"/>,</p>
                 

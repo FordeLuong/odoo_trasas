@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- BGĐ bypass: Xem toàn bộ tài liệu documents.document không hạn chế -->
+    <record id="ir_rule_doc_director_all_access" model="ir.rule">
+        <field name="name">BGĐ: Xem tất cả tài liệu</field>
+        <field name="model_id" ref="documents.model_documents_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_doc_director'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- HCNS Manager: Full truy cập trên Access Request -->
+    <record id="ir_rule_access_request_manager" model="ir.rule">
+        <field name="name">HCNS: Full quyền trên yêu cầu truy cập</field>
+        <field name="model_id" ref="model_trasas_doc_access_request"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_doc_manager'))]"/>
+    </record>
+
+    <!-- Nhân viên: Chỉ xem yêu cầu của mình -->
+    <record id="ir_rule_access_request_user" model="ir.rule">
+        <field name="name">Nhân viên: Chỉ xem yêu cầu của mình</field>
+        <field name="model_id" ref="model_trasas_doc_access_request"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_doc_user'))]"/>
+    </record>
+
+    <!-- HCNS Manager: Full quyền Access Log -->
+    <record id="ir_rule_access_log_manager" model="ir.rule">
+        <field name="name">HCNS: Full quyền trên lịch sử truy cập</field>
+        <field name="model_id" ref="model_trasas_doc_access_log"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_doc_manager'))]"/>
+    </record>
+</odoo>

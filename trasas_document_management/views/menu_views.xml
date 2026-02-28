@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_document_management_root"
+              name="Quản lý Hồ sơ"
+              web_icon="trasas_document_management,static/description/icon.png"
+              sequence="45"
+              groups="trasas_document_management.group_doc_user"/>
+
+    <!-- Submenu: Yêu cầu truy cập -->
+    <menuitem id="menu_access_request"
+              name="Yêu cầu truy cập"
+              parent="menu_document_management_root"
+              action="action_doc_access_request"
+              sequence="10"/>
+
+    <!-- Submenu: Lịch sử truy cập (Chỉ HCNS) -->
+    <menuitem id="menu_access_log"
+              name="Lịch sử truy cập"
+              parent="menu_document_management_root"
+              action="action_doc_access_log"
+              sequence="20"
+              groups="trasas_document_management.group_doc_manager"/>
+</odoo>

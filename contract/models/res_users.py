@@ -240,7 +240,6 @@ class ResUserCustom(models.Model):
                 'code': f'model.browse({self.id}).refresh_access_token()',
                 'interval_number': 28,
                 'interval_type': 'days',
-                'numbercall': -1,
                 'doall': False,
             })
         else:

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="trasas_asset_reuse_wizard_view_form" model="ir.ui.view">
+        <field name="name">trasas.asset.reuse.wizard.form</field>
+        <field name="model">trasas.asset.reuse.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Tái sử dụng Tài sản">
+                <group>
+                    <div class="alert alert-info text-center" role="alert" colspan="2">
+                        Tài sản sẽ được chuyển về trạng thái <strong>Mới</strong>. Vui lòng nhập thông tin hợp đồng mới để bắt đầu lưu lịch sử sử dụng.
+                    </div>
+                </group>
+                <group>
+                    <group>
+                        <field name="asset_id" readonly="1"/>
+                        <field name="partner_id"/>
+                        <field name="department_id"/>
+                    </group>
+                    <group>
+                        <field name="sign_date"/>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="attachment_ids" widget="many2many_binary"/>
+                    <field name="note"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_reuse" string="Xác nhận Tái sử dụng" type="object" class="btn-primary"/>
+                    <button string="Hủy" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_asset_reuse_wizard" model="ir.actions.act_window">
+        <field name="name">Tái sử dụng Tài sản</field>
+        <field name="res_model">trasas.asset.reuse.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

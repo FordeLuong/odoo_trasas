@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence cho mã yêu cầu truy cập -->
+        <record id="seq_doc_access_request" model="ir.sequence">
+            <field name="name">Mã Yêu cầu Truy cập</field>
+            <field name="code">trasas.doc.access.request</field>
+            <field name="prefix">YC-%(y)s/</field>
+            <field name="padding">4</field>
+        </record>
+
+        <!-- CRON: Kiểm tra tài liệu hết hiệu lực -->
+        <record id="ir_cron_document_expiry" model="ir.cron">
+            <field name="name">DMS: Cảnh báo &amp; đóng tài liệu hết hiệu lực</field>
+            <field name="model_id" ref="documents.model_documents_document"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_document_expiry_check()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- CRON: Thu hồi quyền truy cập hết hạn -->
+        <record id="ir_cron_revoke_expired_access" model="ir.cron">
+            <field name="name">DMS: Thu hồi quyền truy cập hết hạn</field>
+            <field name="model_id" ref="model_trasas_doc_access_request"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_revoke_expired_access()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

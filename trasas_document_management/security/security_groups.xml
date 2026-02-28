@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ PRIVILEGE (Odoo 19) ============ -->
+    <record id="privilege_trasas_document" model="res.groups.privilege">
+        <field name="name">Quản lý Hồ sơ &amp; Tài liệu</field>
+        <field name="category_id" ref="base.module_category_human_resources"/>
+        <field name="sequence">25</field>
+    </record>
+
+    <!-- ============ SECURITY GROUPS ============ -->
+
+    <!-- Nhóm quyền: Nhân viên -->
+    <record id="group_doc_user" model="res.groups">
+        <field name="name">Nhân viên DMS</field>
+        <field name="privilege_id" ref="privilege_trasas_document"/>
+        <field name="comment">Có thể xem tài liệu được cấp quyền, tạo yêu cầu truy cập</field>
+    </record>
+
+    <!-- Nhóm quyền: HCNS Manager -->
+    <record id="group_doc_manager" model="res.groups">
+        <field name="name">Quản lý HCNS (DMS)</field>
+        <field name="privilege_id" ref="privilege_trasas_document"/>
+        <field name="implied_ids" eval="[(4, ref('group_doc_user'))]"/>
+        <field name="comment">CRUD tất cả tài liệu, Duyệt yêu cầu, Quản lý thư mục</field>
+    </record>
+
+    <!-- Nhóm quyền: Ban Giám đốc -->
+    <record id="group_doc_director" model="res.groups">
+        <field name="name">Ban Giám đốc (DMS)</field>
+        <field name="privilege_id" ref="privilege_trasas_document"/>
+        <field name="implied_ids" eval="[(4, ref('group_doc_user'))]"/>
+        <field name="comment">Xem tất cả tài liệu, Không cần gửi yêu cầu - Bypass phê duyệt</field>
+    </record>
+
+    <!-- Admin tự động có quyền Manager -->
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_doc_manager'))]"/>
+    </record>
+</odoo>
