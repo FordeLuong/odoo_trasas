@@ -14,4 +14,10 @@
               action="action_signature_provider"
               sequence="30"
               groups="trasas_contract_management.group_contract_manager"/>
+    <menuitem id="menu_signature_api_log"
+              name="Nhật ký API ký số"
+              parent="trasas_contract_management.menu_contract_config"
+              action="action_signature_api_log"
+              sequence="40"
+              groups="trasas_contract_management.group_contract_manager"/>
 </odoo>

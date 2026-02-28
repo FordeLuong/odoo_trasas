@@ -2,6 +2,7 @@
 import logging
 import uuid
 import re
+import time
 import requests
 import base64
 import hashlib
@@ -346,34 +347,153 @@ class TrasasSignatureProvider(models.Model):
             safe["sign_files"] = safe_files
         return safe
 
-    def _vnpt_smartca_post(self, path, payload, timeout=30):
+    def _vnpt_smartca_log_api(
+        self,
+        *,
+        request,
+        signer,
+        operation,
+        method,
+        endpoint,
+        url,
+        status_code,
+        success,
+        duration_ms,
+        payload,
+        response_payload,
+        error_message=None,
+    ):
+        vals = {
+            "provider_id": self.id,
+            "request_id": request.id if request else False,
+            "signer_id": signer.id if signer else False,
+            "operation": operation or "",
+            "method": method or "POST",
+            "endpoint": endpoint or "",
+            "url": url or "",
+            "status_code": status_code or 0,
+            "success": bool(success),
+            "duration_ms": duration_ms or 0,
+            "request_payload": json.dumps(
+                self._vnpt_smartca_sanitize_payload(payload),
+                ensure_ascii=False,
+                indent=2,
+            )
+            if payload is not None
+            else "",
+            "response_payload": json.dumps(
+                response_payload, ensure_ascii=False, indent=2
+            )
+            if isinstance(response_payload, (dict, list))
+            else (response_payload or ""),
+            "error_message": error_message or "",
+            "company_id": self.company_id.id or False,
+        }
+        try:
+            self.env["trasas.signature.api.log"].sudo().create(vals)
+        except Exception:
+            _logger.exception("Failed to write SmartCA API log")
+
+    def _vnpt_smartca_post(
+        self, path, payload, timeout=30, request=None, signer=None, operation=None
+    ):
         self.ensure_one()
         url = f"{self._vnpt_smartca_base_url()}{path}"
         _logger.info("SmartCA POST %s", url)
-        resp = requests.post(
-            url,
-            headers=self._vnpt_smartca_headers(),
-            json=payload,
-            timeout=timeout,
-        )
+        started = time.monotonic()
+        try:
+            resp = requests.post(
+                url,
+                headers=self._vnpt_smartca_headers(),
+                json=payload,
+                timeout=timeout,
+            )
+        except requests.RequestException as e:
+            duration_ms = int((time.monotonic() - started) * 1000)
+            self._vnpt_smartca_log_api(
+                request=request,
+                signer=signer,
+                operation=operation,
+                method="POST",
+                endpoint=path,
+                url=url,
+                status_code=0,
+                success=False,
+                duration_ms=duration_ms,
+                payload=payload,
+                response_payload="",
+                error_message=str(e),
+            )
+            raise UserError(_("SmartCA network error: %s") % str(e))
+
+        duration_ms = int((time.monotonic() - started) * 1000)
+        response_payload = None
+        try:
+            response_payload = resp.json()
+        except Exception:
+            response_payload = resp.text
+
         if resp.status_code >= 400:
             _logger.warning(
                 "SmartCA error %s. Payload=%s",
                 resp.status_code,
                 self._vnpt_smartca_sanitize_payload(payload),
             )
+            self._vnpt_smartca_log_api(
+                request=request,
+                signer=signer,
+                operation=operation,
+                method="POST",
+                endpoint=path,
+                url=url,
+                status_code=resp.status_code,
+                success=False,
+                duration_ms=duration_ms,
+                payload=payload,
+                response_payload=response_payload,
+                error_message=resp.text or "",
+            )
             raise UserError(
                 _("SmartCA HTTP %s: %s (URL: %s)")
                 % (resp.status_code, resp.text, url)
             )
         try:
-            return resp.json()
-        except Exception:
+            data = resp.json()
+        except Exception as e:
+            self._vnpt_smartca_log_api(
+                request=request,
+                signer=signer,
+                operation=operation,
+                method="POST",
+                endpoint=path,
+                url=url,
+                status_code=resp.status_code,
+                success=False,
+                duration_ms=duration_ms,
+                payload=payload,
+                response_payload=resp.text,
+                error_message=str(e),
+            )
             raise UserError(
                 _("SmartCA response is not JSON: %s") % resp.text
             )
+        self._vnpt_smartca_log_api(
+            request=request,
+            signer=signer,
+            operation=operation,
+            method="POST",
+            endpoint=path,
+            url=url,
+            status_code=resp.status_code,
+            success=True,
+            duration_ms=duration_ms,
+            payload=payload,
+            response_payload=data,
+            error_message="",
+        )
+        return data
 
-    def _vnpt_smartca_get_certificate(self, signer, transaction_id):
+    def _vnpt_smartca_get_certificate(self, signer, transaction_id, request=None):
         """Fetch certificate info to derive serial_number when missing."""
         self.ensure_one()
         payload = {
@@ -384,7 +504,11 @@ class TrasasSignatureProvider(models.Model):
             "transaction_id": transaction_id,
         }
         data = self._vnpt_smartca_post(
-            "/v1/credentials/get_certificate", payload
+            "/v1/credentials/get_certificate",
+            payload,
+            request=request,
+            signer=signer,
+            operation="get_certificate",
         )
         serial = (
             data.get("serial_number")
@@ -466,7 +590,7 @@ class TrasasSignatureProvider(models.Model):
             if not signer.vnpt_serial_number:
                 try:
                     self._vnpt_smartca_get_certificate(
-                        signer, transaction_id
+                        signer, transaction_id, request=request
                     )
                 except Exception as e:
                     _logger.warning(
@@ -499,7 +623,13 @@ class TrasasSignatureProvider(models.Model):
             if signer.vnpt_serial_number:
                 payload["serial_number"] = signer.vnpt_serial_number
 
-            data = self._vnpt_smartca_post("/v1/signatures/sign", payload)
+            data = self._vnpt_smartca_post(
+                "/v1/signatures/sign",
+                payload,
+                request=request,
+                signer=signer,
+                operation="sign",
+            )
 
             tran_code = (
                 data.get("tran_code")
@@ -555,6 +685,9 @@ class TrasasSignatureProvider(models.Model):
                     "sp_password": self.api_secret,
                     "user_id": signer.id_number or "",
                 },
+                request=request,
+                signer=signer,
+                operation="status",
             )
 
             status_code = (
