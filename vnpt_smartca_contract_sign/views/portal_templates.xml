@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_contract_page" name="Portal Contract Page">
+        <t t-call="portal.portal_layout">
+            <t t-set="title">Contract</t>
+
+            <div class="container my-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 class="mb-2">
+              Hợp đồng: <t t-esc="contract.name"/>
+                        </h3>
+                        <p class="text-muted mb-4">
+              Khách hàng: <t t-esc="contract.partner_id.name"/>
+                        </p>
+
+                        <t t-if="request.params.get('upload') == 'ok'">
+                            <div class="alert alert-success">Upload thành công. Cảm ơn Quý khách!</div>
+                        </t>
+                        <t t-elif="request.params.get('upload') in ['missing','empty']">
+                            <div class="alert alert-danger">Upload không hợp lệ. Vui lòng chọn file PDF đã ký.</div>
+                        </t>
+
+                        <div class="alert alert-info">
+              Bước 1: Tải file PDF đã có chữ ký của Công ty.<br/>
+              Bước 2: Ký số bằng nhà cung cấp chữ ký số của Quý khách trên chính file này (PAdES).<br/>
+              Bước 3: Upload lại file PDF đã ký đầy đủ.
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <t t-if="contract.director_signed_attachment_id">
+                            <a class="btn btn-primary" t-att-href="'/my/contracts/%s/download/director-signed?access_token=%s' % (contract.id, access_token)">
+                  Tải PDF đã ký bởi Công ty
+                            </a>
+                        </t>
+                        <t t-else="">
+                            <span class="badge bg-warning text-dark">Công ty chưa ký xong</span>
+                        </t>
+                    </div>
+
+                    <t t-if="contract.state != 'completed'">
+                        <form t-att-action="'/my/contracts/%s/upload/fully-signed?access_token=%s' % (contract.id, access_token)" method="post" enctype="multipart/form-data">
+                            <div class="mb-2">
+                                <label class="form-label">Upload PDF đã ký đầy đủ</label>
+                                <input class="form-control" type="file" name="fully_signed_file" accept="application/pdf"/>
+                            </div>
+                            <button class="btn btn-success" type="submit">Upload</button>
+                        </form>
+                    </t>
+                    <t t-else="">
+                        <div class="alert alert-success">
+                Hợp đồng đã hoàn tất.
+                        </div>
+                    </t>
+
+                    <hr class="my-4"/>
+                    <div class="text-muted">
+                        <b>Lưu ý:</b> Vui lòng ký trực tiếp vào file PDF (PAdES), không in-scan/ảnh chữ ký.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</template>
+</odoo>

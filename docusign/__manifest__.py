@@ -13,7 +13,7 @@
         and others. Odoo integration with Docusign enhances operation of organization with legitimate
         documentation.
         
-        Version 17.0.1.0 adds:
+        Version 19.0.1.0.0 adds:
         - Real-time webhook support for envelope events (sent, delivered, completed, declined, voided)
         - Automatic document storage in ir.attachment (replaces file system storage)
         - Complete audit trail via mail.thread (chatter) integration
@@ -21,7 +21,7 @@
         - Automatic token refresh with expiration handling
         - HMAC signature verification for webhook security
         
-        Version 17.0.1.2 adds:
+        Version 19.0.1.0.0 adds:
         - Interactive dashboard with real-time statistics
         - Envelope status tracking (new, sent, completed)
         - Recipient signature monitoring

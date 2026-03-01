@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vnpt_contract_user,vnpt.contract user,model_vnpt_contract,group_vnpt_contract_user,1,1,1,0
+access_vnpt_director_sign_wizard_user,vnpt.director.sign.wizard,model_vnpt_director_sign_wizard,group_vnpt_contract_user,1,1,1,0

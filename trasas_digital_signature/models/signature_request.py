@@ -606,9 +606,9 @@ class TrasasSignatureRequest(models.Model):
                 ):
                     self.message_post(
                         body=_(
-                            "Tất cả người ký đã hoàn tất 
-                            "nhưng không thể tải tài liệu đã ký. 
-                            "Vui lòng thử lại hoặc liên hệ quản trị."
+                            """Tất cả người ký đã hoàn tất 
+                            nhưng không thể tải tài liệu đã ký. 
+                            Vui lòng thử lại hoặc liên hệ quản trị."""
                         )
                     )
                 return

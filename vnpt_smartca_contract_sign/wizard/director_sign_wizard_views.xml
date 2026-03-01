@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="vnpt_director_sign_wizard_view" model="ir.ui.view">
+        <field name="name">vnpt.director.sign.wizard.form</field>
+        <field name="model">vnpt.director.sign.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Request Director Signature (VNPT SmartCA)">
+                <group>
+                    <field name="contract_id" readonly="1"/>
+                    <field name="smartca_user_id"/>
+                    <field name="serial_number"/>
+                </group>
+                <group string="Shown on SmartCA App">
+                    <field name="transaction_desc"/>
+                    <field name="doc_id"/>
+                    <field name="time_stamp"/>
+                </group>
+                <footer>
+                    <button string="Auto-fill" type="object" name="action_autofill" class="btn-secondary"/>
+                    <button string="Send request" type="object" name="action_send" class="btn-primary"/>
+                    <button string="Cancel" special="cancel" class="btn-link"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
