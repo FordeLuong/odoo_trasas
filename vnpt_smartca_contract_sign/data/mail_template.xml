@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mail_template_contract_customer_sign" model="mail.template">
+        <field name="name">Contract - Request Customer Signature (Portal)</field>
+        <field name="model_id" ref="model_vnpt_contract"/>
+        <field name="subject">[${object.name}] Vui lòng ký hợp đồng</field>
+        <field name="email_from">${(user.email_formatted or '')|safe}</field>
+        <field name="email_to">${object.partner_id.email or ''}</field>
+        <field name="auto_delete" eval="False"/>
+        <field name="body_html" type="html">
+            <![CDATA[
+      <div style="font-family: Arial, sans-serif; font-size: 14px;">
+        <p>Xin chào ${object.partner_id.name or 'Quý khách'},</p>
+
+        <p>
+          Công ty chúng tôi đã ký số hợp đồng <b>${object.name}</b>.
+          Vui lòng truy cập đường dẫn dưới đây để tải bản PDF đã ký bởi Công ty, ký số bằng nhà cung cấp của Quý khách,
+          rồi upload lại bản PDF đã ký đầy đủ.
+        </p>
+
+        <p>
+          <a href="${ctx.get('portal_url')}" style="background:#875A7B;color:#fff;padding:10px 14px;text-decoration:none;border-radius:6px;">
+            Mở trang ký hợp đồng
+          </a>
+        </p>
+
+        <p>Nếu nút không bấm được, vui lòng copy link này vào trình duyệt:</p>
+        <p style="word-break: break-all;">${ctx.get('portal_url')}</p>
+
+        <hr/>
+        <p style="color:#666;">
+          Lưu ý: Vui lòng ký trực tiếp vào file PDF (PAdES), không in-scan/ảnh chữ ký.
+        </p>
+      </div>
+      ]]>
+        </field>
+    </record>
+</odoo>

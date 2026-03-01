@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="vnpt_contract_view_tree" model="ir.ui.view">
+        <field name="name">vnpt.contract.tree</field>
+        <field name="model">vnpt.contract</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="state"/>
+                <field name="smartca_doc_id"/>
+                <field name="smartca_tran_code"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="vnpt_contract_view_form" model="ir.ui.view">
+        <field name="name">vnpt.contract.form</field>
+        <field name="model">vnpt.contract</field>
+        <field name="arch" type="xml">
+            <form string="Contract">
+                <header>
+                    <button name="action_request_director_signature" type="object" string="Request Director Sign (VNPT)" class="btn-primary" attrs="{'invisible': [('state','not in',('draft','failed'))]}"/>
+
+                    <button name="action_send_to_customer" type="object" string="Send to Customer (Portal)" class="btn-secondary" attrs="{'invisible': [('state','!=','waiting_customer')]}"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,waiting_director,waiting_customer,completed,failed"/>
+                </header>
+
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="partner_id"/>
+                    </group>
+
+                    <group string="PDF Attachments">
+                        <field name="unsigned_attachment_id"/>
+                        <field name="director_placeholder_attachment_id" readonly="1"/>
+                        <field name="director_signed_attachment_id" readonly="1"/>
+                        <field name="fully_signed_attachment_id" readonly="1"/>
+                    </group>
+
+                    <group string="SmartCA (Director)">
+                        <field name="smartca_user_id" readonly="1"/>
+                        <field name="smartca_serial_number" readonly="1"/>
+                        <field name="smartca_transaction_id" readonly="1"/>
+                        <field name="smartca_tran_code" readonly="1"/>
+                        <field name="smartca_doc_id" readonly="1"/>
+                        <field name="smartca_time_stamp" readonly="1"/>
+                        <field name="smartca_transaction_desc" readonly="1"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Chatter">
+                            <field name="message_follower_ids"/>
+                            <field name="activity_ids"/>
+                            <field name="message_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="vnpt_contract_action" model="ir.actions.act_window">
+        <field name="name">VNPT Contracts</field>
+        <field name="res_model">vnpt.contract</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="vnpt_contract_menu_root" name="VNPT SmartCA Contracts"/>
+    <menuitem id="vnpt_contract_menu" name="Contracts" parent="vnpt_contract_menu_root" action="vnpt_contract_action"/>
+</odoo>
