@@ -13,7 +13,7 @@ class VnptContractPortal(CustomerPortal):
         contract.check_access_token(access_token)
 
         values = {"contract": contract, "access_token": access_token}
-        return request.render("vnpt_smartca_contract_full.portal_contract_page", values)
+        return request.render("vnpt_smartca_contract_sign.portal_contract_page", values)
 
     @http.route(['/my/contracts/<int:contract_id>/download/director-signed'], type='http', auth='public', website=True)
     def download_director_signed(self, contract_id, access_token=None, **kw):

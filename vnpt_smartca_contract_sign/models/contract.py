@@ -111,7 +111,7 @@ class VnptContract(models.Model):
         if not self.director_signed_attachment_id:
             raise UserError(_("Missing Director Signed PDF."))
 
-        template = self.env.ref("vnpt_smartca_contract_full.mail_template_contract_customer_sign", raise_if_not_found=False)
+        template = self.env.ref("vnpt_smartca_contract_sign.mail_template_contract_customer_sign", raise_if_not_found=False)
         if not template:
             raise UserError(_("Mail template not found."))
 
