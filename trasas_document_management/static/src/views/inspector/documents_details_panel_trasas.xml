@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <!-- OWL Component Patch cho Cột Phải (Inspector) của app Documents -->
+    <t t-inherit="documents.DocumentsDetailsPanel" t-inherit-mode="extension">
+        
+        <!-- Chèn khung TRASAS vào dưới phần File Size / Owner / Contact -->
+        <xpath expr="//div[hasclass('o_documents_details_panel_fields')]" position="inside">
+            
+            <t t-if="record.data.type !== 'folder'">
+                
+                <!-- TIÊU ĐỀ SECTION -->
+                <div class="w-100 mt-4 mb-2 border-bottom border-secondary d-flex align-items-center pb-2">
+                    <i class="fa fa-id-card-o text-primary me-2"/>
+                    <b class="text-primary text-uppercase" style="font-size: 0.9em;">Thông tin Hồ sơ TRASAS</b>
+                </div>
+
+                <!-- Loại hồ sơ -->
+                <i class="fa fa-list-alt mx-1 my-2"/>
+                <div class="o_field_widget o_field_selection">
+                    <SelectionField
+                        name="'document_type'"
+                        record="record"
+                        readonly="userPermissionViewOnly"
+                    />
+                </div>
+
+                <!-- Số hiệu văn bản -->
+                <i class="fa fa-hashtag mx-1 my-2"/>
+                <div class="o_field_widget o_field_char">
+                    <CharField
+                        name="'document_number'"
+                        record="record"
+                        readonly="userPermissionViewOnly"
+                        placeholder="'Nhập số hiệu văn bản...'"
+                    />
+                </div>
+
+                <!-- Cơ quan cấp -->
+                <i class="fa fa-university mx-1 my-2"/>
+                <div class="o_field_widget o_field_char">
+                    <CharField
+                        name="'issuing_authority'"
+                        record="record"
+                        readonly="userPermissionViewOnly"
+                        placeholder="'Tên cơ quan cấp...'"
+                    />
+                </div>
+
+                <!-- Ngày cấp -->
+                <i class="fa fa-calendar mx-1 my-2"/>
+                <div class="o_field_widget o_field_date">
+                    <DateField
+                        name="'issue_date'"
+                        record="record"
+                        readonly="userPermissionViewOnly"
+                    />
+                </div>
+
+                <!-- Ngày hết hiệu lực -->
+                <i class="fa fa-calendar-times-o mx-1 my-2"/>
+                <div class="o_field_widget o_field_date">
+                    <DateField
+                        name="'validity_date'"
+                        record="record"
+                        readonly="userPermissionViewOnly"
+                    />
+                </div>
+
+                <!-- Số ngày còn lại (Readonly) -->
+                <i class="fa fa-hourglass-half mx-1 my-2"/>
+                <div class="o_field_widget o_field_integer">
+                    <IntegerField
+                        name="'days_to_expire'"
+                        record="record"
+                        readonly="true"
+                    />
+                    <span class="ms-1 text-muted">ngày</span>
+                </div>
+
+                <!-- Độ Mật -->
+                <i class="fa fa-shield mx-1 my-2"/>
+                <div class="o_field_widget o_field_selection">
+                    <SelectionField
+                        name="'confidential_level'"
+                        record="record"
+                        readonly="userPermissionViewOnly"
+                    />
+                </div>
+
+                <!-- Trạng thái (Badge/Selection) -->
+                <i class="fa fa-info-circle mx-1 my-2"/>
+                <div class="o_field_widget o_field_selection">
+                    <SelectionField
+                        name="'doc_state'"
+                        record="record"
+                        readonly="true"
+                    />
+                </div>
+
+                <!-- Phòng ban quản lý -->
+                <i class="fa fa-sitemap mx-1 my-2"/>
+                <div class="o_field_widget o_field_many2one">
+                    <DocumentsDetailsMany2OneField
+                        name="'department_id'"
+                        record="record"
+                        readonly="userPermissionViewOnly"
+                        canOpen="false"
+                        canCreate="false"
+                        canQuickCreate="false"
+                        canCreateEdit="false"
+                        placeholder="'Chọn phòng ban...'"
+                    />
+                </div>
+
+                <!-- Người phụ trách -->
+                <i class="fa fa-user-circle-o mx-1 my-2"/>
+                <div class="o_field_widget o_field_many2one">
+                    <DocumentsDetailsMany2OneField
+                        name="'responsible_user_id'"
+                        record="record"
+                        readonly="userPermissionViewOnly"
+                        canOpen="false"
+                        canCreate="false"
+                        canQuickCreate="false"
+                        canCreateEdit="false"
+                        placeholder="'Người phụ trách...'"
+                    />
+                </div>
+            </t>
+
+        </xpath>
+    </t>
+</templates>

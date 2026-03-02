@@ -22,6 +22,7 @@
         "views/fleet_vehicle_views.xml",
         "views/fleet_legal_document_views.xml",
         "views/fleet_service_log_views.xml",
+        "views/fleet_vehicle_report_views.xml",
     ],
     "post_init_hook": "_post_init_trasas_fleet_states",
     "installable": True,

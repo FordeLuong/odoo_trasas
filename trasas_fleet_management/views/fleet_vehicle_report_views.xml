@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- View List Báo Cáo Thời Hạn Xe -->
+    <record id="fleet_vehicle_report_view_tree" model="ir.ui.view">
+        <field name="name">fleet.vehicle.report.tree</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="arch" type="xml">
+            <list string="Báo cáo thời hạn xe" create="0" delete="0" decoration-warning="state == 'suspended'" decoration-danger="state in ('expired', 'liquidated')">
+                <field name="vehicle_code"/>
+                <field name="license_plate"/>
+                <field name="model_id"/>
+                <field name="next_maintenance_date" widget="remaining_days"/>
+                <field name="next_inspection_date" widget="remaining_days"/>
+                <field name="next_insurance_date" widget="remaining_days"/>
+                <field name="state" widget="badge" decoration-info="state == 'ready'" decoration-success="state == 'in_use'" decoration-warning="state == 'registration'" decoration-danger="state in ['expired', 'suspended']"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Thẻ Action Filter -->
+    <record id="fleet_vehicle_report_action" model="ir.actions.act_window">
+        <field name="name">Báo cáo thời hạn xe</field>
+        <field name="res_model">fleet.vehicle</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="fleet_vehicle_report_view_tree"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Không có dữ liệu thời hạn phương tiện.
+          </p>
+        </field>
+    </record>
+
+    <!-- Server Action Menu Hồ sơ Link qua Documents -->
+    <record id="action_server_fleet_documents" model="ir.actions.server">
+        <field name="name">Hồ sơ phương tiện</field>
+        <field name="model_id" ref="documents.model_documents_document"/>
+        <field name="state">code</field>
+        <field name="code">
+action = env["ir.actions.actions"]._for_xml_id("documents.document_action")
+folder = env.ref('documents_fleet.document_fleet_folder', raise_if_not_found=False)
+action['domain'] = [('res_model', '=', 'fleet.vehicle')]
+action['context'] = {
+    'search_default_res_model': 'fleet.vehicle',
+    'searchpanel_default_folder_id': folder.id if folder else False,
+}
+        </field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_fleet_vehicle_report"
+              name="Báo cáo thời hạn"
+              parent="fleet.menu_fleet_reporting"
+              action="fleet_vehicle_report_action"
+              sequence="20"/>
+
+    <menuitem id="menu_fleet_documents"
+              name="Hồ sơ xe (Tài liệu)"
+              parent="fleet.menu_root"
+              action="action_server_fleet_documents"
+              sequence="15"/>
+</odoo>

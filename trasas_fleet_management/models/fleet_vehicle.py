@@ -50,6 +50,20 @@ class FleetVehicle(models.Model):
         "fleet.legal.document", "vehicle_id", string="Hồ sơ pháp lý"
     )
 
+    next_inspection_date = fields.Date(
+        string="Ngày đăng kiểm tiếp",
+        compute="_compute_next_legal_dates",
+        store=True,
+        tracking=True,
+    )
+
+    next_insurance_date = fields.Date(
+        string="Ngày BH tiếp theo",
+        compute="_compute_next_legal_dates",
+        store=True,
+        tracking=True,
+    )
+
     document_folder_id = fields.Many2one(
         "documents.document",
         string="Folder tài liệu",
@@ -57,6 +71,34 @@ class FleetVehicle(models.Model):
         readonly=True,
         copy=False,
     )
+
+    @api.depends("legal_document_ids.validity_date", "legal_document_ids.state")
+    def _compute_next_legal_dates(self):
+        for rec in self:
+            # Inspection
+            inspections = rec.legal_document_ids.filtered(
+                lambda d: d.document_type == "inspection" and d.state != "revoked"
+            )
+            if inspections:
+                # Get the one with the furthest validity_date
+                furthest_inspection = max(
+                    inspections, key=lambda d: d.validity_date or fields.Date.today()
+                )
+                rec.next_inspection_date = furthest_inspection.validity_date
+            else:
+                rec.next_inspection_date = False
+
+            # Insurance
+            insurances = rec.legal_document_ids.filtered(
+                lambda d: d.document_type == "insurance" and d.state != "revoked"
+            )
+            if insurances:
+                furthest_insurance = max(
+                    insurances, key=lambda d: d.validity_date or fields.Date.today()
+                )
+                rec.next_insurance_date = furthest_insurance.validity_date
+            else:
+                rec.next_insurance_date = False
 
     def _get_or_create_document_folder(self):
         """Lấy hoặc tạo sub-folder trong Documents cho xe này."""

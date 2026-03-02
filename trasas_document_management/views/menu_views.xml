@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Root Menu -->
-    <menuitem id="menu_document_management_root"
-              name="Quản lý Hồ sơ"
-              web_icon="trasas_document_management,static/description/icon.png"
-              sequence="45"
+    <!-- Gắn mảng "Yêu cầu & Lịch sử" thành sub-menus của App Documents chuẩn Odoo (menu id: documents.menu_root) -->
+
+    <!-- Submenu: Quản lý Hình thức Truy cập (Group parent menu) -->
+    <menuitem id="menu_doc_trasas_management"
+              name="Quản lý Truy cập"
+              parent="documents.menu_root"
+              sequence="50"
               groups="trasas_document_management.group_doc_user"/>
 
-    <!-- Submenu: Yêu cầu truy cập -->
-    <menuitem id="menu_access_request"
-              name="Yêu cầu truy cập"
-              parent="menu_document_management_root"
-              action="action_doc_access_request"
-              sequence="10"/>
-
-    <!-- Submenu: Lịch sử truy cập (Chỉ HCNS) -->
+    <!-- Lịch sử (Dành cho HCNS Manager) -->
     <menuitem id="menu_access_log"
-              name="Lịch sử truy cập"
-              parent="menu_document_management_root"
+              name="Lịch sử Truy cập"
+              parent="menu_doc_trasas_management"
               action="action_doc_access_log"
-              sequence="20"
+              sequence="10"
               groups="trasas_document_management.group_doc_manager"/>
+
+    <!-- Yêu cầu (Dành cho Nhân viên) -->
+    <menuitem id="menu_access_request"
+              name="Yêu cầu Truy cập"
+              parent="menu_doc_trasas_management"
+              action="action_doc_access_request"
+              sequence="20"/>
+
 </odoo>

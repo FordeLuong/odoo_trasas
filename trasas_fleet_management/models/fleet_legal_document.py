@@ -123,6 +123,51 @@ class FleetLegalDocument(models.Model):
             if not self.name:
                 self.name = type_label
 
+    @api.model
+    def _cron_check_document_expiry(self):
+        """
+        Daily Cron:
+        Cập nhật trạng thái của các chứng từ (active, expiring_soon, expired).
+        Nếu giấy tờ bắt buộc (đăng ký, đăng kiểm, bảo hiểm) hết hạn, chuyển state xe sang expired.
+        """
+        today = fields.Date.context_today(self)
+        documents = self.search(
+            [("state", "!=", "revoked"), ("validity_date", "!=", False)]
+        )
+
+        expired_vehicles = self.env["fleet.vehicle"]
+
+        for doc in documents:
+            days_left = (doc.validity_date - today).days
+            doc.days_to_expire = days_left
+
+            new_state = doc.state
+            if days_left < 0:
+                new_state = "expired"
+            elif 0 <= days_left <= 30:
+                new_state = "expiring_soon"
+            elif days_left > 30:
+                new_state = "active"
+
+            if new_state != doc.state:
+                doc.state = new_state
+                # Check if it's a mandatory document that just expired
+                if new_state == "expired" and doc.document_type in [
+                    "registration",
+                    "inspection",
+                    "insurance",
+                ]:
+                    expired_vehicles |= doc.vehicle_id
+
+        # Update vehicle states
+        if expired_vehicles:
+            # We filter out already liquidated/expired vehicles just in case, though write will handle it
+            to_expire = expired_vehicles.filtered(
+                lambda v: v.state not in ["liquidated", "expired"]
+            )
+            if to_expire:
+                to_expire.write({"state": "expired"})
+
     # -------------------------------------------------------------------------
     # CRUD: Sync attachments to Documents module
     # -------------------------------------------------------------------------

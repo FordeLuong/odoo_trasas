@@ -23,6 +23,13 @@
                 <field name="vehicle_code"/>
             </xpath>
 
+            <!-- Hợp đồng thẻ xe: ẩn số đếm trên nút form -->
+            <xpath expr="//button[@name='return_action_to_open']//field[@name='contract_count']" position="replace">
+                <div class="o_stat_info">
+                    <span class="o_stat_text">Hợp đồng</span>
+                </div>
+            </xpath>
+
             <!-- Ẩn "Make Vehicle Available" (car) -->
             <xpath expr="//label[@for='plan_to_change_car']" position="attributes">
                 <attribute name="invisible">1</attribute>
@@ -94,6 +101,28 @@
             </xpath>
             <xpath expr="//field[@name='state_id']" position="after">
                 <field name="state" widget="badge" decoration-info="state == 'ready'" decoration-success="state == 'in_use'" decoration-warning="state == 'registration'" decoration-danger="state in ['expired', 'suspended']"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hợp đồng thẻ xe: ẩn số đếm trên thẻ Kanban -->
+    <record id="fleet_vehicle_kanban_trasas_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.kanban.trasas.inherit</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//a[field[@name='contract_count']]" position="replace">
+                <a t-if="record.contract_count.raw_value>0" type="object"
+                   name="return_action_to_open" href="#" data-context='{"xml_id":"fleet_vehicle_log_contract_action"}'
+                   title="Hợp đồng">
+                    <field name="contract_count" invisible="1"/>
+                    <span t-if="record.contract_renewal_due_soon.raw_value and !record.contract_renewal_overdue.raw_value"
+                          class="fa fa-exclamation-triangle text-warning" role="img" aria-label="Warning: renewal due soon" title="Warning: renewal due soon">
+                    </span>
+                    <span t-if="record.contract_renewal_overdue.raw_value"
+                          class="fa fa-exclamation-triangle text-danger" role="img" aria-label="Attention: renewal overdue" title="Attention: renewal overdue">
+                    </span>
+                </a>
             </xpath>
         </field>
     </record>

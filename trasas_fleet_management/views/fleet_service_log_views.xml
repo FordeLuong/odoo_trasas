@@ -14,6 +14,33 @@
                 <button name="action_cancel" string="Hủy" type="object"
                         invisible="state not in ('new', 'running')"/>
             </xpath>
+            <xpath expr="//field[@name='service_type_id']" position="after">
+                <field name="description"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Thêm field description vào tree view -->
+    <record id="fleet_vehicle_log_services_view_tree_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.log.services.tree.trasas.inherit</field>
+        <field name="model">fleet.vehicle.log.services</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_log_services_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='service_type_id']" position="after">
+                <field name="description"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Thêm field name (mô tả được đồng bộ) vào Odometer tree view -->
+    <record id="fleet_vehicle_odometer_view_tree_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.odometer.tree.trasas.inherit</field>
+        <field name="model">fleet.vehicle.odometer</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_odometer_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='driver_id']" position="after">
+                <field name="name" string="Mô tả công việc" optional="show"/>
+            </xpath>
         </field>
     </record>
 </odoo>
