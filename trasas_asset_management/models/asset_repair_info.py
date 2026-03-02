@@ -1,48 +1,51 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 from odoo import models, fields
 
 
-class TrasasAssetRenovationCost(models.Model):
-    _name = "trasas.asset.renovation.cost"
-    _description = "Chi phí cải tạo tài sản"
+class TrasasAssetRepairInfo(models.Model):
+    _name = "trasas.asset.repair.info"
+    _description = "Thong tin sua chua tai san"
     _order = "date desc, id desc"
 
     asset_id = fields.Many2one(
         "trasas.asset",
-        string="Tài sản",
+        string="Tai san",
         required=True,
         ondelete="cascade",
         index=True,
     )
     name = fields.Char(
-        string="Tên hạng mục cải tạo",
+        string="Ten hang muc sua chua",
         required=True,
-        help="Mô tả ngắn gọn nội dung chi phí cải tạo",
+        help="Mo ta ngan gon noi dung sua chua",
     )
     date = fields.Date(
-        string="Ngày phát sinh",
+        string="Ngay phat sinh",
         required=True,
         default=fields.Date.context_today,
     )
     start_date = fields.Date(
-        string="Ngày bắt đầu",
+        string="Ngay bat dau",
         required=True,
         default=fields.Date.context_today,
     )
     finish_date = fields.Date(
-        string="Ngày hoàn thành",
+        string="Ngay hoan thanh",
+        required=True,
         default=fields.Date.context_today,
     )
     amount = fields.Monetary(
-        string="Chi phí",
+        string="Chi phi",
+        required=True,
         currency_field="currency_id",
     )
     currency_id = fields.Many2one(
         "res.currency",
-        string="Tiền tệ",
+        string="Tien te",
         default=lambda self: self.env.company.currency_id,
         required=True,
     )
     note = fields.Text(
-        string="Ghi chú",
+        string="Ghi chu",
     )
+

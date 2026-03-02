@@ -100,15 +100,5 @@
             <field name="legend_blocked">Chờ thủ tục</field>
             <field name="legend_done">Thanh lý xong</field>
         </record>
-
-        <record id="stage_completed" model="trasas.asset.stage">
-            <field name="name">Hoàn thành</field>
-            <field name="sequence">11</field>
-            <field name="state">completed</field>
-            <field name="fold" eval="True"/>
-            <field name="legend_normal">Đã hoàn thành</field>
-            <field name="legend_blocked">Không áp dụng</field>
-            <field name="legend_done">Không áp dụng</field>
-        </record>
     </data>
 </odoo>

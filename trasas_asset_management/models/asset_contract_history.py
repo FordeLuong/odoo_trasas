@@ -16,6 +16,23 @@ class TrasasAssetContractHistory(models.Model):
     sign_date = fields.Date(
         string="Ngày ký",
     )
+    party_a_id = fields.Many2one(
+        "res.partner",
+        string="Bên A",
+    )
+    party_b_id = fields.Many2one(
+        "res.partner",
+        string="Bên B",
+    )
+    rent_price = fields.Monetary(
+        string="Giá thuê",
+        currency_field="currency_id",
+    )
+    currency_id = fields.Many2one(
+        "res.currency",
+        string="Tiền tệ",
+        default=lambda self: self.env.company.currency_id,
+    )
     start_date = fields.Date(
         string="Ngày hiệu lực",
         required=True,

@@ -8,135 +8,53 @@
             <form string="Tài sản">
                 <header>
                     <!-- === CHUNG: Mới → Đang sử dụng (khi phân loại nội bộ hoặc nhóm không có phân loại) === -->
-                    <button name="action_confirm"
-                            string="Đưa vào sử dụng"
-                            type="object"
-                            class="btn-primary"
-                            invisible="state != 'draft' or asset_classification in ('lease_out', 'lease_in')"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_confirm" string="Đưa vào sử dụng" type="object" class="btn-primary" invisible="state != 'draft' or asset_classification in ('lease_out', 'lease_in')" groups="trasas_asset_management.group_asset_manager"/>
 
                     <!-- === NXCT/MMTB: Mới → Cho thuê (khi phân loại = Cho thuê) === -->
-                    <button name="action_lease_direct"
-                            string="Cho thuê"
-                            type="object"
-                            class="btn-primary"
-                            invisible="state != 'draft' or asset_classification != 'lease_out'"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_lease_direct" string="Cho thuê" type="object" class="btn-primary" invisible="state != 'draft' or asset_classification != 'lease_out'" groups="trasas_asset_management.group_asset_manager"/>
 
                     <!-- === NXCT/MMTB: Mới → Thuê ngoài (khi phân loại = Thuê ngoài) === -->
-                    <button name="action_lease_in"
-                            string="Thuê ngoài"
-                            type="object"
-                            class="btn-primary"
-                            invisible="state != 'draft' or asset_classification != 'lease_in'"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_lease_in" string="Thuê ngoài" type="object" class="btn-primary" invisible="state != 'draft' or asset_classification != 'lease_in'" groups="trasas_asset_management.group_asset_manager"/>
 
                     <!-- === THIẾT BỊ (MMTB, TBVP, TSVH): Sửa chữa / Bảo trì / Thanh lý === -->
-                    <button name="action_repair"
-                            string="Sửa chữa"
-                            type="object"
-                            class="btn-warning"
-                            invisible="state != 'in_use' or asset_group == 'nxct'"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_repair" string="Sửa chữa" type="object" class="btn-warning" invisible="state != 'in_use' or asset_group == 'nxct'" groups="trasas_asset_management.group_asset_manager"/>
 
-                    <button name="action_maintenance"
-                            string="Bảo trì định kỳ"
-                            type="object"
-                            class="btn-warning"
-                            invisible="state != 'in_use' or asset_group == 'nxct'"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_maintenance" string="Bảo trì định kỳ" type="object" class="btn-warning" invisible="state != 'in_use' or asset_group == 'nxct' or asset_group_code == '002'" groups="trasas_asset_management.group_asset_manager"/>
 
-                    <button name="action_return_to_use"
-                            string="Đưa lại vào SD"
-                            type="object"
-                            class="btn-success"
-                            invisible="state not in ('repair', 'maintenance')"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_return_to_use" string="Đưa lại vào SD" type="object" class="btn-success" invisible="state not in ('repair', 'maintenance')" groups="trasas_asset_management.group_asset_manager"/>
 
-                    <button name="action_liquidate"
-                            string="Thanh lý"
-                            type="object"
-                            class="btn-danger"
-                            invisible="state not in ('in_use', 'repair', 'maintenance') or asset_group == 'nxct'"
-                            groups="trasas_asset_management.group_asset_manager"
-                            confirm="Xác nhận thanh lý tài sản?"/>
+                    <button name="action_liquidate" string="Thanh lý" type="object" class="btn-danger" invisible="state not in ('in_use', 'repair', 'maintenance') or asset_group == 'nxct'" groups="trasas_asset_management.group_asset_manager" confirm="Xác nhận thanh lý tài sản?"/>
 
                     <!-- === ĐẤT / MẶT BẰNG (NXCT): Cho thuê / Cải tạo / Hết hạn / Kết thúc HĐ === -->
-                    <button name="action_lease"
-                            string="Cho thuê"
-                            type="object"
-                            class="btn-warning"
-                            invisible="state != 'in_use' or asset_group != 'nxct'"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_lease" string="Cho thuê" type="object" class="btn-warning" invisible="state != 'in_use' or asset_group != 'nxct' or (asset_group_code == '001' and asset_classification == 'internal')" groups="trasas_asset_management.group_asset_manager"/>
 
-                    <button name="action_renovation"
-                            string="Cải tạo"
-                            type="object"
-                            class="btn-warning"
-                            invisible="state != 'in_use' or asset_group != 'nxct'"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_renovation" string="Cải tạo" type="object" class="btn-warning" invisible="state != 'in_use' or asset_group != 'nxct'" groups="trasas_asset_management.group_asset_manager"/>
 
-                    <button name="action_return_from_renovation"
-                            string="Hoàn tất cải tạo"
-                            type="object"
-                            class="btn-success"
-                            invisible="state != 'renovation'"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_return_from_renovation" string="Hoàn tất cải tạo" type="object" class="btn-success" invisible="state != 'renovation' or not renovation_cost_ready" groups="trasas_asset_management.group_asset_manager"/>
 
-                    <button name="action_contract_ended"
-                            string="Kết thúc HĐ"
-                            type="object"
-                            class="btn-danger"
-                            invisible="state not in ('leased', 'expiring')"
-                            groups="trasas_asset_management.group_asset_manager"
-                            confirm="Xác nhận kết thúc hợp đồng?"/>
+                    <button name="action_contract_ended" string="Kết thúc HĐ" type="object" class="btn-danger" invisible="state not in ('leased', 'expiring')" groups="trasas_asset_management.group_asset_manager" confirm="Xác nhận kết thúc hợp đồng?"/>
 
-                    <button name="%(trasas_asset_management.action_asset_renew_wizard)d"
-                            string="Tái ký"
-                            type="action"
-                            class="btn-primary"
-                            invisible="state not in ('contract_ended', 'expiring') or asset_group != 'nxct'"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="%(trasas_asset_management.action_asset_renew_wizard)d" string="Tái ký" type="action" class="btn-primary" invisible="state not in ('contract_ended', 'expiring') or asset_group != 'nxct'" groups="trasas_asset_management.group_asset_manager"/>
 
                     <!-- === CHUNG: Hoàn thành / Đặt về Mới === -->
-                    <button name="action_completed"
-                            string="Hoàn thành"
-                            type="object"
-                            class="btn-primary"
-                            invisible="state not in ('contract_ended', 'in_use')"
-                            groups="trasas_asset_management.group_asset_manager"
-                            confirm="Xác nhận hoàn thành tài sản?"/>
+                    <button name="action_completed" string="Hoàn thành" type="object" class="btn-primary" invisible="state not in ('contract_ended', 'in_use')" groups="trasas_asset_management.group_asset_manager" confirm="Xác nhận hoàn thành tài sản?"/>
 
-                    <button name="action_return_to_use_from_lease"
-                            string="Tái sử dụng"
-                            type="object"
-                            class="btn-success"
-                            invisible="state != 'completed' or asset_group != 'nxct'"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_return_to_use_from_lease" string="Tái sử dụng" type="object" class="btn-success" invisible="state != 'completed' or asset_group != 'nxct'" groups="trasas_asset_management.group_asset_manager"/>
 
-                    <button name="action_set_to_draft"
-                            string="Đặt về Mới"
-                            type="object"
-                            invisible="1"
-                            groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_set_to_draft" string="Đặt về Mới" type="object" invisible="1" groups="trasas_asset_management.group_asset_manager"/>
 
-                    <field name="state" widget="statusbar"
-                           statusbar_visible="draft,in_use,completed"
-                           invisible="asset_group != 'nxct'"/>
-                    <field name="state" widget="statusbar"
-                           statusbar_visible="draft,in_use"
-                           invisible="asset_group == 'nxct'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,leased,lease_in,repair,maintenance,liquidated,renovation,expiring,contract_ended" invisible="asset_group_code != '001' or asset_classification not in ('lease_out','lease_in')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_use,completed" invisible="asset_group != 'nxct' or (asset_group_code == '001' and asset_classification in ('lease_out','lease_in'))"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_use" invisible="asset_group == 'nxct' or (asset_group_code == '001' and asset_classification in ('lease_out','lease_in'))"/>
+                    <field name="renovation_cost_ready" invisible="1"/>
+                    <field name="asset_group_code" invisible="1"/>
                 </header>
 
                 <sheet>
                     <!-- Smart button -->
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_legal_documents"
-                                type="object"
-                                class="oe_stat_button"
-                                icon="fa-file-text-o">
-                            <field name="legal_document_count" widget="statinfo"
-                                   string="Hồ sơ"/>
+                        <button name="action_view_legal_documents" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <field name="legal_document_count" widget="statinfo" string="Hồ sơ"/>
                         </button>
                     </div>
 
@@ -155,8 +73,7 @@
                         <group string="Thông tin định danh">
                             <field name="asset_group_id"/>
                             <field name="asset_group" invisible="1"/>
-                            <field name="asset_classification"
-                                   invisible="asset_group not in ('nxct', 'mmtb')"/>
+                            <field name="asset_classification" invisible="asset_group not in ('nxct', 'mmtb')"/>
                         </group>
                         <group string="Mua sắm – Ghi nhận">
                             <field name="supplier_id"/>
@@ -177,9 +94,10 @@
                             <field name="responsible_user_id" widget="many2one_avatar_user"/>
                             <field name="ownership_type"/>
                         </group>
-                        
-                        <group string="Kế hoạch bảo trì" invisible="asset_group not in ('mmtb', 'tbvp')">
+
+                        <group string="Kế hoạch bảo trì" invisible="(asset_group not in ('mmtb', 'tbvp') and asset_group_code != '002') or asset_group_code == '003'">
                             <field name="maintenance_frequency"/>
+                            <field name="use_start_date" invisible="asset_group_code != '002'"/>
                             <field name="next_maintenance_date"/>
                         </group>
                     </group>
@@ -204,7 +122,7 @@
                         </page>
 
                         <!-- TAB 2: Hồ sơ chứng từ đính kèm -->
-                        <page string="Hồ sơ chứng từ" name="documents">
+                        <page string="Hồ sơ" name="documents">
                             <field name="legal_document_ids">
                                 <list editable="bottom">
                                     <field name="sequence" widget="handle"/>
@@ -214,15 +132,8 @@
                                     <field name="issuing_authority"/>
                                     <field name="certificate_number"/>
                                     <field name="validity_date"/>
-                                    <field name="days_to_expire"
-                                           decoration-danger="days_to_expire &lt; 0"
-                                           decoration-warning="days_to_expire &gt;= 0 and days_to_expire &lt;= 30"/>
-                                    <field name="state"
-                                           decoration-success="state == 'active'"
-                                           decoration-warning="state == 'expiring_soon'"
-                                           decoration-danger="state == 'expired'"
-                                           decoration-muted="state == 'revoked'"
-                                           widget="badge"/>
+                                    <field name="days_to_expire" decoration-danger="days_to_expire &lt; 0" decoration-warning="days_to_expire &gt;= 0 and days_to_expire &lt;= 30"/>
+                                    <field name="state" decoration-success="state == 'active'" decoration-warning="state == 'expiring_soon'" decoration-danger="state == 'expired'" decoration-muted="state == 'revoked'" widget="badge"/>
                                     <field name="attachment_ids" widget="many2many_binary"/>
                                     <field name="note"/>
                                 </list>
@@ -230,9 +141,7 @@
                         </page>
 
                         <!-- TAB 3: Trường riêng NXCT -->
-                        <page string="Nhà cửa / Công trình"
-                              name="nxct_details"
-                              invisible="asset_group != 'nxct'">
+                        <page string="Nhà cửa / Công trình" name="nxct_details" invisible="asset_group != 'nxct'">
                             <group>
                                 <group>
                                     <field name="building_address"/>
@@ -251,9 +160,7 @@
                         </page>
 
                         <!-- TAB 4: Trường riêng MMTB -->
-                        <page string="Máy móc thiết bị"
-                              name="mmtb_details"
-                              invisible="asset_group != 'mmtb'">
+                        <page string="Máy móc thiết bị" name="mmtb_details" invisible="asset_group != 'mmtb'">
                             <group>
                                 <group>
                                     <field name="machine_model"/>
@@ -275,9 +182,7 @@
                         </page>
 
                         <!-- TAB 5: Trường riêng TBVP -->
-                        <page string="Thiết bị văn phòng"
-                              name="tbvp_details"
-                              invisible="asset_group != 'tbvp'">
+                        <page string="Thiết bị văn phòng" name="tbvp_details" invisible="asset_group != 'tbvp'">
                             <group>
                                 <group>
                                     <field name="equipment_serial"/>
@@ -291,9 +196,7 @@
                         </page>
 
                         <!-- TAB 6: Trường riêng TSVH -->
-                        <page string="Tài sản vô hình"
-                              name="tsvh_details"
-                              invisible="asset_group != 'tsvh'">
+                        <page string="Tài sản vô hình" name="tsvh_details" invisible="asset_group != 'tsvh'">
                             <group>
                                 <group>
                                     <field name="license_key"/>
@@ -318,19 +221,19 @@
                         </page>
 
                         <!-- TAB 8: Ghi chú -->
-                        <page string="Ghi chú" name="notes">
+                        <page string="Ghi chú" name="notes" invisible="1">
                             <field name="note" placeholder="Ghi chú chung..."/>
                         </page>
 
-                        <!-- TAB 9: Chi phí cải tạo (Chỉ dành cho NXCT) -->
-                        <page string="Chi phí cải tạo"
-                              name="renovation_costs"
-                              invisible="asset_group != 'nxct'">
+                        <!-- TAB 9: Thông tin cải tạo (Chỉ dành cho NXCT) -->
+                        <page string="Thông tin cải tạo" name="renovation_costs" invisible="asset_group != 'nxct' or (asset_group_code == '001' and asset_classification in ('lease_out','lease_in'))">
                             <field name="renovation_cost_ids">
                                 <list editable="bottom">
                                     <field name="date"/>
                                     <field name="name"/>
-                                    <field name="amount" sum="Tổng tiền"/>
+                                    <field name="start_date"/>
+                                    <field name="finish_date"/>
+                                    <field name="amount" sum="Chi phí"/>
                                     <field name="currency_id" invisible="1"/>
                                     <field name="note"/>
                                 </list>
@@ -345,13 +248,40 @@
                                 </form>
                             </field>
                         </page>
-                        <!-- TAB 10: Lịch sử hợp đồng (Chỉ dành cho NXCT) -->
-                        <page string="Lịch sử hợp đồng"
-                              name="contract_history"
-                              invisible="asset_group != 'nxct'">
+                        <!-- TAB 10: Thông tin sửa chữa (Chỉ dành cho nhóm 002) -->
+                        <page string="Thông tin sửa chữa" name="repair_info" invisible="asset_group_code != '002'">
+                            <field name="repair_info_ids" readonly="1">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="name"/>
+                                    <field name="start_date"/>
+                                    <field name="finish_date"/>
+                                    <field name="amount" sum="Chi phí"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="note"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="date"/>
+                                        <field name="start_date"/>
+                                        <field name="finish_date"/>
+                                        <field name="amount" widget="monetary"/>
+                                        <field name="currency_id"/>
+                                        <field name="note"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <!-- TAB 11: Lịch sử hợp đồng (Chỉ dành cho NXCT) -->
+                        <page string="Lịch sử hợp đồng" name="contract_history" invisible="asset_group != 'nxct' or (asset_group_code == '001' and asset_classification == 'internal' and state == 'in_use')">
                             <field name="contract_history_ids" readonly="1">
                                 <list>
                                     <field name="sign_date"/>
+                                    <field name="party_a_id"/>
+                                    <field name="party_b_id"/>
+                                    <field name="rent_price" widget="monetary"/>
+                                    <field name="currency_id" invisible="1"/>
                                     <field name="start_date"/>
                                     <field name="end_date"/>
                                     <field name="note"/>
@@ -360,6 +290,10 @@
                                 <form>
                                     <group>
                                         <field name="sign_date"/>
+                                        <field name="party_a_id"/>
+                                        <field name="party_b_id"/>
+                                        <field name="rent_price" widget="monetary"/>
+                                        <field name="currency_id"/>
                                         <field name="start_date"/>
                                         <field name="end_date"/>
                                     </group>
@@ -386,10 +320,7 @@
         <field name="name">trasas.asset.kanban</field>
         <field name="model">trasas.asset</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="stage_id"
-                    default_order="priority desc, create_date desc"
-                    class="o_kanban_small_column o_kanban_project_tasks"
-                    examples="asset">
+            <kanban default_group_by="stage_id" default_order="priority desc, create_date desc" class="o_kanban_small_column o_kanban_project_tasks" examples="asset">
                 <field name="color"/>
                 <field name="priority"/>
                 <field name="stage_id"/>
@@ -400,13 +331,10 @@
                 <field name="name"/>
                 <field name="responsible_user_id"/>
                 <field name="location"/>
-                <progressbar field="kanban_state"
-                             colors='{"done": "success", "blocked": "danger"}'/>
+                <progressbar field="kanban_state" colors='{"done": "success", "blocked": "danger"}'/>
                 <templates>
                     <t t-name="card">
-                        <widget name="web_ribbon" title="Hoàn thành"
-                                bg_color="text-bg-success"
-                                invisible="state != 'completed'"/>
+                        <widget name="web_ribbon" title="Hoàn thành" bg_color="text-bg-success" invisible="state != 'completed'"/>
                         <div class="oe_kanban_content">
                             <div class="o_kanban_record_top mb-0">
                                 <div class="o_kanban_record_headings">
@@ -414,27 +342,19 @@
                                         <field name="name"/>
                                     </strong>
                                 </div>
-                                
+
                                 <!-- Trạng thái Badge -->
                                 <div class="ms-2">
-                                    <field name="state" widget="badge" 
-                                        decoration-success="state == 'in_use'"
-                                        decoration-info="state == 'draft'"
-                                        decoration-warning="state in ('repair', 'maintenance', 'renovation', 'expiring', 'leased', 'lease_in')"
-                                        decoration-danger="state in ('liquidated', 'contract_ended')"
-                                        decoration-muted="state == 'completed'"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'in_use'" decoration-info="state == 'draft'" decoration-warning="state in ('repair', 'maintenance', 'renovation', 'expiring', 'leased', 'lease_in')" decoration-danger="state in ('liquidated', 'contract_ended')" decoration-muted="state == 'completed'"/>
                                 </div>
 
                                 <div class="o_dropdown_kanban dropdown">
-                                    <a role="button" class="dropdown-toggle o-no-caret btn"
-                                       data-bs-toggle="dropdown" href="#">
+                                    <a role="button" class="dropdown-toggle o-no-caret btn" data-bs-toggle="dropdown" href="#">
                                         <span class="fa fa-ellipsis-v"/>
                                     </a>
                                     <div class="dropdown-menu" role="menu">
-                                        <a role="menuitem" type="edit"
-                                           class="dropdown-item">Sửa</a>
-                                        <a role="menuitem" type="delete"
-                                           class="dropdown-item">Xóa</a>
+                                        <a role="menuitem" type="edit" class="dropdown-item">Sửa</a>
+                                        <a role="menuitem" type="delete" class="dropdown-item">Xóa</a>
                                         <field name="color" widget="kanban_color_picker"/>
                                     </div>
                                 </div>
@@ -443,21 +363,18 @@
                                 <field name="code" class="text-muted"/>
                                 <field name="asset_group_id" class="d-block"/>
                                 <div class="text-muted mt-1" invisible="not acquisition_date">
-                                    <i class="fa fa-calendar me-1"/> <field name="acquisition_date"/>
+                                    <i class="fa fa-calendar me-1"/>
+                                    <field name="acquisition_date"/>
                                 </div>
-                                <field name="location" class="text-muted d-block"
-                                       invisible="not location"/>
+                                <field name="location" class="text-muted d-block" invisible="not location"/>
                             </div>
                             <div class="o_kanban_record_bottom">
                                 <div class="oe_kanban_bottom_left">
                                     <field name="priority" widget="priority"/>
                                 </div>
                                 <div class="oe_kanban_bottom_right">
-                                    <field name="kanban_state"
-                                           widget="state_selection"
-                                           groups="trasas_asset_management.group_asset_manager"/>
-                                    <field name="responsible_user_id"
-                                           widget="many2one_avatar_user"/>
+                                    <field name="kanban_state" widget="state_selection" groups="trasas_asset_management.group_asset_manager"/>
+                                    <field name="responsible_user_id" widget="many2one_avatar_user"/>
                                 </div>
                             </div>
                         </div>
@@ -472,10 +389,7 @@
         <field name="name">trasas.asset.list</field>
         <field name="model">trasas.asset</field>
         <field name="arch" type="xml">
-            <list string="Danh sách tài sản"
-                  decoration-muted="state == 'completed'"
-                  decoration-danger="state in ('liquidated', 'contract_ended')"
-                  decoration-warning="state in ('repair', 'maintenance', 'renovation', 'expiring')">
+            <list string="Danh sách tài sản" decoration-muted="state == 'completed'" decoration-danger="state in ('liquidated', 'contract_ended')" decoration-warning="state in ('repair', 'maintenance', 'renovation', 'expiring')">
                 <field name="code"/>
                 <field name="name"/>
                 <field name="asset_group_id"/>
@@ -486,12 +400,7 @@
                 <field name="residual_value" optional="show"/>
                 <field name="acquisition_date"/>
                 <field name="responsible_user_id" widget="many2one_avatar_user"/>
-                <field name="state" widget="badge"
-                       decoration-success="state == 'in_use'"
-                       decoration-info="state == 'draft'"
-                       decoration-warning="state in ('repair', 'maintenance', 'renovation', 'expiring', 'leased')"
-                       decoration-danger="state in ('liquidated', 'contract_ended')"
-                       decoration-muted="state == 'completed'"/>
+                <field name="state" widget="badge" decoration-success="state == 'in_use'" decoration-info="state == 'draft'" decoration-warning="state in ('repair', 'maintenance', 'renovation', 'expiring', 'leased')" decoration-danger="state in ('liquidated', 'contract_ended')" decoration-muted="state == 'completed'"/>
             </list>
         </field>
     </record>

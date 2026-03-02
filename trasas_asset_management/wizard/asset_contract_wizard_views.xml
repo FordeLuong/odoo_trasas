@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_asset_contract_wizard_form" model="ir.ui.view">
+        <field name="name">trasas.asset.contract.wizard.form</field>
+        <field name="model">trasas.asset.contract.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Hợp đồng">
+                <group>
+                    <field name="asset_id" invisible="1"/>
+                    <field name="action_type" invisible="1"/>
+                </group>
+                <group>
+                    <group string="Bên A">
+                        <field name="party_a_id"/>
+                    </group>
+                    <group string="Bên B">
+                        <field name="party_b_id"/>
+                    </group>
+                </group>
+                <group>
+                    <group>
+                        <field name="rent_price"/>
+                        <field name="sign_date"/>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                    </group>
+                    <group>
+                        <field name="attachment_ids" widget="many2many_binary"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="note" placeholder="Nhập ghi chú hợp đồng..."/>
+                </group>
+                <footer>
+                    <button string="Xác nhận" name="action_confirm_contract" type="object" class="btn-primary"/>
+                    <button string="Hủy" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

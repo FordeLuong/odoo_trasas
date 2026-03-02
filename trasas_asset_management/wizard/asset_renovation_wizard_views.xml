@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_asset_renovation_wizard_form" model="ir.ui.view">
+        <field name="name">trasas.asset.renovation.wizard.form</field>
+        <field name="model">trasas.asset.renovation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cải tạo">
+                <group>
+                    <field name="asset_id" invisible="1"/>
+                </group>
+                <group>
+                    <group>
+                        <field name="name" string="Tên hạng mục cải tạo"/>
+                        <field name="start_date" string="Ngày bắt đầu"/>
+                        <field name="finish_date" string="Ngày kết thúc"/>
+                        <field name="amount" string="Chi phí"/>
+                        <field name="currency_id" string="Tiền tệ"/>
+                    </group>
+                    <group>
+                        <field name="note" string="Ghi chú"/>
+                    </group>
+                </group>
+                <footer>
+                    <button string="Xác nhận" name="action_confirm_renovation" type="object" class="btn-primary"/>
+                    <button string="Hủy" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

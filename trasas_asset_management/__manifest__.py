@@ -39,7 +39,10 @@
         # Views
         "views/asset_legal_document_views.xml",
         "views/asset_type_views.xml",
+        "wizard/asset_contract_wizard_views.xml",
         "wizard/asset_renew_wizard_views.xml",
+        "wizard/asset_renovation_wizard_views.xml",
+        "wizard/asset_repair_wizard_views.xml",
         "wizard/asset_reuse_wizard_views.xml",
         "views/asset_views.xml",
         "views/menu_views.xml",
