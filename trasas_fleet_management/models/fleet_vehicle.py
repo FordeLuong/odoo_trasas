@@ -13,8 +13,13 @@ class FleetVehicle(models.Model):
         readonly=True,
         copy=False,
         tracking=True,
+        default=lambda self: (
+            self.env["ir.sequence"].next_by_code("fleet.vehicle.trasas") or "/"
+        ),
         help="Định dạng: STT.YY/PT-TRS",
     )
+
+    license_plate = fields.Char(required=True)
 
     state = fields.Selection(
         [
@@ -216,7 +221,7 @@ class FleetVehicle(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if not vals.get("vehicle_code"):
+            if not vals.get("vehicle_code") or vals.get("vehicle_code") == "/":
                 vals["vehicle_code"] = (
                     self.env["ir.sequence"].next_by_code("fleet.vehicle.trasas") or "/"
                 )
@@ -251,22 +256,31 @@ class FleetVehicle(models.Model):
             if new_state:
                 vals["state"] = new_state
 
-        # 3. Kiểm tra ràng buộc khi chuyển sang Sẵn sàng (ready)
+        # 3. Kiểm tra ràng buộc khi chuyển sang Đăng kiểm (registration) hoặc Sẵn sàng (ready)
         # Chỉ kiểm tra nếu đổi từ UI (không có skip_validation trong context)
         if not self.env.context.get("skip_validation"):
             new_state = vals.get("state")
             for rec in self:
-                if new_state == "ready" and rec.state != "ready":
+                # BẤT KỲ khi nào trạng thái đích là "ready" HOẶC "registration", nếu trạng thái cũ KHÁC, thì phải chặn check
+                if new_state in ["registration", "ready"] and rec.state not in [
+                    "registration",
+                    "ready",
+                ]:
+                    # Gán tạm val mới để hàm check đọc được (nếu người dùng vừa điền form vừa bấm nút / thanh trạng thái)
+                    if "license_plate" in vals:
+                        rec.license_plate = vals["license_plate"]
                     rec._check_mandatory_documents()
 
                 # Chuyển sang Đang sử dụng (in_use)
                 if new_state == "in_use" and rec.state != "in_use":
-                    if not vals.get(
-                        "start_use_date", rec.start_use_date
-                    ) or not vals.get("maintenance_type", rec.maintenance_type):
+                    if (
+                        not vals.get("start_use_date", rec.start_use_date)
+                        or not vals.get("maintenance_type", rec.maintenance_type)
+                        or not vals.get("driver_id", rec.driver_id)
+                    ):
                         raise UserError(
                             _(
-                                "Vui lòng nhập Ngày bắt đầu sử dụng và Loại bảo dưỡng định kỳ trước khi đưa vào sử dụng."
+                                "Vui lòng nhập Ngày bắt đầu sử dụng, Loại bảo dưỡng định kỳ và Tài xế trước khi đưa vào sử dụng."
                             )
                         )
 
@@ -275,11 +289,16 @@ class FleetVehicle(models.Model):
     def _check_mandatory_documents(self):
         """Kiểm tra các hồ sơ bắt buộc trước khi cho phép Ready."""
         self.ensure_one()
+
+        if not self.license_plate:
+            raise UserError(_("Vui lòng nhập Biển số xe."))
+
         today = fields.Date.today()
         required_docs = {
             "registration": "Giấy đăng ký xe",
             "inspection": "Phiếu đăng kiểm",
             "insurance": "Bảo hiểm xe",
+            "license_plate": "Giấy tờ biển số",
         }
 
         missing_docs = []
@@ -305,8 +324,7 @@ class FleetVehicle(models.Model):
 
         if missing_docs:
             raise UserError(
-                _("Hồ sơ phương tiện không đủ điều kiện để Sẵn sàng sử dụng:\n%s")
-                % "\n".join(missing_docs)
+                _("Hồ sơ phương tiện chưa đầy đủ:\n%s") % "\n".join(missing_docs)
             )
 
     # -------------------------------------------------------------------------
@@ -314,7 +332,7 @@ class FleetVehicle(models.Model):
     # -------------------------------------------------------------------------
 
     def action_to_registration(self):
-        """Mới -> Đăng kiểm"""
+        """Mới -> Đăng kiểm. Chặn nếu thiếu hồ sơ."""
         for rec in self:
             if rec.state != "draft":
                 continue
@@ -342,13 +360,36 @@ class FleetVehicle(models.Model):
             rec.write({"state": "suspended"})
 
     def action_liquidate(self):
-        """Thanh lý"""
+        """Thanh lý: Chuyển state sang liquidated, vẫn giữ active=True để hiện trên view"""
         for rec in self:
             if rec.state != "suspended":
                 raise UserError(
                     _("Cần chuyển qua trạng thái Tạm ngưng trước khi thanh lý.")
                 )
-            rec.write({"state": "liquidated", "active": False})
+            rec.write({"state": "liquidated"})
+
+    def action_reuse(self):
+        """Đưa lại sử dụng: Từ Tạm ngưng -> Đang sử dụng, yêu cầu mọi phiếu Service đều phải done."""
+        for rec in self:
+            if rec.state != "suspended":
+                continue
+
+            # Kiểm tra các phiếu dịch vụ thuộc về xe này
+            # Lấy tất cả các phiếu service log KHÁC 'done' và 'cancelled'
+            unfinished_services = self.env["fleet.vehicle.log.services"].search(
+                [("vehicle_id", "=", rec.id), ("state", "in", ["new", "running"])]
+            )
+
+            if unfinished_services:
+                raise UserError(
+                    _(
+                        "Không thể Đưa lại sử dụng! Phương tiện '%s' vẫn còn phiếu Dịch vụ/Sửa chữa chưa hoàn tất (đang ở trạng thái Mới hoặc Đang tiến hành)."
+                    )
+                    % rec.license_plate
+                )
+
+            # Đổi state sang in_use (việc check Tài xế, Ngày bd được trigger tự động nhờ override ở def write)
+            rec.write({"state": "in_use"})
 
     # -------------------------------------------------------------------------
     # CRON / LOGIC
