@@ -24,4 +24,17 @@
             <field name="active" eval="True"/>
             <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 01:00:00')"/>
         </record>
+
+        <!-- CRON: Theo dõi thời hạn hợp đồng (Cảnh báo trước 7 ngày, đến hạn tự chuyển Kết thúc HĐ) -->
+        <record id="ir_cron_contract_expiry" model="ir.cron">
+            <field name="name">Tài sản: Theo dõi thời hạn hợp đồng</field>
+            <field name="model_id" ref="model_trasas_asset"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_check_contract_expiry()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 01:00:00')"/>
+            <field name="priority">5</field>
+        </record>
 </odoo>

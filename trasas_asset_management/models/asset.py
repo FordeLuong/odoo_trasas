@@ -54,6 +54,12 @@ class TrasasAsset(models.Model):
         store=True,
         help="Dùng để ẩn/hiện trường riêng theo nhóm",
     )
+    asset_group_code = fields.Char(
+        related="asset_group_id.code",
+        string="Mã viết tắt nhóm",
+        store=True,
+        readonly=True,
+    )
 
     asset_classification = fields.Selection(
         [
@@ -187,6 +193,10 @@ class TrasasAsset(models.Model):
         tracking=True,
         help="Chu kỳ bảo trì định kỳ cho thiết bị",
     )
+    use_start_date = fields.Date(
+        string="Ngày bắt đầu sử dụng",
+        tracking=True,
+    )
     next_maintenance_date = fields.Date(
         string="Ngày bảo trì tiếp theo",
         tracking=True,
@@ -294,10 +304,40 @@ class TrasasAsset(models.Model):
             if stage and rec.stage_id != stage:
                 rec.stage_id = stage
 
+    def _get_next_maintenance_date_from_start(self):
+        self.ensure_one()
+        if not self.use_start_date or not self.maintenance_frequency:
+            return False
+        months = int(self.maintenance_frequency)
+        from dateutil.relativedelta import relativedelta
+
+        return self.use_start_date + relativedelta(months=months)
+
+    def _update_next_maintenance_date_group002(self):
+        for rec in self:
+            if rec.asset_group_code != "002":
+                continue
+            next_date = rec._get_next_maintenance_date_from_start()
+            if rec.next_maintenance_date != next_date:
+                rec.with_context(skip_maintenance_update=True).write(
+                    {"next_maintenance_date": next_date}
+                )
+
+    @api.onchange("use_start_date", "maintenance_frequency", "asset_group_code")
+    def _onchange_next_maintenance_date_group002(self):
+        if self.asset_group_code == "002":
+            self.next_maintenance_date = self._get_next_maintenance_date_from_start()
+
     def write(self, vals):
         res = super().write(vals)
         if "state" in vals:
             self._sync_stage_from_state()
+        if not self.env.context.get("skip_maintenance_update") and any(
+            key in vals for key in ("use_start_date", "maintenance_frequency", "asset_group_id")
+        ):
+            self.filtered(
+                lambda r: r.asset_group_code == "002"
+            )._update_next_maintenance_date_group002()
         return res
 
     def init(self):
@@ -353,11 +393,21 @@ class TrasasAsset(models.Model):
         "asset_id",
         string="Chi phí cải tạo",
     )
+    repair_info_ids = fields.One2many(
+        "trasas.asset.repair.info",
+        "asset_id",
+        string="Thông tin sửa chữa",
+    )
 
     total_renovation_cost = fields.Monetary(
         string="Tổng chi phí cải tạo",
         compute="_compute_total_renovation_cost",
         currency_field="currency_id",
+        store=True,
+    )
+    renovation_cost_ready = fields.Boolean(
+        string="Có chi phí cải tạo hoàn tất",
+        compute="_compute_renovation_cost_ready",
         store=True,
     )
 
@@ -371,6 +421,13 @@ class TrasasAsset(models.Model):
     def _compute_total_renovation_cost(self):
         for rec in self:
             rec.total_renovation_cost = sum(rec.renovation_cost_ids.mapped("amount"))
+
+    @api.depends("renovation_cost_ids.finish_date", "renovation_cost_ids.amount")
+    def _compute_renovation_cost_ready(self):
+        for rec in self:
+            rec.renovation_cost_ready = any(
+                line.finish_date and line.amount for line in rec.renovation_cost_ids
+            )
 
     # =====================================================================
     # TRƯỜNG RIÊNG: NHÓM NXCT (Nhà cửa / Công trình)
@@ -534,6 +591,7 @@ class TrasasAsset(models.Model):
                         self.env["ir.sequence"].next_by_code("trasas.asset") or "TS/NEW"
                     )
         records = super().create(vals_list)
+        records._update_next_maintenance_date_group002()
 
         for rec in records:
             rec._schedule_activity_upload_documents()
@@ -548,12 +606,65 @@ class TrasasAsset(models.Model):
     # STATE TRANSITIONS — CHUNG
     # =====================================================================
 
+    def _should_open_contract_wizard(self):
+        self.ensure_one()
+        return (
+            self.asset_group_code == "001"
+            and self.asset_classification in ("lease_out", "lease_in")
+        ) or (self.asset_group_code == "002" and self.asset_classification == "lease_in")
+
+    def _action_open_contract_wizard(self, action_type):
+        self.ensure_one()
+        return {
+            "name": _("Hợp đồng"),
+            "type": "ir.actions.act_window",
+            "res_model": "trasas.asset.contract.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_asset_id": self.id,
+                "default_action_type": action_type,
+            },
+        }
+
+    def _action_open_repair_wizard(self):
+        self.ensure_one()
+        return {
+            "name": _("Thông tin sửa chữa"),
+            "type": "ir.actions.act_window",
+            "res_model": "trasas.asset.repair.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_asset_id": self.id,
+            },
+        }
+
+    def _action_open_renovation_wizard(self):
+        self.ensure_one()
+        return {
+            "name": _("Cải tạo"),
+            "type": "ir.actions.act_window",
+            "res_model": "trasas.asset.renovation.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_asset_id": self.id,
+            },
+        }
+
     def action_confirm(self):
         """Mới → Đang sử dụng (áp dụng tất cả nhóm)"""
         for rec in self:
             if rec.state != "draft":
                 raise UserError(
                     _("Chỉ tài sản trạng thái Mới mới có thể đưa vào sử dụng!")
+                )
+            if not rec.legal_document_ids.filtered(lambda doc: doc.attachment_ids):
+                raise UserError(
+                    _(
+                        "Vui lòng đính kèm ít nhất 01 file trong Hồ sơ chứng từ trước khi đưa tài sản vào sử dụng!"
+                    )
                 )
             rec.write({"state": "in_use"})
             rec._close_activities()
@@ -595,6 +706,13 @@ class TrasasAsset(models.Model):
 
     def action_repair(self):
         """Đang sử dụng → Sửa chữa"""
+        if not self.env.context.get("skip_repair_wizard"):
+            if len(self) > 1 and any(rec.asset_group_code == "002" for rec in self):
+                raise UserError(
+                    _("Vui lòng thao tác từng tài sản để nhập thông tin sửa chữa!")
+                )
+            if len(self) == 1 and self.asset_group_code == "002":
+                return self._action_open_repair_wizard()
         for rec in self:
             if rec.state != "in_use":
                 raise UserError(
@@ -675,9 +793,24 @@ class TrasasAsset(models.Model):
 
     def action_lease(self):
         """Đang sử dụng → Cho thuê"""
+        if not self.env.context.get("skip_contract_wizard"):
+            if len(self) > 1 and any(
+                rec._should_open_contract_wizard() for rec in self
+            ):
+                raise UserError(
+                    _("Vui lòng thao tác từng tài sản để nhập thông tin hợp đồng!")
+                )
+            if len(self) == 1 and self._should_open_contract_wizard():
+                return self._action_open_contract_wizard("lease")
         for rec in self:
             if rec.state != "in_use":
                 raise UserError(_("Chỉ tài sản Đang sử dụng mới có thể Cho thuê!"))
+            if not rec.legal_document_ids.filtered(lambda doc: doc.attachment_ids):
+                raise UserError(
+                    _(
+                        "Vui lòng đính kèm ít nhất 01 file trong Hồ sơ chứng từ trước khi Cho thuê!"
+                    )
+                )
             rec.write({"state": "leased"})
             rec.message_post(
                 body=_("🏠 Tài sản đã cho thuê."),
@@ -687,9 +820,24 @@ class TrasasAsset(models.Model):
 
     def action_lease_direct(self):
         """Mới → Cho thuê (từ phân loại Cho thuê)"""
+        if not self.env.context.get("skip_contract_wizard"):
+            if len(self) > 1 and any(
+                rec._should_open_contract_wizard() for rec in self
+            ):
+                raise UserError(
+                    _("Vui lòng thao tác từng tài sản để nhập thông tin hợp đồng!")
+                )
+            if len(self) == 1 and self._should_open_contract_wizard():
+                return self._action_open_contract_wizard("lease_direct")
         for rec in self:
             if rec.state != "draft":
                 raise UserError(_("Chỉ tài sản trạng thái Mới!"))
+            if not rec.legal_document_ids.filtered(lambda doc: doc.attachment_ids):
+                raise UserError(
+                    _(
+                        "Vui lòng đính kèm ít nhất 01 file trong Hồ sơ chứng từ trước khi Cho thuê!"
+                    )
+                )
             rec.write({"state": "leased"})
             rec._close_activities()
             rec.message_post(
@@ -700,9 +848,24 @@ class TrasasAsset(models.Model):
 
     def action_lease_in(self):
         """Mới → Thuê ngoài (từ phân loại Thuê ngoài)"""
+        if not self.env.context.get("skip_contract_wizard"):
+            if len(self) > 1 and any(
+                rec._should_open_contract_wizard() for rec in self
+            ):
+                raise UserError(
+                    _("Vui lòng thao tác từng tài sản để nhập thông tin hợp đồng!")
+                )
+            if len(self) == 1 and self._should_open_contract_wizard():
+                return self._action_open_contract_wizard("lease_in")
         for rec in self:
             if rec.state != "draft":
                 raise UserError(_("Chỉ tài sản trạng thái Mới!"))
+            if not rec.legal_document_ids.filtered(lambda doc: doc.attachment_ids):
+                raise UserError(
+                    _(
+                        "Vui lòng đính kèm ít nhất 01 file trong Hồ sơ chứng từ trước khi Thuê ngoài!"
+                    )
+                )
             rec.write({"state": "lease_in"})
             rec._close_activities()
             rec.message_post(
@@ -713,6 +876,12 @@ class TrasasAsset(models.Model):
 
     def action_renovation(self):
         """Đang sử dụng → Cải tạo"""
+        if not self.env.context.get("skip_renovation_wizard"):
+            if len(self) > 1:
+                raise UserError(
+                    _("Vui lòng thao tác từng tài sản để nhập thông tin cải tạo!")
+                )
+            return self._action_open_renovation_wizard()
         for rec in self:
             if rec.state != "in_use":
                 raise UserError(_("Chỉ tài sản Đang sử dụng mới có thể Cải tạo!"))
@@ -729,6 +898,12 @@ class TrasasAsset(models.Model):
             if rec.state != "renovation":
                 raise UserError(
                     _("Chỉ tài sản đang Cải tạo mới có thể đưa lại vào sử dụng!")
+                )
+            if not rec.renovation_cost_ready:
+                raise UserError(
+                    _(
+                        "Vui lòng nhập Ngày hoàn thành và Chi phí trong tab Thông tin cải tạo trước khi Hoàn tất cải tạo!"
+                    )
                 )
             rec.write({"state": "in_use"})
             rec.message_post(
@@ -942,8 +1117,10 @@ class TrasasAsset(models.Model):
         assets = self.search(
             [
                 ("state", "=", "in_use"),
-                ("asset_group", "in", ["mmtb", "tbvp"]),
                 ("next_maintenance_date", "!=", False),
+                "|",
+                ("asset_group", "in", ["mmtb", "tbvp"]),
+                ("asset_group_code", "=", "002"),
             ]
         )
 
@@ -982,6 +1159,75 @@ class TrasasAsset(models.Model):
                     ]
                 )
                 activities.action_done()
+
+    @api.model
+    def _cron_check_contract_expiry(self):
+        """Cảnh báo hợp đồng sắp hết hạn và tự động kết thúc hợp đồng khi đến hạn."""
+        today = fields.Date.context_today(self)
+        warning_date = today + timedelta(days=7)
+
+        assets = self.search(
+            [
+                ("state", "in", ["leased", "lease_in", "expiring"]),
+            ]
+        )
+
+        Contract = self.env["trasas.asset.contract.history"]
+        Activity = self.env["mail.activity"]
+
+        for rec in assets:
+            contract = Contract.search(
+                [("asset_id", "=", rec.id), ("end_date", "!=", False)],
+                order="end_date desc, id desc",
+                limit=1,
+            )
+            if not contract or not contract.end_date:
+                continue
+
+            end_date = contract.end_date
+
+            if end_date == warning_date:
+                if rec.state != "expiring":
+                    rec.write({"state": "expiring"})
+                    rec.message_post(
+                        body=_(
+                            "Hợp đồng sắp hết hạn vào ngày %s."
+                        )
+                        % end_date.strftime("%d/%m/%Y"),
+                        subject=_("Sắp hết hạn hợp đồng"),
+                    )
+                if rec.responsible_user_id:
+                    existing = Activity.search(
+                        [
+                            ("res_model", "=", "trasas.asset"),
+                            ("res_id", "=", rec.id),
+                            ("summary", "ilike", "Sắp hết hạn hợp đồng"),
+                            ("date_deadline", "=", warning_date),
+                        ],
+                        limit=1,
+                    )
+                    if not existing:
+                        rec.activity_schedule(
+                            "mail.mail_activity_data_todo",
+                            user_id=rec.responsible_user_id.id,
+                            summary=_("Sắp hết hạn hợp đồng: %s") % rec.name,
+                            note=_(
+                                "Hợp đồng sẽ hết hạn vào ngày %s. Vui lòng xem xét tái ký."
+                            )
+                            % end_date.strftime("%d/%m/%Y"),
+                            date_deadline=warning_date,
+                        )
+
+            elif end_date <= today:
+                if rec.state != "contract_ended":
+                    rec.write({"state": "contract_ended"})
+                    rec.message_post(
+                        body=_(
+                            "Hợp đồng đã hết hạn vào ngày %s. Tài sản chuyển sang trạng thái Kết thúc HĐ."
+                        )
+                        % end_date.strftime("%d/%m/%Y"),
+                        subject=_("Kết thúc hợp đồng"),
+                    )
 
     # =====================================================================
     # SMART BUTTONS

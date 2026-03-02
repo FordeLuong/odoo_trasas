@@ -9,9 +9,17 @@ access_asset_stage_manager,access.trasas.asset.stage.manager,model_trasas_asset_
 access_asset_stage_director,access.trasas.asset.stage.director,model_trasas_asset_stage,group_asset_director,1,0,0,0
 access_asset_renovation_cost_manager,access.trasas.asset.renovation.cost.manager,model_trasas_asset_renovation_cost,group_asset_manager,1,1,1,1
 access_asset_renovation_cost_director,access.trasas.asset.renovation.cost.director,model_trasas_asset_renovation_cost,group_asset_director,1,0,0,0
+access_asset_repair_info_manager,access.trasas.asset.repair.info.manager,model_trasas_asset_repair_info,group_asset_manager,1,1,1,1
+access_asset_repair_info_director,access.trasas.asset.repair.info.director,model_trasas_asset_repair_info,group_asset_director,1,0,0,0
 access_asset_contract_history_manager,access.trasas.asset.contract.history.manager,model_trasas_asset_contract_history,group_asset_manager,1,1,1,1
 access_asset_contract_history_director,access.trasas.asset.contract.history.director,model_trasas_asset_contract_history,group_asset_director,1,0,0,0
+access_asset_contract_wizard_manager,access.trasas.asset.contract.wizard.manager,model_trasas_asset_contract_wizard,group_asset_manager,1,1,1,1
+access_asset_contract_wizard_director,access.trasas.asset.contract.wizard.director,model_trasas_asset_contract_wizard,group_asset_director,1,0,0,0
+access_asset_renovation_wizard_manager,access.trasas.asset.renovation.wizard.manager,model_trasas_asset_renovation_wizard,group_asset_manager,1,1,1,1
+access_asset_renovation_wizard_director,access.trasas.asset.renovation.wizard.director,model_trasas_asset_renovation_wizard,group_asset_director,1,0,0,0
 access_asset_renew_wizard_manager,access.trasas.asset.renew.wizard.manager,model_trasas_asset_renew_wizard,group_asset_manager,1,1,1,1
 access_asset_renew_wizard_director,access.trasas.asset.renew.wizard.director,model_trasas_asset_renew_wizard,group_asset_director,1,0,0,0
+access_asset_repair_wizard_manager,access.trasas.asset.repair.wizard.manager,model_trasas_asset_repair_wizard,group_asset_manager,1,1,1,1
+access_asset_repair_wizard_director,access.trasas.asset.repair.wizard.director,model_trasas_asset_repair_wizard,group_asset_director,1,0,0,0
 access_asset_reuse_wizard_manager,access.trasas.asset.reuse.wizard.manager,model_trasas_asset_reuse_wizard,group_asset_manager,1,1,1,1
 access_asset_reuse_wizard_director,access.trasas.asset.reuse.wizard.director,model_trasas_asset_reuse_wizard,group_asset_director,1,0,0,0
