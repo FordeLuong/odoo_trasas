@@ -13,6 +13,9 @@
      "author": "TRASAS",
     "website": "https://trasas.com",
     "depends": ["base", "mail", "web", "portal", "website"],
+    "external_dependencies": {
+        "python": ["pyhanko"],
+    },
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",

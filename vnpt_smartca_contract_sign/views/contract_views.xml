@@ -4,13 +4,13 @@
         <field name="name">vnpt.contract.tree</field>
         <field name="model">vnpt.contract</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="state"/>
                 <field name="smartca_doc_id"/>
                 <field name="smartca_tran_code"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -20,9 +20,9 @@
         <field name="arch" type="xml">
             <form string="Contract">
                 <header>
-                    <button name="action_request_director_signature" type="object" string="Request Director Sign (VNPT)" class="btn-primary" attrs="{'invisible': [('state','not in',('draft','failed'))]}"/>
+                    <button name="action_request_director_signature" type="object" string="Request Director Sign (VNPT)" class="btn-primary" invisible="state not in ('draft', 'failed')"/>
 
-                    <button name="action_send_to_customer" type="object" string="Send to Customer (Portal)" class="btn-secondary" attrs="{'invisible': [('state','!=','waiting_customer')]}"/>
+                    <button name="action_send_to_customer" type="object" string="Send to Customer (Portal)" class="btn-secondary" invisible="state != 'waiting_customer'"/>
 
                     <field name="state" widget="statusbar" statusbar_visible="draft,waiting_director,waiting_customer,completed,failed"/>
                 </header>
@@ -49,15 +49,8 @@
                         <field name="smartca_time_stamp" readonly="1"/>
                         <field name="smartca_transaction_desc" readonly="1"/>
                     </group>
-
-                    <notebook>
-                        <page string="Chatter">
-                            <field name="message_follower_ids"/>
-                            <field name="activity_ids"/>
-                            <field name="message_ids"/>
-                        </page>
-                    </notebook>
                 </sheet>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -65,7 +58,7 @@
     <record id="vnpt_contract_action" model="ir.actions.act_window">
         <field name="name">VNPT Contracts</field>
         <field name="res_model">vnpt.contract</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <menuitem id="vnpt_contract_menu_root" name="VNPT SmartCA Contracts"/>
