@@ -5,29 +5,29 @@ from odoo.exceptions import UserError
 
 class TrasasAssetRepairWizard(models.TransientModel):
     _name = "trasas.asset.repair.wizard"
-    _description = "Thong tin sua chua"
+    _description = "Thông tin sửa chữa"
 
     asset_id = fields.Many2one(
         "trasas.asset",
-        string="Tai san",
+        string="Tài sản",
         required=True,
     )
     name = fields.Char(
-        string="Ten hang muc sua chua",
+        string="Tên hạng mục sửa chữa",
         required=True,
     )
     date = fields.Date(
-        string="Ngay phat sinh",
+        string="Ngày phát sinh",
         required=True,
         default=fields.Date.context_today,
     )
     start_date = fields.Date(
-        string="Ngay bat dau",
+        string="Ngày bắt đầu",
         required=True,
         default=fields.Date.context_today,
     )
     finish_date = fields.Date(
-        string="Ngay hoan thanh",
+        string="Ngày hoàn thành",
         required=True,
         default=fields.Date.context_today,
     )
@@ -38,12 +38,12 @@ class TrasasAssetRepairWizard(models.TransientModel):
     )
     currency_id = fields.Many2one(
         "res.currency",
-        string="Tien te",
+        string="Tiền tệ",
         default=lambda self: self.env.company.currency_id,
         required=True,
     )
     note = fields.Text(
-        string="Ghi chu",
+        string="Ghi chú",
     )
 
     @api.model
@@ -61,7 +61,7 @@ class TrasasAssetRepairWizard(models.TransientModel):
         asset = self.asset_id
 
         if asset.state != "in_use":
-            raise UserError(_("Chi tai san Dang su dung moi co the Sua chua!"))
+            raise UserError(_("Chỉ tài sản Đang sử dụng mới có thể Sửa chữa!"))
 
         self.env["trasas.asset.repair.info"].create(
             {

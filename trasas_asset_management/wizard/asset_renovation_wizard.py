@@ -5,24 +5,24 @@ from odoo.exceptions import UserError
 
 class TrasasAssetRenovationWizard(models.TransientModel):
     _name = "trasas.asset.renovation.wizard"
-    _description = "Cai tao"
+    _description = "**Cải tạo**"
 
     asset_id = fields.Many2one(
         "trasas.asset",
-        string="Tai san",
+        string="Tài sản",
         required=True,
     )
     name = fields.Char(
-        string="Ten hang muc cai tao",
+        string="Tên hạng mục cải tạo",
         required=True,
     )
     start_date = fields.Date(
-        string="Ngay bat dau",
+        string="Ngày bắt đầu",
         required=True,
         default=fields.Date.context_today,
     )
     finish_date = fields.Date(
-        string="Ngay ket thuc",
+        string="Ngày kết thúc",
     )
     amount = fields.Monetary(
         string="Chi phi",
@@ -30,12 +30,12 @@ class TrasasAssetRenovationWizard(models.TransientModel):
     )
     currency_id = fields.Many2one(
         "res.currency",
-        string="Tien te",
+        string="Tiền tệ",
         default=lambda self: self.env.company.currency_id,
         required=True,
     )
     note = fields.Text(
-        string="Ghi chu",
+        string="Ghi chú",
     )
 
     @api.model
@@ -53,7 +53,7 @@ class TrasasAssetRenovationWizard(models.TransientModel):
         asset = self.asset_id
 
         if asset.state != "in_use":
-            raise UserError(_("Chi tai san Dang su dung moi co the Cai tao!"))
+            raise UserError(_("Chỉ tài sản Đang sử dụng mới có thể Cải tạo!"))
 
         vals = {
             "asset_id": asset.id,

@@ -5,61 +5,61 @@ from odoo.exceptions import UserError
 
 class TrasasAssetContractWizard(models.TransientModel):
     _name = "trasas.asset.contract.wizard"
-    _description = "Hop dong"
+    _description = "Hợp đồng"
 
     asset_id = fields.Many2one(
         "trasas.asset",
-        string="Tai san",
+        string="Tài sản",
         required=True,
     )
     party_a_id = fields.Many2one(
         "res.partner",
-        string="Ben A",
+        string="Bên A",
         required=True,
     )
     party_b_id = fields.Many2one(
         "res.partner",
-        string="Ben B",
+        string="Bên B",
         required=True,
     )
     rent_price = fields.Monetary(
-        string="Gia thue",
+        string="Giá thuê",
         currency_field="currency_id",
         required=True,
     )
     currency_id = fields.Many2one(
         "res.currency",
-        string="Tien te",
+        string="Tiền tệ",
         default=lambda self: self.env.company.currency_id,
         required=True,
     )
     sign_date = fields.Date(
-        string="Ngay ky",
+        string="Ngày ký",
         default=fields.Date.context_today,
         required=True,
     )
     start_date = fields.Date(
-        string="Ngay hieu luc",
+        string="Ngày hiệu lực",
         required=True,
     )
     end_date = fields.Date(
-        string="Ngay ket thuc hieu luc",
+        string="Ngày kết thúc hiệu lực",
         required=True,
     )
     attachment_ids = fields.Many2many(
         "ir.attachment",
-        string="Hop dong dinh kem",
+        string="Hợp đồng đính kèm",
     )
     note = fields.Text(
-        string="Ghi chu",
+        string="Ghi chú",
     )
     action_type = fields.Selection(
         [
-            ("lease", "Cho thue"),
-            ("lease_direct", "Cho thue (Moi)"),
-            ("lease_in", "Thue ngoai"),
+            ("lease", "Cho thuê"),
+            ("lease_direct", "Cho thuê (Mới)"),
+            ("lease_in", "Thuê ngoài"),
         ],
-        string="Loai thao tac",
+        string="Loại thao tác",
         required=True,
         default="lease",
     )
@@ -81,7 +81,7 @@ class TrasasAssetContractWizard(models.TransientModel):
         asset = self.asset_id
 
         if self.end_date < self.start_date:
-            raise UserError(_("Ngay ket thuc khong duoc nho hon ngay bat dau!"))
+            raise UserError(_("Ngày kết thúc không được nhỏ hơn ngày bắt đầu!"))
 
         self.env["trasas.asset.contract.history"].create(
             {
@@ -100,7 +100,7 @@ class TrasasAssetContractWizard(models.TransientModel):
             }
         )
 
-        # Apply corresponding state transition
+        # Áp dụng chuyển đổi trạng thái tương ứng
         if self.action_type == "lease":
             asset.with_context(skip_contract_wizard=True).action_lease()
         elif self.action_type == "lease_direct":
@@ -109,4 +109,3 @@ class TrasasAssetContractWizard(models.TransientModel):
             asset.with_context(skip_contract_wizard=True).action_lease_in()
 
         return {"type": "ir.actions.act_window_close"}
-

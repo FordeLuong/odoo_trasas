@@ -4,16 +4,16 @@
         <field name="name">trasas.asset.contract.wizard.form</field>
         <field name="model">trasas.asset.contract.wizard</field>
         <field name="arch" type="xml">
-            <form string="Hop dong">
+            <form string="Hợp đồng">
                 <group>
                     <field name="asset_id" invisible="1"/>
                     <field name="action_type" invisible="1"/>
                 </group>
                 <group>
-                    <group string="Ben A">
+                    <group string="Bên A">
                         <field name="party_a_id"/>
                     </group>
-                    <group string="Ben B">
+                    <group string="Bên B">
                         <field name="party_b_id"/>
                     </group>
                 </group>
@@ -29,14 +29,13 @@
                     </group>
                 </group>
                 <group>
-                    <field name="note" placeholder="Nhap ghi chu hop dong..."/>
+                    <field name="note" placeholder="Nhập ghi chú hợp đồng..."/>
                 </group>
                 <footer>
-                    <button string="Xac nhan" name="action_confirm_contract" type="object" class="btn-primary"/>
-                    <button string="Huy" class="btn-secondary" special="cancel"/>
+                    <button string="Xác nhận" name="action_confirm_contract" type="object" class="btn-primary"/>
+                    <button string="Hủy" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
     </record>
 </odoo>
-
