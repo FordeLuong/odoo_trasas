@@ -12,6 +12,7 @@
                     <button name="action_set_ready" string="Sẵn sàng sử dụng" type="object" class="oe_highlight" invisible="state != 'registration'"/>
                     <button name="action_start_using" string="Bắt đầu sử dụng" type="object" class="oe_highlight" invisible="state != 'ready'"/>
                     <button name="action_suspend" string="Tạm ngưng sử dụng" type="object" invisible="state in ['draft', 'ready', 'suspended', 'liquidated']"/>
+                    <button name="action_reuse" string="Đưa lại sử dụng" type="object" class="oe_highlight" invisible="state != 'suspended'"/>
                     <button name="action_liquidate" string="Thanh lý" type="object" class="btn-danger" invisible="state != 'suspended'"/>
                     <field name="state" invisible="1"/>
                     <field name="state_id" widget="statusbar" options="{'clickable': '1'}"/>

@@ -16,6 +16,7 @@
             </xpath>
             <xpath expr="//field[@name='service_type_id']" position="after">
                 <field name="description"/>
+                <field name="date_complete"/>
             </xpath>
         </field>
     </record>
@@ -28,6 +29,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='service_type_id']" position="after">
                 <field name="description"/>
+                <field name="date_complete" optional="show"/>
             </xpath>
         </field>
     </record>
