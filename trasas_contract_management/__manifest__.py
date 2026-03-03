@@ -34,6 +34,7 @@
         "contacts",  # Để quản lý đối tác
         "sign",  # Tích hợp chữ ký số
         "documents",  # Tích hợp ứng dụng Tài liệu (Documents)
+        "hr",  # Để lấy thông tin Trưởng bộ phận
     ],
     "data": [
         # Security

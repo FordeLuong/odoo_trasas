@@ -48,7 +48,7 @@
 
     <!-- Admin automatically gets Manager rights -->
     <record id="base.group_system" model="res.groups">
-        <field name="implied_ids" eval="[(4, ref('group_contract_manager'))]"/>
+        <field name="implied_ids" eval="[(4, ref('group_contract_user')), (4, ref('group_contract_approver')), (4, ref('group_contract_manager'))]"/>
     </record>
     
     <!-- ============ RECORD RULES ============ -->

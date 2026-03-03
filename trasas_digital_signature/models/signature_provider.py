@@ -5,7 +5,6 @@ import re
 import time
 import requests
 import base64
-import hashlib
 import json
 import io
 import zipfile
@@ -47,12 +46,12 @@ class TrasasSignatureProvider(models.Model):
     api_key = fields.Char(
         string="API Key ",
         help="sp_id của nhà cung cấp",
-        groups="trasas_contract_management.group_contract_manager",
+        groups="trasas_contract_management.group_contract_manager,trasas_contract_management.group_contract_approver,trasas_contract_management.group_contract_user",
     )
     api_secret = fields.Char(
         string="API Secret",
         help="sp_password của nhà cung cấp",
-        groups="trasas_contract_management.group_contract_manager",
+        groups="trasas_contract_management.group_contract_manager,trasas_contract_management.group_contract_approver,trasas_contract_management.group_contract_user",
     )
     test_mode = fields.Boolean(
         string="Chế độ test",
@@ -124,9 +123,7 @@ class TrasasSignatureProvider(models.Model):
         except UserError:
             raise
         except requests.RequestException as e:
-            raise UserError(
-                _("Lỗi mạng khi kết nối với %s:\n%s") % (self.name, str(e))
-            )
+            raise UserError(_("Lỗi mạng khi kết nối với %s:\n%s") % (self.name, str(e)))
         except Exception as e:
             raise UserError(_("Lỗi kết nối với %s:\n%s") % (self.name, str(e)))
 
@@ -225,11 +222,7 @@ class TrasasSignatureProvider(models.Model):
         return True
 
     def _demo_send_document(self, request):
-        base_url = (
-            self.env["ir.config_parameter"]
-            .sudo()
-            .get_param("web.base.url")
-        )
+        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
         result = {
             "provider_document_ref": f"DEMO-{uuid.uuid4().hex[:8].upper()}",
             "signers": [],
@@ -299,9 +292,7 @@ class TrasasSignatureProvider(models.Model):
         """Return SmartCA gateway base URL."""
         self.ensure_one()
         base_url = self.api_url or (
-            "https://rmgateway.vnptit.vn"
-            if self.test_mode
-            else "https://gwsca.vnpt.vn"
+            "https://rmgateway.vnptit.vn" if self.test_mode else "https://gwsca.vnpt.vn"
         )
         base_url = base_url.rstrip("/")
         if base_url.endswith("/v1"):
@@ -452,8 +443,7 @@ class TrasasSignatureProvider(models.Model):
                 error_message=resp.text or "",
             )
             raise UserError(
-                _("SmartCA HTTP %s: %s (URL: %s)")
-                % (resp.status_code, resp.text, url)
+                _("SmartCA HTTP %s: %s (URL: %s)") % (resp.status_code, resp.text, url)
             )
         try:
             data = resp.json()
@@ -472,9 +462,7 @@ class TrasasSignatureProvider(models.Model):
                 response_payload=resp.text,
                 error_message=str(e),
             )
-            raise UserError(
-                _("SmartCA response is not JSON: %s") % resp.text
-            )
+            raise UserError(_("SmartCA response is not JSON: %s") % resp.text)
         app_status = None
         app_message = ""
         if isinstance(data, dict):
@@ -502,8 +490,7 @@ class TrasasSignatureProvider(models.Model):
                 error_message=app_message or resp.text or "",
             )
             raise UserError(
-                _("SmartCA error %s: %s")
-                % (app_status, app_message or resp.text)
+                _("SmartCA error %s: %s") % (app_status, app_message or resp.text)
             )
         self._vnpt_smartca_log_api(
             request=request,
@@ -588,8 +575,7 @@ class TrasasSignatureProvider(models.Model):
             resp = requests.request("GET", base_url, timeout=10)
         except requests.RequestException as e:
             raise UserError(
-                _("Không kết nối được đến gateway: %s\n%s")
-                % (base_url, str(e))
+                _("Không kết nối được đến gateway: %s\n%s") % (base_url, str(e))
             )
 
         if resp.status_code >= 500:
@@ -620,9 +606,7 @@ class TrasasSignatureProvider(models.Model):
         for signer in request.signer_ids.sorted("sign_order"):
             if not signer.id_number:
                 raise UserError(
-                    _(
-                        "Thiếu 'Định danh ký (CCCD/MST)' cho người ký: %s"
-                    )
+                    _("Thiếu 'Định danh ký (CCCD/MST)' cho người ký: %s")
                     % (signer.signer_name or signer.id)
                 )
 
@@ -653,9 +637,7 @@ class TrasasSignatureProvider(models.Model):
                 "user_id": signer.id_number,
                 "transaction_id": transaction_id,
                 "transaction_desc": (
-                    request.contract_id.name
-                    if request.contract_id
-                    else request.name
+                    request.contract_id.name if request.contract_id else request.name
                 ),
                 "time_stamp": datetime.utcnow().strftime("%Y%m%d%H%M%SZ"),
                 "sign_files": [
@@ -680,18 +662,26 @@ class TrasasSignatureProvider(models.Model):
 
             payload_data = data.get("data") if isinstance(data, dict) else {}
             tran_code = (
-                (payload_data.get("tran_code") if isinstance(payload_data, dict) else "")
-                or (payload_data.get("tranId") if isinstance(payload_data, dict) else "")
-                or (payload_data.get("transaction_code") if isinstance(payload_data, dict) else "")
+                (
+                    payload_data.get("tran_code")
+                    if isinstance(payload_data, dict)
+                    else ""
+                )
+                or (
+                    payload_data.get("tranId") if isinstance(payload_data, dict) else ""
+                )
+                or (
+                    payload_data.get("transaction_code")
+                    if isinstance(payload_data, dict)
+                    else ""
+                )
                 or data.get("tran_code")
                 or data.get("tranId")
                 or data.get("transaction_code")
                 or ""
             )
             if not tran_code:
-                _logger.warning(
-                    "SmartCA sign: missing tran_code. Response=%s", data
-                )
+                _logger.warning("SmartCA sign: missing tran_code. Response=%s", data)
 
             status_code = data.get("status_code") if isinstance(data, dict) else None
             message = data.get("message") if isinstance(data, dict) else None
@@ -703,7 +693,11 @@ class TrasasSignatureProvider(models.Model):
                     "vnpt_last_status": str(
                         status_code
                         or message
-                        or (payload_data.get("status") if isinstance(payload_data, dict) else None)
+                        or (
+                            payload_data.get("status")
+                            if isinstance(payload_data, dict)
+                            else None
+                        )
                         or "PENDING"
                     ),
                 }
@@ -803,19 +797,13 @@ class TrasasSignatureProvider(models.Model):
             elif isinstance(payload_data, list):
                 signed_files = payload_data
             if not signed_files and isinstance(data, dict):
-                signed_files = (
-                    data.get("signatures") or data.get("signed_files") or []
-                )
+                signed_files = data.get("signatures") or data.get("signed_files") or []
             sig_val = None
             ts_sig = None
             if signed_files and isinstance(signed_files, list):
                 first = signed_files[0] or {}
-                sig_val = first.get("signature_value") or first.get(
-                    "signature"
-                )
-                ts_sig = first.get("timestamp_signature") or first.get(
-                    "sign_time"
-                )
+                sig_val = first.get("signature_value") or first.get("signature")
+                ts_sig = first.get("timestamp_signature") or first.get("sign_time")
 
             mapped = "waiting"
             signed_date = False
@@ -845,8 +833,7 @@ class TrasasSignatureProvider(models.Model):
                     "vnpt_last_status": str(
                         status_code or status_value or message or ""
                     ),
-                    "vnpt_signature_value": sig_val
-                    or signer.vnpt_signature_value,
+                    "vnpt_signature_value": sig_val or signer.vnpt_signature_value,
                     "vnpt_timestamp_signature": ts_sig
                     or signer.vnpt_timestamp_signature,
                 }
@@ -879,9 +866,7 @@ class TrasasSignatureProvider(models.Model):
             "provider": "VNPT SmartCA",
             "provider_type": "vnpt_smartca",
             "request": request.name,
-            "contract": (
-                request.contract_id.name if request.contract_id else None
-            ),
+            "contract": (request.contract_id.name if request.contract_id else None),
             "hash_algo": request.hash_algo,
             "hash_hex": request.hash_hex,
             "generated_at": datetime.utcnow().isoformat() + "Z",
@@ -909,9 +894,7 @@ class TrasasSignatureProvider(models.Model):
 
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as z:
-            z.writestr(
-                request.document_filename or "document.pdf", pdf_bytes
-            )
+            z.writestr(request.document_filename or "document.pdf", pdf_bytes)
             z.writestr(
                 "signatures.json",
                 json.dumps(audit, ensure_ascii=False, indent=2),
@@ -919,11 +902,7 @@ class TrasasSignatureProvider(models.Model):
 
         package_b64 = base64.b64encode(buf.getvalue())
         request.sudo().write(
-            {
-                "signed_package_info": json.dumps(
-                    audit, ensure_ascii=False
-                )
-            }
+            {"signed_package_info": json.dumps(audit, ensure_ascii=False)}
         )
         return package_b64
 

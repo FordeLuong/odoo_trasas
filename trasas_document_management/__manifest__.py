@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "TRASAS - Quản lý Hồ sơ & Tài liệu (DMS)",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Document Management",
     "summary": "Quản lý hồ sơ, tài liệu nội bộ với quy trình phê duyệt và truy cập có giới hạn",
     "description": """
@@ -48,5 +48,5 @@
     "installable": True,
     "application": True,
     "auto_install": False,
-    "post_migrate": "trasas_document_management.hooks.post_migrate",
+    "post_init_hook": "post_init_hook",
 }

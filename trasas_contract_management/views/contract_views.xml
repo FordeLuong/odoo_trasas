@@ -28,7 +28,7 @@
                             string="Xác nhận rà soát" 
                             type="object" 
                             class="btn-primary"
-                            invisible="state != 'in_review'"
+                            invisible="state != 'in_review' or not is_reviewer"
                             groups="trasas_contract_management.group_contract_user"/>
                     
                     <!-- Nút: Phê duyệt -->
@@ -36,7 +36,7 @@
                             string="Phê duyệt" 
                             type="object" 
                             class="btn-success"
-                            invisible="state != 'waiting'"
+                            invisible="state != 'waiting' or not is_current_approver"
                             groups="trasas_contract_management.group_contract_approver"/>
                     
                     <!-- Nút: Từ chối -->
@@ -44,7 +44,7 @@
                             string="Từ chối" 
                             type="object" 
                             class="btn-danger"
-                            invisible="state != 'waiting'"
+                            invisible="state != 'waiting' or not is_current_approver"
                             groups="trasas_contract_management.group_contract_approver"/>
                     
                     <!-- Nút: Bắt đầu ký -->
@@ -133,6 +133,8 @@
                     <field name="state" widget="statusbar" 
                            statusbar_visible="draft,in_review,waiting,approved,signing,signed,expired"/>
                     <field name="is_approver" invisible="1"/>
+                    <field name="is_reviewer" invisible="1"/>
+                    <field name="is_current_approver" invisible="1"/>
                 </header>
                 
                 <sheet>

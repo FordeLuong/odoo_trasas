@@ -26,6 +26,25 @@ class TrasasContract(models.Model):
         help="Giai đoạn hiện tại của hợp đồng (dùng cho Kanban)",
     )
 
+    # ============ COMPUTED: PHÂN QUYỀN HIỂN THỊ NÚT ============
+    is_approver = fields.Boolean(
+        string="Is Approver",
+        compute="_compute_is_approver",
+        help="True nếu user hiện tại thuộc nhóm Approver (Giám đốc)",
+    )
+
+    is_reviewer = fields.Boolean(
+        string="Is Reviewer",
+        compute="_compute_is_reviewer",
+        help="True nếu user hiện tại là người được giao rà soát hợp đồng này",
+    )
+
+    is_current_approver = fields.Boolean(
+        string="Is Current Approver",
+        compute="_compute_is_current_approver",
+        help="True nếu user hiện tại là người đang được giao phê duyệt hợp đồng này",
+    )
+
     kanban_state = fields.Selection(
         [
             ("normal", "Bình thường"),
@@ -325,21 +344,84 @@ class TrasasContract(models.Model):
         help="Lý do giám đốc từ chối phê duyệt",
     )
 
-    # ============ COMPUTED: PHÂN QUYỀN HIỂN THỊ NÚT ============
-    is_approver = fields.Boolean(
-        string="Is Approver",
-        compute="_compute_is_approver",
-        help="True nếu user hiện tại thuộc nhóm Approver (Giám đốc)",
-    )
-
     # ============ COMPUTED FIELDS ============
     def _compute_is_approver(self):
-        """Kiểm tra user hiện tại có phải Approver (Giám đốc) không"""
-        is_approver = self.env.user.has_group(
+        """
+        Kiểm tra user hiện tại có phải Approver (Giám đốc) không.
+        Admin sẽ trả về False để thấy được các nút bị ẩn bởi is_approver.
+        """
+        user = self.env.user
+        is_admin = user.has_group("base.group_system")
+        is_approver = user.has_group(
             "trasas_contract_management.group_contract_approver"
         )
+
         for record in self:
-            record.is_approver = is_approver
+            record.is_approver = is_approver and not is_admin
+
+    @api.depends("state", "activity_ids")
+    def _compute_is_reviewer(self):
+        """
+        Kiểm tra user hiện tại có phải là người đang được giao rà soát không.
+        Dựa trên:
+        1. Trạng thái là 'in_review'
+        2. Có một Activity 'To Do' chưa hoàn thành giao cho user hiện tại.
+        """
+        current_user_id = self.env.user.id
+        todo_type_id = self.env.ref("mail.mail_activity_data_todo").id
+        is_admin = self.env.user.has_group("base.group_system")
+        for record in self:
+            if is_admin:
+                record.is_reviewer = True
+                continue
+            if record.state != "in_review":
+                record.is_reviewer = False
+                continue
+
+            # Kiểm tra xem có activity rà soát nào đang giao cho user hiện tại không
+            activity = record.activity_ids.filtered(
+                lambda a: (
+                    a.activity_type_id.id == todo_type_id
+                    and a.user_id.id == current_user_id
+                    and (
+                        "B3" in (a.summary or "")
+                        or "rà soát" in (a.summary or "").lower()
+                    )
+                )
+            )
+            record.is_reviewer = bool(activity)
+
+    @api.depends("state", "activity_ids")
+    def _compute_is_current_approver(self):
+        """
+        Kiểm tra user hiện tại có phải là người đang được giao phê duyệt không.
+        Dựa trên:
+        1. Trạng thái là 'waiting'
+        2. Có một Activity 'To Do' chưa hoàn thành giao cho user hiện tại.
+        """
+        current_user_id = self.env.user.id
+        todo_type_id = self.env.ref("mail.mail_activity_data_todo").id
+        is_admin = self.env.user.has_group("base.group_system")
+        for record in self:
+            if is_admin:
+                record.is_current_approver = True
+                continue
+            if record.state != "waiting":
+                record.is_current_approver = False
+                continue
+
+            # Kiểm tra xem có activity phê duyệt nào đang giao cho user hiện tại không
+            activity = record.activity_ids.filtered(
+                lambda a: (
+                    a.activity_type_id.id == todo_type_id
+                    and a.user_id.id == current_user_id
+                    and (
+                        "B4" in (a.summary or "")
+                        or "phê duyệt" in (a.summary or "").lower()
+                    )
+                )
+            )
+            record.is_current_approver = bool(activity)
 
     @api.depends("date_start", "date_end")
     def _compute_duration_days(self):
@@ -624,13 +706,13 @@ class TrasasContract(models.Model):
             # --- Activity Logic ---
             record._close_activities()
 
-            # Tạo Activity cho nhóm Approver (Giám đốc) để thông báo duyệt
+            # Tạo Activity cho Nhóm Approver (Giám đốc) - Chỉ giao cho người đầu tiên để tránh duplicate
             approvers = record._get_users_from_group(
                 "trasas_contract_management.group_contract_approver"
             )
-            for user in approvers:
+            if approvers:
                 record._schedule_activity(
-                    user.id,
+                    approvers[0].id,
                     _("⏳ Yêu cầu phê duyệt hợp đồng: %s") % record.name,
                     deadline=1,
                     note="Yêu cầu phê duyệt hợp đồng",
@@ -812,6 +894,18 @@ class TrasasContract(models.Model):
             if record.state != "draft":
                 raise UserError(_("Chỉ có thể gửi rà soát hợp đồng ở trạng thái Nháp!"))
 
+            # Kiểm tra file đính kèm (ir.attachment) trước khi gửi rà soát
+            attachment_count = self.env["ir.attachment"].search_count(
+                [
+                    ("res_model", "=", self._name),
+                    ("res_id", "=", record.id),
+                ]
+            )
+            if attachment_count == 0:
+                raise UserError(
+                    _("Vui lòng đính kèm ít nhất một file trước khi gửi rà soát!")
+                )
+
             record.write({"state": "in_review"})
             record.message_post(
                 body=_(
@@ -824,9 +918,19 @@ class TrasasContract(models.Model):
             record._close_activities()
 
             # [B3] Tạo Activity cho Reviewer hoặc nhóm Contract Manager
-            reviewer = record.reviewer_id
+            # Ưu tiên 1: Người rà soát đề xuất
+            # Ưu tiên 2: Trưởng bộ phận của người tạo
+            # Ưu tiên 3: Nhóm Contract Manager
+            reviewer = record.suggested_reviewer_id
+            if not reviewer:
+                employee = self.env["hr.employee"].search(
+                    [("user_id", "=", record.user_id.id)], limit=1
+                )
+                if employee and employee.parent_id and employee.parent_id.user_id:
+                    reviewer = employee.parent_id.user_id
+
             if reviewer:
-                # Nếu có người rà soát cụ thể
+                # Nếu có người rà soát cụ thể (Đề xuất hoặc Trưởng phòng)
                 record._schedule_activity(
                     reviewer.id,
                     _("Rà soát hợp đồng: %s (B3)") % record.name,
@@ -879,13 +983,13 @@ class TrasasContract(models.Model):
             # --- Activity Logic ---
             record._close_activities()
 
-            # [B4] Gửi cho Giám đốc (nhóm Contract Approver)
+            # [B4] Gửi cho Giám đốc (nhóm Contract Approver) - Chỉ giao cho 1 người
             approvers = record._get_users_from_group(
                 "trasas_contract_management.group_contract_approver"
             )
-            for user in approvers:
+            if approvers:
                 record._schedule_activity(
-                    user.id,
+                    approvers[0].id,
                     _("⏳ Yêu cầu phê duyệt hợp đồng: %s (B4)") % record.name,
                     deadline=2,  # +2 ngày
                 )
