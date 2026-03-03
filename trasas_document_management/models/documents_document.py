@@ -132,9 +132,10 @@ class DocumentsDocumentInherit(models.Model):
         [
             ("public", "Công khai"),
             ("restricted", "Giới hạn"),
+            ("only me", "Chỉ mình tôi"),
         ],
         string="Độ mật",
-        default="restricted",
+        default="only me",
         tracking=True,
     )
 
@@ -162,6 +163,35 @@ class DocumentsDocumentInherit(models.Model):
         default=lambda self: self.env.user,
         tracking=True,
     )
+    # =====================================================================
+    # SYNC confidential_level → access_internal (Odoo native permission)
+    # =====================================================================
+
+    _CONFIDENTIAL_TO_ACCESS = {
+        "public": "edit",  # Tất cả internal user đều thấy
+        "restricted": "none",  # Chỉ owner + người được share
+        "only me": "none",  # Chỉ owner
+    }
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            # Chỉ áp dụng cho file (không phải folder)
+            if vals.get("type") == "folder":
+                continue
+            if "confidential_level" in vals and "access_internal" not in vals:
+                cl = vals["confidential_level"]
+                vals["access_internal"] = self._CONFIDENTIAL_TO_ACCESS.get(cl, "none")
+            elif "access_internal" not in vals:
+                # Default confidential_level = "only me" → access_internal = "none"
+                vals["access_internal"] = "none"
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if "confidential_level" in vals:
+            cl = vals["confidential_level"]
+            vals["access_internal"] = self._CONFIDENTIAL_TO_ACCESS.get(cl, "none")
+        return super().write(vals)
 
     # =====================================================================
     # COMPUTED

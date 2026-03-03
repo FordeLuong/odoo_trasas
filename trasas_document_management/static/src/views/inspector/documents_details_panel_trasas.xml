@@ -57,10 +57,10 @@
                         <span class="ms-1 text-muted" style="font-size: 0.9em;">ngày</span>
                     </div>
 
-                    <!-- Độ Mật -->
+                    <!-- Độ Mật (với popup xác nhận) -->
                     <i class="fa fa-shield mx-1 my-2"/>
                     <div class="o_field_widget o_field_selection d-flex align-items-center">
-                        <SelectionField
+                        <ConfidentialLevelField
                             name="'confidential_level'"
                             record="record"
                             readonly="userPermissionViewOnly"

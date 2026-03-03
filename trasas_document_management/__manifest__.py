@@ -40,6 +40,7 @@
     ],
     "assets": {
         "web.assets_backend": [
+            "trasas_document_management/static/src/views/inspector/confidential_level_field.js",
             "trasas_document_management/static/src/views/inspector/documents_details_panel_patch.js",
             "trasas_document_management/static/src/views/inspector/documents_details_panel_trasas.xml",
         ],
