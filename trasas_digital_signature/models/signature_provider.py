@@ -281,9 +281,10 @@ class TrasasSignatureProvider(models.Model):
         sp_id = (self.api_key or "").strip()
         if not sp_id:
             return "sp769"
-        if sp_id.lower().startswith("sp"):
-            return sp_id
-        return f"sp{sp_id}"
+        sp_id_lower = sp_id.lower()
+        if re.fullmatch(r"sp?\d+", sp_id_lower):
+            return sp_id_lower if sp_id_lower.startswith("sp") else f"sp{sp_id_lower}"
+        return "sp769"
 
     def _vnpt_smartca_payload_sp_id(self):
         return (self.api_key or "").strip()
@@ -305,9 +306,6 @@ class TrasasSignatureProvider(models.Model):
         base_url = base_url.rstrip("/")
         if base_url.endswith("/v1"):
             base_url = base_url[:-3]
-
-        if not self._vnpt_smartca_is_legacy_sp_id():
-            return base_url
 
         sp_path = self._vnpt_smartca_sp_path()
         if "/sca/" in base_url:
@@ -477,6 +475,36 @@ class TrasasSignatureProvider(models.Model):
             raise UserError(
                 _("SmartCA response is not JSON: %s") % resp.text
             )
+        app_status = None
+        app_message = ""
+        if isinstance(data, dict):
+            app_status = data.get("status_code")
+            app_message = data.get("message") or ""
+        app_status_int = None
+        if app_status is not None:
+            try:
+                app_status_int = int(app_status)
+            except (TypeError, ValueError):
+                app_status_int = None
+        if app_status_int is not None and app_status_int != 200:
+            self._vnpt_smartca_log_api(
+                request=request,
+                signer=signer,
+                operation=operation,
+                method="POST",
+                endpoint=path,
+                url=url,
+                status_code=resp.status_code,
+                success=False,
+                duration_ms=duration_ms,
+                payload=payload,
+                response_payload=data,
+                error_message=app_message or resp.text or "",
+            )
+            raise UserError(
+                _("SmartCA error %s: %s")
+                % (app_status, app_message or resp.text)
+            )
         self._vnpt_smartca_log_api(
             request=request,
             signer=signer,
@@ -510,12 +538,41 @@ class TrasasSignatureProvider(models.Model):
             signer=signer,
             operation="get_certificate",
         )
-        serial = (
-            data.get("serial_number")
-            or data.get("serialNumber")
-            or data.get("cert_serial")
-            or ""
-        )
+        payload_data = data.get("data") if isinstance(data, dict) else {}
+        serial = ""
+        certs = []
+        if isinstance(payload_data, dict):
+            serial = (
+                payload_data.get("serial_number")
+                or payload_data.get("serialNumber")
+                or payload_data.get("cert_serial")
+                or ""
+            )
+            certs = (
+                payload_data.get("user_certificates")
+                or payload_data.get("certificates")
+                or payload_data.get("userCertificates")
+                or []
+            )
+        elif isinstance(payload_data, list):
+            certs = payload_data
+
+        if not serial and certs and isinstance(certs, list):
+            first = certs[0] or {}
+            if isinstance(first, dict):
+                serial = (
+                    first.get("serial_number")
+                    or first.get("serialNumber")
+                    or first.get("cert_serial")
+                    or ""
+                )
+        if not serial and isinstance(data, dict):
+            serial = (
+                data.get("serial_number")
+                or data.get("serialNumber")
+                or data.get("cert_serial")
+                or ""
+            )
         if serial:
             signer.write({"vnpt_serial_number": serial})
         return data
@@ -553,15 +610,6 @@ class TrasasSignatureProvider(models.Model):
         self.ensure_one()
         if not self.api_key or not self.api_secret:
             raise UserError(_("Thiếu SP ID / SP Password (API Key/Secret)."))
-        base_url = (
-            self.env["ir.config_parameter"]
-            .sudo()
-            .get_param("web.base.url")
-            .rstrip("/")
-        )
-        callback_url = (
-            f"{base_url}/trasas/signature/callback/{request.callback_token}"
-        )
 
         if not request.hash_hex:
             request._prepare_hash_for_signing()
@@ -604,7 +652,6 @@ class TrasasSignatureProvider(models.Model):
                 "sp_password": self.api_secret,
                 "user_id": signer.id_number,
                 "transaction_id": transaction_id,
-                "callback_url": callback_url,
                 "transaction_desc": (
                     request.contract_id.name
                     if request.contract_id
@@ -631,8 +678,12 @@ class TrasasSignatureProvider(models.Model):
                 operation="sign",
             )
 
+            payload_data = data.get("data") if isinstance(data, dict) else {}
             tran_code = (
-                data.get("tran_code")
+                (payload_data.get("tran_code") if isinstance(payload_data, dict) else "")
+                or (payload_data.get("tranId") if isinstance(payload_data, dict) else "")
+                or (payload_data.get("transaction_code") if isinstance(payload_data, dict) else "")
+                or data.get("tran_code")
                 or data.get("tranId")
                 or data.get("transaction_code")
                 or ""
@@ -642,14 +693,17 @@ class TrasasSignatureProvider(models.Model):
                     "SmartCA sign: missing tran_code. Response=%s", data
                 )
 
+            status_code = data.get("status_code") if isinstance(data, dict) else None
+            message = data.get("message") if isinstance(data, dict) else None
             signer.write(
                 {
                     "vnpt_transaction_id": transaction_id,
                     "vnpt_tran_code": tran_code,
                     "provider_signer_ref": tran_code or transaction_id,
                     "vnpt_last_status": str(
-                        data.get("status_code")
-                        or data.get("status")
+                        status_code
+                        or message
+                        or (payload_data.get("status") if isinstance(payload_data, dict) else None)
                         or "PENDING"
                     ),
                 }
@@ -673,34 +727,85 @@ class TrasasSignatureProvider(models.Model):
         any_refused = False
 
         for signer in request.signer_ids:
-            tran = signer.vnpt_tran_code or signer.provider_signer_ref
-            if not tran:
+            tran_candidates = []
+            for candidate in (
+                signer.vnpt_tran_code,
+                signer.provider_signer_ref,
+                signer.vnpt_transaction_id,
+            ):
+                candidate = (candidate or "").strip()
+                if candidate and candidate not in tran_candidates:
+                    tran_candidates.append(candidate)
+            if not tran_candidates:
                 all_signed = False
                 continue
+            data = None
+            last_error = None
+            for tran in tran_candidates:
+                try:
+                    data = self._vnpt_smartca_post(
+                        f"/v1/signatures/sign/{tran}/status",
+                        {
+                            "sp_id": self._vnpt_smartca_payload_sp_id(),
+                            "sp_password": self.api_secret,
+                            "user_id": signer.id_number or "",
+                        },
+                        request=request,
+                        signer=signer,
+                        operation="status",
+                    )
+                    break
+                except UserError as e:
+                    last_error = str(e)
+                    if "sig_tran_not_exist" in last_error:
+                        _logger.warning(
+                            "SmartCA status not found for %s (%s).",
+                            signer.signer_name or signer.id,
+                            tran,
+                        )
+                        continue
+                    raise
+            if data is None:
+                signer.write(
+                    {
+                        "vnpt_last_status": "sig_tran_not_exist",
+                    }
+                )
+                all_signed = False
+                res["signers"].append(
+                    {
+                        "provider_signer_ref": signer.provider_signer_ref,
+                        "status": "waiting",
+                        "signed_date": False,
+                    }
+                )
+                continue
 
-            data = self._vnpt_smartca_post(
-                f"/v1/signatures/sign/{tran}/status",
-                {
-                    "sp_id": self._vnpt_smartca_payload_sp_id(),
-                    "sp_password": self.api_secret,
-                    "user_id": signer.id_number or "",
-                },
-                request=request,
-                signer=signer,
-                operation="status",
-            )
+            payload_data = data.get("data") if isinstance(data, dict) else {}
+            status_code = data.get("status_code") if isinstance(data, dict) else None
+            status_value = None
+            if isinstance(payload_data, dict):
+                status_value = payload_data.get("status") or payload_data.get("state")
+                if status_code is None:
+                    status_code = payload_data.get("status_code")
+            if status_value is None and isinstance(data, dict):
+                status_value = data.get("status") or data.get("state")
+            message = data.get("message") if isinstance(data, dict) else None
+            status_str = str(status_value or message or status_code or "").lower()
 
-            status_code = (
-                data.get("status_code")
-                or data.get("status")
-                or data.get("state")
-            )
-            status_str = (
-                str(status_code).lower() if status_code is not None else ""
-            )
-            signed_files = (
-                data.get("signatures") or data.get("signed_files") or []
-            )
+            signed_files = []
+            if isinstance(payload_data, dict):
+                signed_files = (
+                    payload_data.get("signatures")
+                    or payload_data.get("signed_files")
+                    or []
+                )
+            elif isinstance(payload_data, list):
+                signed_files = payload_data
+            if not signed_files and isinstance(data, dict):
+                signed_files = (
+                    data.get("signatures") or data.get("signed_files") or []
+                )
             sig_val = None
             ts_sig = None
             if signed_files and isinstance(signed_files, list):
@@ -714,12 +819,7 @@ class TrasasSignatureProvider(models.Model):
 
             mapped = "waiting"
             signed_date = False
-            if "signed" in status_str or status_str in (
-                "1",
-                "success",
-                "completed",
-                "done",
-            ):
+            if signed_files and isinstance(signed_files, list):
                 mapped = "signed"
                 signed_date = fields.Datetime.now()
             elif "refus" in status_str or status_str in (
@@ -731,10 +831,20 @@ class TrasasSignatureProvider(models.Model):
                 "failed",
             ):
                 mapped = "refused"
+            elif "signed" in status_str or status_str in (
+                "1",
+                "success",
+                "completed",
+                "done",
+            ):
+                mapped = "signed"
+                signed_date = fields.Datetime.now()
 
             signer.write(
                 {
-                    "vnpt_last_status": str(status_code),
+                    "vnpt_last_status": str(
+                        status_code or status_value or message or ""
+                    ),
                     "vnpt_signature_value": sig_val
                     or signer.vnpt_signature_value,
                     "vnpt_timestamp_signature": ts_sig
