@@ -24,4 +24,17 @@
               action="action_doc_access_request"
               sequence="20"/>
 
+    <!-- Danh mục Loại hồ sơ (Dành cho Quản trị viên Documents) -->
+    <record id="action_trasas_document_type" model="ir.actions.act_window">
+        <field name="name">Loại hồ sơ (TRASAS)</field>
+        <field name="res_model">trasas.document.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_trasas_document_type"
+              name="Loại tài liệu"
+              parent="documents.Config"
+              action="action_trasas_document_type"
+              sequence="100"/>
+
 </odoo>

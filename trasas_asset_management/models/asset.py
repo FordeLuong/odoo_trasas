@@ -333,11 +333,23 @@ class TrasasAsset(models.Model):
         if "state" in vals:
             self._sync_stage_from_state()
         if not self.env.context.get("skip_maintenance_update") and any(
-            key in vals for key in ("use_start_date", "maintenance_frequency", "asset_group_id")
+            key in vals
+            for key in ("use_start_date", "maintenance_frequency", "asset_group_id")
         ):
             self.filtered(
                 lambda r: r.asset_group_code == "002"
             )._update_next_maintenance_date_group002()
+
+        if "name" in vals or "code" in vals:
+            for rec in self:
+                if rec.document_folder_id:
+                    folder_name = f"{rec.code}_{rec.name}" if rec.code else rec.name
+                    rec.document_folder_id.sudo().write({"name": folder_name})
+
+        # If moving to a new group, we might want to change folder, but keeping it simple for now or we just let it create if missing
+        if "asset_group_id" in vals:
+            self._create_document_folder()
+
         return res
 
     def init(self):
@@ -550,6 +562,12 @@ class TrasasAsset(models.Model):
         default=lambda self: self.env.company,
         required=True,
     )
+    document_folder_id = fields.Many2one(
+        "documents.document",
+        string="Folder tài liệu",
+        domain="[('type', '=', 'folder')]",
+        readonly=True,
+    )
 
     # =====================================================================
     # COMPUTED
@@ -593,6 +611,8 @@ class TrasasAsset(models.Model):
         records = super().create(vals_list)
         records._update_next_maintenance_date_group002()
 
+        records._create_document_folder()
+
         for rec in records:
             rec._schedule_activity_upload_documents()
             rec._send_asset_created_notification()
@@ -602,16 +622,41 @@ class TrasasAsset(models.Model):
             )
         return records
 
+    def _create_document_folder(self):
+        Document = self.env["documents.document"].sudo()
+        for rec in self:
+            if (
+                not rec.document_folder_id
+                and rec.asset_group_id
+                and rec.asset_group_id.document_folder_id
+            ):
+                folder_name = f"{rec.code}_{rec.name}" if rec.code else rec.name
+                folder = Document.create(
+                    {
+                        "name": folder_name,
+                        "type": "folder",
+                        "folder_id": rec.asset_group_id.document_folder_id.id,
+                    }
+                )
+                rec.with_context(skip_maintenance_update=True).write(
+                    {"document_folder_id": folder.id}
+                )
+
+    @api.model
+    def _create_folders_for_existing(self):
+        records = self.search([("document_folder_id", "=", False)])
+        records._create_document_folder()
+        self.env["trasas.asset.legal.document"].search(
+            []
+        )._sync_attachments_to_document()
+
     # =====================================================================
     # STATE TRANSITIONS — CHUNG
     # =====================================================================
 
     def _should_open_contract_wizard(self):
         self.ensure_one()
-        return (
-            self.asset_group_code == "001"
-            and self.asset_classification in ("lease_out", "lease_in")
-        ) or (self.asset_group_code == "002" and self.asset_classification == "lease_in")
+        return True
 
     def _action_open_contract_wizard(self, action_type):
         self.ensure_one()
@@ -1190,9 +1235,7 @@ class TrasasAsset(models.Model):
                 if rec.state != "expiring":
                     rec.write({"state": "expiring"})
                     rec.message_post(
-                        body=_(
-                            "Hợp đồng sắp hết hạn vào ngày %s."
-                        )
+                        body=_("Hợp đồng sắp hết hạn vào ngày %s.")
                         % end_date.strftime("%d/%m/%Y"),
                         subject=_("Sắp hết hạn hợp đồng"),
                     )
@@ -1235,6 +1278,21 @@ class TrasasAsset(models.Model):
 
     def action_view_legal_documents(self):
         self.ensure_one()
+        if self.document_folder_id:
+            return {
+                "type": "ir.actions.act_window",
+                "name": _("Hồ sơ — %s") % self.name,
+                "res_model": "documents.document",
+                "view_mode": "kanban,list,form",
+                "domain": [
+                    ("folder_id", "child_of", self.document_folder_id.id),
+                    ("type", "in", ["empty", "binary", "url"]),
+                ],
+                "context": {
+                    "default_folder_id": self.document_folder_id.id,
+                    "searchpanel_default_folder_id": self.document_folder_id.id,
+                },
+            }
         return {
             "type": "ir.actions.act_window",
             "name": _("Hồ sơ — %s") % self.name,

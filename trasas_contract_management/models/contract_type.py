@@ -47,6 +47,13 @@ class ContractType(models.Model):
         string="Số hợp đồng", compute="_compute_contract_count"
     )
 
+    document_folder_id = fields.Many2one(
+        "documents.document",
+        string="Folder tài liệu",
+        domain="[('type', '=', 'folder')]",
+        readonly=True,
+    )
+
     @api.depends("code")
     def _compute_contract_count(self):
         """Đếm số hợp đồng theo loại"""
@@ -54,6 +61,46 @@ class ContractType(models.Model):
             record.contract_count = self.env["trasas.contract"].search_count(
                 [("contract_type_id", "=", record.id)]
             )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._create_document_folder()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "name" in vals or "code" in vals:
+            for rec in self:
+                if rec.document_folder_id:
+                    folder_name = f"{rec.code} - {rec.name}" if rec.code else rec.name
+                    rec.document_folder_id.sudo().write({"name": folder_name})
+        return res
+
+    def _create_document_folder(self):
+        root_folder = self.env.ref(
+            "trasas_contract_management.document_folder_contract_root",
+            raise_if_not_found=False,
+        )
+        if not root_folder:
+            return
+        Document = self.env["documents.document"].sudo()
+        for rec in self:
+            if not rec.document_folder_id:
+                folder_name = f"{rec.code} - {rec.name}" if rec.code else rec.name
+                folder = Document.create(
+                    {
+                        "name": folder_name,
+                        "type": "folder",
+                        "folder_id": root_folder.id,
+                    }
+                )
+                rec.document_folder_id = folder.id
+
+    @api.model
+    def _create_folders_for_existing(self):
+        records = self.search([("document_folder_id", "=", False)])
+        records._create_document_folder()
 
     def action_view_contracts(self):
         """Xem danh sách hợp đồng thuộc loại này"""

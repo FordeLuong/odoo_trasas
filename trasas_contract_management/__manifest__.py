@@ -33,6 +33,7 @@
         "mail",  # Để có Chatter và gửi email
         "contacts",  # Để quản lý đối tác
         "sign",  # Tích hợp chữ ký số
+        "documents",  # Tích hợp ứng dụng Tài liệu (Documents)
     ],
     "data": [
         # Security
@@ -41,6 +42,7 @@
         # Data
         "data/mail_template_data.xml",
         "data/ir_cron_data.xml",
+        "data/document_workspace_data.xml",
         "data/contract_type_data.xml",
         "data/contract_stage_data.xml",
         # Views

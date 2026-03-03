@@ -89,7 +89,7 @@
     <!-- ============================================ -->
     <menuitem id="menu_portal_management_root" 
               name="Portal Management" 
-              web_icon="portal_custom,static/description/icon.png"
+              web_icon="portal_trasas,static/description/icon.png"
               sequence="20" 
               groups="base.group_system,hr.group_hr_user"/>
 

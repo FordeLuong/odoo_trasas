@@ -25,6 +25,7 @@
         "mail",
         "hr",
         "account",
+        "documents",
     ],
     "data": [
         # Security
@@ -33,6 +34,7 @@
         # Data
         "data/mail_template_data.xml",
         "data/ir_sequence_data.xml",
+        "data/document_workspace_data.xml",
         "data/asset_type_data.xml",
         "data/asset_stage_data.xml",
         "data/ir_cron_data.xml",

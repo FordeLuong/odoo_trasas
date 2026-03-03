@@ -1,13 +1,13 @@
 {
-    "name": "Custom Portal",
+    "name": "Portal TRASAS",
     "version": "1.3",
-    "summary": "Custom Portal Module inheriting from standard Portal",
+    "summary": "TRASAS Portal - Giao diện Portal cho nhân viên",
     "description": """
-        This module extends the standard Odoo Portal with social media style layout.
-        Includes Line Manager Approval App for portal users.
+        Module mở rộng Portal chuẩn Odoo với giao diện social media.
+        Bao gồm ứng dụng phê duyệt cho portal users.
     """,
     "category": "Website/Website",
-    "author": "Antigravity",
+    "author": "TRASAS",
     "depends": ["portal", "website_blog", "website_slides", "hr"],
     "data": [
         "security/ir.model.access.csv",
@@ -18,7 +18,7 @@
     ],
     "assets": {
         "web.assets_frontend": [
-            "portal_custom/static/src/js/portal_approvals.js",
+            "portal_trasas/static/src/js/portal_approvals.js",
         ],
     },
     "installable": True,

@@ -3,6 +3,86 @@ from odoo import models, fields, api, _
 from datetime import timedelta
 
 
+class TrasasDocumentType(models.Model):
+    _name = "trasas.document.type"
+    _description = "Loại hồ sơ (TRASAS)"
+    _order = "sequence, id"
+
+    name = fields.Char(string="Tên loại hồ sơ", required=True)
+    code = fields.Char(string="Mã", copy=False)
+    active = fields.Boolean(default=True)
+    sequence = fields.Integer(string="Thứ tự", default=10)
+    folder_id = fields.Many2one(
+        "documents.document",
+        string="Thư mục liên kết",
+        ondelete="set null",
+        copy=False,
+        domain=[("type", "=", "folder")],
+    )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._sync_document_folder()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if any(f in vals for f in ["name", "active", "sequence"]):
+            self._sync_document_folder()
+        return res
+
+    def unlink(self):
+        # Lưu trữ thư mục liên kết trước khi xóa loại hồ sơ để tránh mồ côi dữ liệu
+        for rec in self:
+            if rec.folder_id:
+                rec.folder_id.write({"active": False})
+        return super().unlink()
+
+    @api.model
+    def _sync_document_folder(self, *args, **kwargs):
+        """Tạo hoặc cập nhật thư mục tương ứng trong app Documents"""
+        # Lấy ID của root folder từ XML data
+        root_folder = self.env.ref(
+            "trasas_document_management.workspace_trasas_internal_docs",
+            raise_if_not_found=False,
+        )
+        if not root_folder:
+            return
+
+        # Duyệt qua cả các bản ghi đã active=False để đồng bộ trạng thái lưu trữ
+        if self:
+            records = self.with_context(active_test=False)
+        else:
+            records = (
+                self.env["trasas.document.type"]
+                .with_context(active_test=False)
+                .search([])
+            )
+
+        for rec in records:
+            folder_vals = {
+                "name": rec.name,
+                "type": "folder",
+                "folder_id": root_folder.id,
+                "active": rec.active,
+                "access_internal": "edit",  # Tất cả internal users có thể xem + upload
+            }
+            # Nếu documents.document có field sequence thì đồng bộ luôn
+            if "sequence" in self.env["documents.document"]._fields:
+                folder_vals["sequence"] = rec.sequence
+
+            if not rec.folder_id:
+                # Chỉ tạo mới nếu bản ghi đang active
+                if rec.active:
+                    folder = self.env["documents.document"].create(folder_vals)
+                    rec.with_context(tracking_disable=True).write(
+                        {"folder_id": folder.id}
+                    )
+            else:
+                rec.folder_id.write(folder_vals)
+
+
 class DocumentsDocumentInherit(models.Model):
     """Kế thừa documents.document — Bổ sung trường thông tin cơ bản (B2b),
     trạng thái hiệu lực, và cảnh báo hết hạn (B5, B12)
@@ -14,17 +94,8 @@ class DocumentsDocumentInherit(models.Model):
     # THÔNG TIN CƠ BẢN BỔ SUNG (B2b)
     # =====================================================================
 
-    document_type = fields.Selection(
-        [
-            ("contract", "Hợp đồng"),
-            ("license", "Giấy phép"),
-            ("appendix", "Phụ lục"),
-            ("regulation", "Nội quy / Quy định"),
-            ("policy", "Chính sách"),
-            ("certificate", "Chứng chỉ / Chứng nhận"),
-            ("report", "Báo cáo"),
-            ("other", "Khác"),
-        ],
+    document_type_id = fields.Many2one(
+        "trasas.document.type",
         string="Loại hồ sơ",
         tracking=True,
         help="Phân loại loại hình tài liệu",
@@ -60,12 +131,10 @@ class DocumentsDocumentInherit(models.Model):
     confidential_level = fields.Selection(
         [
             ("public", "Công khai"),
-            ("internal", "Nội bộ"),
-            ("confidential", "Mật"),
-            ("restricted", "Tuyệt mật"),
+            ("restricted", "Giới hạn"),
         ],
         string="Độ mật",
-        default="internal",
+        default="restricted",
         tracking=True,
     )
 

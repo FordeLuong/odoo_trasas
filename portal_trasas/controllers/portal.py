@@ -155,77 +155,77 @@ class CustomPortal(CustomerPortal):
 
     @http.route(['/my/leaves'], type='http', auth='user', website=True)
     def portal_leaves(self, **kw):
-        return request.render('portal_custom.portal_app_leaves', {
+        return request.render('portal_trasas.portal_app_leaves', {
             'user': request.env.user,
             'app_name': 'Leaves',
         })
 
     @http.route(['/my/personal-information'], type='http', auth='user', website=True)
     def portal_personal_information(self, **kw):
-        return request.render('portal_custom.portal_app_personal_information', {
+        return request.render('portal_trasas.portal_app_personal_information', {
             'user': request.env.user,
             'app_name': 'Personal Information',
         })
 
     @http.route(['/my/rocks'], type='http', auth='user', website=True)
     def portal_rocks(self, **kw):
-        return request.render('portal_custom.portal_app_rocks', {
+        return request.render('portal_trasas.portal_app_rocks', {
             'user': request.env.user,
             'app_name': 'Rocks',
         })
 
     @http.route(['/my/performance'], type='http', auth='user', website=True)
     def portal_performance(self, **kw):
-        return request.render('portal_custom.portal_app_performance', {
+        return request.render('portal_trasas.portal_app_performance', {
             'user': request.env.user,
             'app_name': 'Performance',
         })
 
     @http.route(['/my/team-accountabilities'], type='http', auth='user', website=True)
     def portal_team_accountabilities(self, **kw):
-        return request.render('portal_custom.portal_app_team_accountabilities', {
+        return request.render('portal_trasas.portal_app_team_accountabilities', {
             'user': request.env.user,
             'app_name': 'Team Accountabilities',
         })
 
     @http.route(['/my/appraisals'], type='http', auth='user', website=True)
     def portal_appraisals(self, **kw):
-        return request.render('portal_custom.portal_app_appraisals', {
+        return request.render('portal_trasas.portal_app_appraisals', {
             'user': request.env.user,
             'app_name': 'Appraisals',
         })
 
     @http.route(['/my/employee-engagement'], type='http', auth='user', website=True)
     def portal_employee_engagement(self, **kw):
-        return request.render('portal_custom.portal_app_employee_engagement', {
+        return request.render('portal_trasas.portal_app_employee_engagement', {
             'user': request.env.user,
             'app_name': 'Employee Engagement',
         })
 
     @http.route(['/my/expenses'], type='http', auth='user', website=True)
     def portal_expenses(self, **kw):
-        return request.render('portal_custom.portal_app_expenses', {
+        return request.render('portal_trasas.portal_app_expenses', {
             'user': request.env.user,
             'app_name': 'Expenses',
         })
 
     @http.route(['/my/cond'], type='http', auth='user', website=True)
     def portal_cond(self, **kw):
-        return request.render('portal_custom.portal_app_cond', {
+        return request.render('portal_trasas.portal_app_cond', {
             'user': request.env.user,
             'app_name': 'COND',
         })
 
     @http.route(['/my/payslips'], type='http', auth='user', website=True)
     def portal_payslips(self, **kw):
-        return request.render('portal_custom.portal_app_payslips', {
+        return request.render('portal_trasas.portal_app_payslips', {
             'user': request.env.user,
             'app_name': 'Payslips',
         })
 
     @http.route(['/my/knowledge-hub'], type='http', auth='user', website=True)
     def portal_knowledge_hub(self, **kw):
-        return request.render('portal_custom.portal_app_knowledge_hub', {
+        return request.render('portal_trasas.portal_app_knowledge_hub', {
             'user': request.env.user,
             'app_name': 'Knowledge Hub',
         })
@@ -236,7 +236,7 @@ class CustomPortal(CustomerPortal):
         values.update({
             'user': request.env.user,
         })
-        return request.render('portal_custom.portal_settings_page', values)
+        return request.render('portal_trasas.portal_settings_page', values)
 
     # =========================================================
     # APPROVALS MOVED TO M02_P0200_00

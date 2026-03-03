@@ -144,6 +144,12 @@
                                 invisible="sign_request_count == 0">
                             <field name="sign_request_count" widget="statinfo" string="Chữ ký số"/>
                         </button>
+                        <button name="action_view_documents"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-folder-open"
+                                string="Hồ sơ / Tài liệu"
+                                invisible="state == 'draft'"/>
                     </div>
                     
                     <!-- Ribbon cho hợp đồng hết hạn -->

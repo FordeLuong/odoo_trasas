@@ -3,7 +3,7 @@
     <!-- ========================================== -->
     <!-- CSS TÙY CHỈNH CHO GIỐNG FACEBOOK -->
     <!-- ========================================== -->
-    <template id="portal_custom_css" inherit_id="portal.frontend_layout" priority="10">
+    <template id="portal_trasas_css" inherit_id="portal.frontend_layout" priority="10">
         <xpath expr="//head" position="inside">
             <style>body {
                     background-color: #f0f2f5; /* Màu nền xám đặc trưng của FB */
@@ -542,35 +542,35 @@
     </template>
     <!-- Giữ nguyên các định nghĩa template con -->
     <template id="portal_app_leaves" name="Portal App Leaves">
-        <t t-call="portal_custom.portal_app_base" />
+        <t t-call="portal_trasas.portal_app_base" />
     </template>
 
     <template id="portal_app_personal_information" name="Portal App Personal Information">
-        <t t-call="portal_custom.portal_app_base" />
+        <t t-call="portal_trasas.portal_app_base" />
     </template>
 
     <template id="portal_app_performance" name="Portal App Performance">
-        <t t-call="portal_custom.portal_app_base" />
+        <t t-call="portal_trasas.portal_app_base" />
     </template>
 
     <template id="portal_app_employee_engagement" name="Portal App Employee Engagement">
-        <t t-call="portal_custom.portal_app_base" />
+        <t t-call="portal_trasas.portal_app_base" />
     </template>
 
     <template id="portal_app_expenses" name="Portal App Expenses">
-        <t t-call="portal_custom.portal_app_base" />
+        <t t-call="portal_trasas.portal_app_base" />
     </template>
 
     <template id="portal_app_cond" name="Portal App COND">
-        <t t-call="portal_custom.portal_app_base" />
+        <t t-call="portal_trasas.portal_app_base" />
     </template>
 
     <template id="portal_app_payslips" name="Portal App Payslips">
-        <t t-call="portal_custom.portal_app_base" />
+        <t t-call="portal_trasas.portal_app_base" />
     </template>
 
     <template id="portal_app_knowledge_hub" name="Portal App Knowledge Hub">
-        <t t-call="portal_custom.portal_app_base" />
+        <t t-call="portal_trasas.portal_app_base" />
     </template>
     <!-- ========== SETTINGS PAGE ========== -->
     <template id="portal_settings_page" name="Portal Settings Page">

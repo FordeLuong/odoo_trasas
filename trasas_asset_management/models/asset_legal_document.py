@@ -146,3 +146,38 @@ class TrasasAssetLegalDocument(models.Model):
             )
             if not self.name:
                 self.name = type_label
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._sync_attachments_to_document()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "attachment_ids" in vals:
+            self._sync_attachments_to_document()
+        return res
+
+    def _sync_attachments_to_document(self):
+        Document = self.env["documents.document"].sudo()
+        for rec in self:
+            if not rec.asset_id.document_folder_id:
+                continue
+            folder_id = rec.asset_id.document_folder_id.id
+
+            existing_docs = Document.search(
+                [("attachment_id", "in", rec.attachment_ids.ids)]
+            )
+            existing_attachment_ids = existing_docs.mapped("attachment_id").ids
+
+            for attachment in rec.attachment_ids:
+                if attachment.id not in existing_attachment_ids:
+                    Document.create(
+                        {
+                            "name": attachment.name,
+                            "folder_id": folder_id,
+                            "attachment_id": attachment.id,
+                            "owner_id": self.env.user.id,
+                        }
+                    )

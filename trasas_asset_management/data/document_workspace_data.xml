@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Root Folder: Tài sản -->
+        <record id="document_folder_asset_root" model="documents.document">
+            <field name="name">Tài sản</field>
+            <field name="type">folder</field>
+            <field name="access_internal">edit</field>
+        </record>
+    </data>
+    <data>
+        <function model="trasas.asset.type" name="_create_folders_for_existing"/>
+        <function model="trasas.asset" name="_create_folders_for_existing"/>
+    </data>
+</odoo>

@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="documents.document_view_kanban"/>
         <field name="arch" type="xml">
             <xpath expr="//kanban/field[@name='id']" position="after">
-                <field name="document_type"/>
+                <field name="document_type_id"/>
                 <field name="document_number"/>
                 <field name="issuing_authority"/>
                 <field name="issue_date"/>
@@ -29,7 +29,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='file_size']" position="after">
                 <!-- Data for JS inspector (ẩn hoặc hiện optional) -->
-                <field name="document_type" optional="show"/>
+                <field name="document_type_id" optional="show"/>
                 <field name="document_number" optional="hide"/>
                 <field name="issuing_authority" optional="hide"/>
                 <field name="issue_date" optional="hide"/>
@@ -61,7 +61,7 @@
                 <filter string="Hết hiệu lực" name="filter_doc_expired" domain="[('doc_state', '=', 'expired')]"/>
                 <filter string="Đã thu hồi" name="filter_doc_revoked" domain="[('doc_state', '=', 'revoked')]"/>
                 <separator/>
-                <filter string="Loại hồ sơ" name="group_by_doc_type" context="{'group_by':'document_type'}"/>
+                <filter string="Loại hồ sơ" name="group_by_doc_type" context="{'group_by':'document_type_id'}"/>
                 <filter string="Phòng ban" name="group_by_department" context="{'group_by':'department_id'}"/>
                 <filter string="Người phụ trách" name="group_by_responsible" context="{'group_by':'responsible_user_id'}"/>
                 <filter string="Trạng thái hiệu lực" name="group_by_doc_state" context="{'group_by':'doc_state'}"/>

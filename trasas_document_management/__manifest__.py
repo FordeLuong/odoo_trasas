@@ -32,6 +32,7 @@
         "security/ir_rules.xml",
         "security/ir.model.access.csv",
         "data/ir_cron_data.xml",
+        "data/document_workspace_data.xml",
         "views/document_views.xml",
         "views/access_request_views.xml",
         "views/access_log_views.xml",
@@ -47,4 +48,5 @@
     "installable": True,
     "application": True,
     "auto_install": False,
+    "post_migrate": "trasas_document_management.hooks.post_migrate",
 }

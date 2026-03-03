@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- 1. Root Workspace (Folder) -->
+        <record id="workspace_trasas_internal_docs" model="documents.document">
+            <field name="name">Hồ sơ tài liệu nội bộ</field>
+            <field name="type">folder</field>
+            <field name="access_internal">edit</field>
+        </record>
+
+        <!-- 2. Default Document Types for new model -->
+        <record id="doc_type_hr_policy" model="trasas.document.type">
+            <field name="name">Chính sách nhân sự</field>
+            <field name="code">HR_POLICY</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="doc_type_company_regulation" model="trasas.document.type">
+            <field name="name">Quy định công ty</field>
+            <field name="code">COMPANY_REGULATION</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="doc_type_appointment" model="trasas.document.type">
+            <field name="name">Quyết định bổ nhiệm</field>
+            <field name="code">APPOINTMENT</field>
+            <field name="sequence">30</field>
+        </record>
+    </data>
+
+    <!-- 3. Trigger initial sync for folders - Move outside noupdate to run on every upgrade -->
+    <function model="trasas.document.type" name="_sync_document_folder" eval="[[]]"/>
+
+</odoo>

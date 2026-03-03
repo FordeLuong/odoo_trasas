@@ -128,6 +128,13 @@ class TrasasContract(models.Model):
 
     description = fields.Text(string="Mô tả", help="Mô tả chi tiết nội dung hợp đồng")
 
+    document_folder_id = fields.Many2one(
+        "documents.document",
+        string="Folder tài liệu",
+        domain="[('type', '=', 'folder')]",
+        readonly=True,
+    )
+
     # ============ LUỒNG KÝ ============
     signing_flow = fields.Selection(
         [
@@ -434,7 +441,154 @@ class TrasasContract(models.Model):
                     vals["name"] = (
                         self.env["ir.sequence"].next_by_code("trasas.contract") or "New"
                     )
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        records._create_document_folder()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+
+        # Cập nhật tên thư mục nếu name (số hợp đồng) đổi
+        if "name" in vals:
+            for rec in self:
+                if rec.document_folder_id:
+                    folder_name = (
+                        f"{rec.name}_{rec.partner_id.name}"
+                        if rec.name
+                        else rec.partner_id.name
+                    )
+                    rec.document_folder_id.sudo().write({"name": folder_name})
+
+        # Xử lý khi có file mới tải lên => sync sang Documents app
+        if any(f in vals for f in ["final_scan_file", "stamped_file"]):
+            for rec in self:
+                if vals.get("final_scan_file"):
+                    rec._create_attachment_from_binary(
+                        vals.get("final_scan_file"),
+                        vals.get("final_scan_filename") or f"Ban_Scan_{rec.name}.pdf",
+                    )
+                if vals.get("stamped_file"):
+                    rec._create_attachment_from_binary(
+                        vals.get("stamped_file"),
+                        vals.get("stamped_filename") or f"Ban_Dong_Dau_{rec.name}.pdf",
+                    )
+                rec._sync_attachments_to_document()
+
+        return res
+
+    def _create_attachment_from_binary(self, file_content, file_name):
+        """Tạo ir.attachment từ trường binary nếu chưa có"""
+        self.ensure_one()
+        if not file_content:
+            return
+
+        Attachment = self.env["ir.attachment"].sudo()
+        existing = Attachment.search(
+            [
+                ("res_model", "=", self._name),
+                ("res_id", "=", self.id),
+                ("name", "=", file_name),
+            ],
+            limit=1,
+        )
+
+        if not existing:
+            Attachment.create(
+                {
+                    "name": file_name,
+                    "type": "binary",
+                    "datas": file_content,
+                    "res_model": self._name,
+                    "res_id": self.id,
+                }
+            )
+
+    def _create_document_folder(self):
+        Document = self.env["documents.document"].sudo()
+        for rec in self:
+            if (
+                not rec.document_folder_id
+                and rec.contract_type_id
+                and rec.contract_type_id.document_folder_id
+            ):
+                folder_name = (
+                    f"{rec.name}_{rec.partner_id.name}"
+                    if rec.name
+                    else rec.partner_id.name
+                )
+                folder = Document.create(
+                    {
+                        "name": folder_name,
+                        "type": "folder",
+                        "folder_id": rec.contract_type_id.document_folder_id.id,
+                    }
+                )
+                rec.write({"document_folder_id": folder.id})
+
+    @api.model
+    def _create_folders_for_existing(self):
+        records = self.search([("document_folder_id", "=", False)])
+        records._create_document_folder()
+        # Duyệt qua từng record để đồng bộ file đính kèm (tránh lỗi singleton)
+        for rec in self.search([]):
+            # Tạo attachment cho các trường binary nếu đã có dữ liệu nhưng chưa có attachment
+            if rec.final_scan_file:
+                rec._create_attachment_from_binary(
+                    rec.final_scan_file,
+                    rec.final_scan_filename or f"Ban_Scan_{rec.name}.pdf",
+                )
+            if rec.stamped_file:
+                rec._create_attachment_from_binary(
+                    rec.stamped_file,
+                    rec.stamped_filename or f"Ban_Dong_Dau_{rec.name}.pdf",
+                )
+            rec._sync_attachments_to_document()
+
+    def _sync_attachments_to_document(self):
+        """Đồng bộ các file đính kèm của Hợp đồng sang ứng dụng Documents.
+        Bao gồm cả Chatter và các trường Binary (final_scan_file, stamped_file).
+        """
+        self.ensure_one()
+        if not self.document_folder_id:
+            return
+
+        Document = self.env["documents.document"].sudo()
+        Attachment = self.env["ir.attachment"].sudo()
+
+        # Tìm toàn bộ attachment liên quan (cả chatter và binary field)
+        domain = [
+            ("res_model", "=", self._name),
+            ("res_id", "=", self.id),
+        ]
+        attachments = Attachment.search(domain)
+
+        for attachment in attachments:
+            # Kiểm tra xem đã tồn tại doc cho attachment này chưa
+            existing = Document.search([("attachment_id", "=", attachment.id)], limit=1)
+            if not existing:
+                Document.create(
+                    {
+                        "attachment_id": attachment.id,
+                        "folder_id": self.document_folder_id.id,
+                        "name": attachment.name,
+                    }
+                )
+
+    def action_view_documents(self):
+        """Mở danh sách file đính kèm của Hợp đồng (Giao diện list view)"""
+        self.ensure_one()
+
+        return {
+            "name": _("Hồ sơ / Tài liệu"),
+            "type": "ir.actions.act_window",
+            "res_model": "ir.attachment",
+            "view_mode": "list,form",
+            "domain": [("res_model", "=", self._name), ("res_id", "=", self.id)],
+            "context": {
+                "default_res_model": self._name,
+                "default_res_id": self.id,
+            },
+        }
 
     def _generate_contract_number(self, contract_type):
         """Tạo số hợp đồng theo pattern"""

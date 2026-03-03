@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Root Folder Cấp 0: Công văn -->
+        <record id="document_workspace_dispatch_root" model="documents.document">
+            <field name="name">Công văn</field>
+            <field name="type">folder</field>
+            <field name="access_internal">edit</field>
+        </record>
+
+        <!-- Root Folder Cấp 1: Công văn đến -->
+        <record id="document_workspace_dispatch" model="documents.document">
+            <field name="name">Công văn đến</field>
+            <field name="type">folder</field>
+            <field name="folder_id" ref="trasas_dispatch_management.document_workspace_dispatch_root"/>
+            <field name="access_internal">edit</field>
+        </record>
+
+        <!-- Gọi hàm tạo thư mục lưu trữ cho Loại công văn đã có -->
+        <function model="trasas.dispatch.type" name="_create_folders_for_existing" />
+        
+        <!-- Gọi hàm tạo thư mục lưu trữ cho Công văn đã có -->
+        <function model="trasas.dispatch.incoming" name="_create_folders_for_existing" />
+    </data>
+</odoo>

@@ -11,7 +11,7 @@
         chỉ đạo, xử lý cho đến lưu trữ.
     """,
     "author": "LiemPhong",
-    "depends": ["base", "mail", "contacts", "portal", "portal_custom"],
+    "depends": ["base", "mail", "contacts", "portal", "portal_custom", "documents"],
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
@@ -24,6 +24,7 @@
         "views/dispatch_type_views.xml",
         "views/menu_views.xml",
         "views/portal_templates.xml",
+        "data/document_workspace_data.xml",
     ],
     "installable": True,
     "application": True,

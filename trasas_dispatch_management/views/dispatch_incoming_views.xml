@@ -138,6 +138,14 @@
                            options="{'clickable': 1}"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_documents"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-folder-open"
+                                string="Hồ sơ / Tài liệu"
+                                invisible="state == 'draft'"/>
+                    </div>
                     <widget name="web_ribbon" title="Đã hoàn thành" bg_color="bg-success" invisible="state != 'done'"/>
                     <widget name="web_ribbon" title="Chờ xác nhận" bg_color="bg-warning" invisible="state != 'waiting_confirmation'"/>
                     <widget name="web_ribbon" title="Quá hạn" bg_color="bg-danger" invisible="not is_overdue"/>

@@ -19,7 +19,7 @@ class FleetVehicle(models.Model):
         help="Định dạng: STT.YY/PT-TRS",
     )
 
-    license_plate = fields.Char(required=True)
+    license_plate = fields.Char(required=False, tracking=True)
 
     state = fields.Selection(
         [
@@ -220,17 +220,39 @@ class FleetVehicle(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        draft_state_id = self._sync_state_id("draft")
         for vals in vals_list:
             if not vals.get("vehicle_code") or vals.get("vehicle_code") == "/":
                 vals["vehicle_code"] = (
                     self.env["ir.sequence"].next_by_code("fleet.vehicle.trasas") or "/"
                 )
-            # Đồng bộ state_id khi tạo mới
-            state_val = vals.get("state", "draft")
-            synced_id = self._sync_state_id(state_val)
-            if synced_id:
-                vals["state_id"] = synced_id
+            # LUÔN ÉP VỀ TRẠNG THÁI "PHƯƠNG TIỆN MỚI" KHI TẠO MỚI BẤT KỂ TỪ UI NÀO
+            vals["state"] = "draft"
+            if draft_state_id:
+                vals["state_id"] = draft_state_id
         return super().create(vals_list)
+
+    @api.onchange("model_id")
+    def _onchange_model_id_sync_fields(self):
+        """Khi chọn Model xe, ép đồng bộ lại các trường kỹ thuật của xe."""
+        if self.model_id:
+            # Re-trigger all compute methods relating to model_id that load fields
+            self._compute_seats()
+            self._compute_doors()
+            self._compute_color()
+            self._compute_trailer_hook()
+            self._compute_fuel_type()
+            self._compute_transmission()
+            self._compute_power()
+            self._compute_horsepower()
+            self._compute_horsepower_tax()
+            self._compute_co2()
+            self._compute_co2_standard()
+            self._compute_electric_assistance()
+            self._compute_category()
+            self._compute_range_unit()
+            self._compute_vehicle_range()
+            self._compute_model_year()
 
     @api.depends("start_use_date", "maintenance_type")
     def _compute_next_maintenance_date(self):
@@ -256,16 +278,13 @@ class FleetVehicle(models.Model):
             if new_state:
                 vals["state"] = new_state
 
-        # 3. Kiểm tra ràng buộc khi chuyển sang Đăng kiểm (registration) hoặc Sẵn sàng (ready)
+        # 3. Kiểm tra ràng buộc khi chuyển sang Sẵn sàng (ready)
         # Chỉ kiểm tra nếu đổi từ UI (không có skip_validation trong context)
         if not self.env.context.get("skip_validation"):
             new_state = vals.get("state")
             for rec in self:
-                # BẤT KỲ khi nào trạng thái đích là "ready" HOẶC "registration", nếu trạng thái cũ KHÁC, thì phải chặn check
-                if new_state in ["registration", "ready"] and rec.state not in [
-                    "registration",
-                    "ready",
-                ]:
+                # CHỈ check khi chuyển TỪ "Đăng kiểm" SANG "Sẵn sàng sử dụng"
+                if new_state == "ready" and rec.state == "registration":
                     # Gán tạm val mới để hàm check đọc được (nếu người dùng vừa điền form vừa bấm nút / thanh trạng thái)
                     if "license_plate" in vals:
                         rec.license_plate = vals["license_plate"]

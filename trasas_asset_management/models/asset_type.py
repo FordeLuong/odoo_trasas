@@ -51,6 +51,12 @@ class TrasasAssetType(models.Model):
         string="Số tài sản",
         compute="_compute_asset_count",
     )
+    document_folder_id = fields.Many2one(
+        "documents.document",
+        string="Folder tài liệu",
+        domain="[('type', '=', 'folder')]",
+        readonly=True,
+    )
 
     _sql_constraints = [
         ("code_unique", "unique(code)", "Mã viết tắt nhóm tài sản phải là duy nhất!"),
@@ -61,6 +67,46 @@ class TrasasAssetType(models.Model):
         Asset = self.env["trasas.asset"]
         for rec in self:
             rec.asset_count = Asset.search_count([("asset_group_id", "=", rec.id)])
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._create_document_folder()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "name" in vals or "code" in vals:
+            for rec in self:
+                if rec.document_folder_id:
+                    folder_name = f"{rec.code} - {rec.name}" if rec.code else rec.name
+                    rec.document_folder_id.sudo().write({"name": folder_name})
+        return res
+
+    def _create_document_folder(self):
+        root_folder = self.env.ref(
+            "trasas_asset_management.document_folder_asset_root",
+            raise_if_not_found=False,
+        )
+        if not root_folder:
+            return
+        Document = self.env["documents.document"].sudo()
+        for rec in self:
+            if not rec.document_folder_id:
+                folder_name = f"{rec.code} - {rec.name}" if rec.code else rec.name
+                folder = Document.create(
+                    {
+                        "name": folder_name,
+                        "type": "folder",
+                        "folder_id": root_folder.id,
+                    }
+                )
+                rec.document_folder_id = folder.id
+
+    @api.model
+    def _create_folders_for_existing(self):
+        records = self.search([("document_folder_id", "=", False)])
+        records._create_document_folder()
 
     def action_view_assets(self):
         """Smart button: Xem tài sản thuộc nhóm này"""
