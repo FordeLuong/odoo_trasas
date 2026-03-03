@@ -2,3 +2,5 @@
 from . import documents_document
 from . import doc_access_request
 from . import doc_access_log
+from . import report_wizard
+from . import report_iso

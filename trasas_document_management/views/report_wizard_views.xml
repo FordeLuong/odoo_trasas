@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Wizard Form View -->
+    <record id="view_doc_report_wizard_form" model="ir.ui.view">
+        <field name="name">trasas.doc.report.wizard.form</field>
+        <field name="model">trasas.doc.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Xuất Báo cáo ISO">
+                <group>
+                    <group string="Bộ lọc">
+                        <field name="folder_id"/>
+                        <field name="document_type_id"/>
+                        <field name="doc_state"/>
+                    </group>
+                    <group string="Khoảng thời gian (Ngày cấp)">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_print" type="object"
+                            string="In Báo cáo PDF" class="btn-primary"
+                            icon="fa-print"/>
+                    <button string="Đóng" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action mở wizard -->
+    <record id="action_doc_report_wizard" model="ir.actions.act_window">
+        <field name="name">Báo cáo ISO</field>
+        <field name="res_model">trasas.doc.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu item — dưới "Quản lý Truy cập" -->
+    <menuitem id="menu_doc_iso_report"
+              name="Báo cáo ISO"
+              parent="menu_doc_trasas_management"
+              action="action_doc_report_wizard"
+              sequence="40"
+              groups="trasas_document_management.group_doc_manager,trasas_document_management.group_doc_director"/>
+</odoo>

@@ -7,7 +7,22 @@
         <xpath expr="//div[hasclass('o_documents_details_panel_fields')]" position="after">
             
             <t t-if="record.data.type !== 'folder'">
-                
+
+                <!-- BANNER: Yêu cầu truy cập (khi chưa có quyền) -->
+                <t t-if="!record.data.can_access_content">
+                    <div class="w-100 mt-3 p-3 border border-warning rounded bg-warning-subtle text-center">
+                        <i class="fa fa-lock fa-2x text-warning mb-2 d-block"/>
+                        <p class="mb-2 fw-bold text-dark">Tài liệu này ở chế độ Giới hạn</p>
+                        <p class="mb-2 text-muted small">Bạn cần được chủ sở hữu cấp quyền để xem nội dung.</p>
+                        <button class="btn btn-warning btn-sm fw-bold"
+                                t-on-click="() => this.onRequestAccess()">
+                            <i class="fa fa-key me-1"/>Xin quyền truy cập
+                        </button>
+                    </div>
+                </t>
+
+                <!-- THÔNG TIN HỒ SƠ — Chỉ hiện khi có quyền truy cập nội dung -->
+                <t t-if="record.data.can_access_content">
                 <!-- TIÊU ĐỀ SECTION -->
                 <div class="w-100 mt-4 mb-2 border-bottom border-secondary d-flex align-items-center pb-2">
                     <i class="fa fa-id-card-o text-primary me-2"/>
@@ -21,7 +36,7 @@
                         <CharField
                             name="'document_number'"
                             record="record"
-                            readonly="userPermissionViewOnly"
+                            readonly="!record.data.is_owner"
                             placeholder="'Số hiệu...'"
                         />
                     </div>
@@ -32,7 +47,7 @@
                         <DateTimeField
                             name="'issue_date'"
                             record="record"
-                            readonly="userPermissionViewOnly"
+                            readonly="!record.data.is_owner"
                         />
                     </div>
 
@@ -42,7 +57,7 @@
                         <DateTimeField
                             name="'validity_date'"
                             record="record"
-                            readonly="userPermissionViewOnly"
+                            readonly="!record.data.is_owner"
                         />
                     </div>
 
@@ -57,13 +72,13 @@
                         <span class="ms-1 text-muted" style="font-size: 0.9em;">ngày</span>
                     </div>
 
-                    <!-- Độ Mật (với popup xác nhận) -->
+                    <!-- Độ Mật (với popup xác nhận) — Chỉ owner chỉnh -->
                     <i class="fa fa-shield mx-1 my-2"/>
                     <div class="o_field_widget o_field_selection d-flex align-items-center">
                         <ConfidentialLevelField
                             name="'confidential_level'"
                             record="record"
-                            readonly="userPermissionViewOnly"
+                            readonly="!record.data.is_owner"
                         />
                     </div>
 
@@ -83,7 +98,7 @@
                         <DocumentsDetailsMany2OneField
                             name="'department_id'"
                             record="record"
-                            readonly="userPermissionViewOnly"
+                            readonly="!record.data.is_owner"
                             canOpen="false"
                             canCreate="false"
                             canQuickCreate="false"
@@ -98,7 +113,7 @@
                         <DocumentsDetailsMany2OneField
                             name="'responsible_user_id'"
                             record="record"
-                            readonly="userPermissionViewOnly"
+                            readonly="!record.data.is_owner"
                             canOpen="false"
                             canCreate="false"
                             canQuickCreate="false"
@@ -107,6 +122,7 @@
                         />
                     </div>
                 </div>
+                </t>
             </t>
 
         </xpath>

@@ -17,6 +17,8 @@
                 <field name="doc_state"/>
                 <field name="department_id"/>
                 <field name="responsible_user_id"/>
+                <field name="can_access_content"/>
+                <field name="is_owner"/>
             </xpath>
         </field>
     </record>

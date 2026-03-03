@@ -37,6 +37,8 @@
         "views/access_request_views.xml",
         "views/access_log_views.xml",
         "views/menu_views.xml",
+        "report/doc_iso_report.xml",
+        "views/report_wizard_views.xml",
     ],
     "assets": {
         "web.assets_backend": [

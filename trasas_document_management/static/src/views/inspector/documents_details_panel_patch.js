@@ -15,3 +15,19 @@ patch(DocumentsDetailsPanel.components, {
     IntegerField,
     ConfidentialLevelField,
 });
+
+// Patch prototype để thêm method onRequestAccess
+patch(DocumentsDetailsPanel.prototype, {
+    async onRequestAccess() {
+        const recordId = this.record.resId;
+        if (!recordId) return;
+        const result = await this.env.services.orm.call(
+            "documents.document",
+            "action_request_access",
+            [recordId],
+        );
+        if (result) {
+            this.env.services.action.doAction(result);
+        }
+    },
+});

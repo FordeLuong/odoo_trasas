@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ir.actions.report -->
+    <record id="action_report_doc_iso" model="ir.actions.report">
+        <field name="name">Sổ Kiểm Soát Tài Liệu (ISO)</field>
+        <field name="model">documents.document</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">trasas_document_management.doc_iso_report_template</field>
+        <field name="report_file">trasas_document_management.doc_iso_report_template</field>
+        <field name="print_report_name">'So_Kiem_Soat_Tai_Lieu_ISO'</field>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- QWeb Template -->
+    <template id="doc_iso_report_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page" style="font-size: 12px;">
+                    <!-- HEADER -->
+                    <div class="text-center mb-4">
+                        <h3 style="font-weight: bold; text-transform: uppercase; margin-bottom: 5px;">
+                            SỔ KIỂM SOÁT TÀI LIỆU
+                        </h3>
+                        <p style="font-size: 11px; color: #666; margin: 0;">
+                            (Theo tiêu chuẩn ISO 9001:2015 — Mục 7.5 Thông tin dạng văn bản)
+                        </p>
+                    </div>
+
+                    <!-- FILTER INFO -->
+                    <t t-if="data and data.get('wizard')">
+                        <div class="row mb-3" style="font-size: 11px; border: 1px solid #ccc; padding: 8px; border-radius: 4px;">
+                            <div class="col-4">
+                                <strong>Workspace:</strong> <t t-out="data['wizard']['folder_name']"/>
+                            </div>
+                            <div class="col-4">
+                                <strong>Loại hồ sơ:</strong> <t t-out="data['wizard']['document_type_name']"/>
+                            </div>
+                            <div class="col-4">
+                                <strong>Trạng thái:</strong> <t t-out="data['wizard']['doc_state']"/>
+                            </div>
+                            <t t-if="data['wizard']['date_from'] or data['wizard']['date_to']">
+                                <div class="col-12 mt-1">
+                                    <strong>Thời gian:</strong>
+                                    <t t-if="data['wizard']['date_from']">
+                                        từ <t t-out="data['wizard']['date_from']"/>
+                                    </t>
+                                    <t t-if="data['wizard']['date_to']">
+                                        đến <t t-out="data['wizard']['date_to']"/>
+                                    </t>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+
+                    <!-- TABLE -->
+                    <table class="table table-sm table-bordered" style="font-size: 11px;">
+                        <thead>
+                            <tr style="background-color: #2c3e50; color: white; text-align: center;">
+                                <th style="width: 4%;">STT</th>
+                                <th style="width: 10%;">Số hiệu</th>
+                                <th style="width: 20%;">Tên tài liệu</th>
+                                <th style="width: 12%;">Loại hồ sơ</th>
+                                <th style="width: 9%;">Ngày cấp</th>
+                                <th style="width: 9%;">Hết hạn</th>
+                                <th style="width: 10%;">Trạng thái</th>
+                                <th style="width: 8%;">Độ mật</th>
+                                <th style="width: 10%;">Phòng ban</th>
+                                <th style="width: 8%;">Người PT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="idx" t-value="0"/>
+                            <t t-foreach="docs" t-as="doc">
+                                <t t-set="idx" t-value="idx + 1"/>
+                                <tr>
+                                    <td class="text-center"><t t-out="idx"/></td>
+                                    <td><t t-out="doc.document_number or '-'"/></td>
+                                    <td><t t-out="doc.name"/></td>
+                                    <td><t t-out="doc.document_type_id.name or '-'"/></td>
+                                    <td class="text-center">
+                                        <t t-if="doc.issue_date">
+                                            <t t-out="doc.issue_date" t-options="{'widget': 'date'}"/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td class="text-center">
+                                        <t t-if="doc.validity_date">
+                                            <t t-out="doc.validity_date" t-options="{'widget': 'date'}"/>
+                                        </t>
+                                        <t t-else="">Vô thời hạn</t>
+                                    </td>
+                                    <td class="text-center">
+                                        <t t-if="doc.doc_state == 'active'">
+                                            <span style="color: green;">Hiệu lực</span>
+                                        </t>
+                                        <t t-elif="doc.doc_state == 'expiring_soon'">
+                                            <span style="color: orange;">Sắp hết hạn</span>
+                                        </t>
+                                        <t t-elif="doc.doc_state == 'expired'">
+                                            <span style="color: red;">Hết hiệu lực</span>
+                                        </t>
+                                        <t t-elif="doc.doc_state == 'revoked'">
+                                            <span style="color: gray;">Đã thu hồi</span>
+                                        </t>
+                                    </td>
+                                    <td class="text-center">
+                                        <t t-if="doc.confidential_level == 'public'">Công khai</t>
+                                        <t t-elif="doc.confidential_level == 'restricted'">Giới hạn</t>
+                                        <t t-elif="doc.confidential_level == 'only me'">Chỉ mình tôi</t>
+                                    </td>
+                                    <td><t t-out="doc.department_id.name or '-'"/></td>
+                                    <td><t t-out="doc.responsible_user_id.name or '-'"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- FOOTER SUMMARY -->
+                    <div class="row mt-3" style="font-size: 11px;">
+                        <div class="col-6">
+                            <strong>Tổng số tài liệu:</strong> <t t-out="len(docs)"/>
+                        </div>
+                        <div class="col-6 text-end">
+                            <strong>Ngày xuất:</strong>
+                            <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                        </div>
+                    </div>
+
+                    <!-- SIGNATURE BLOCK -->
+                    <div class="row mt-5" style="font-size: 11px; text-align: center;">
+                        <div class="col-4">
+                            <strong>Người lập</strong>
+                            <br/><br/><br/><br/>
+                            <p>(Ký, ghi rõ họ tên)</p>
+                        </div>
+                        <div class="col-4">
+                            <strong>Kiểm soát</strong>
+                            <br/><br/><br/><br/>
+                            <p>(Ký, ghi rõ họ tên)</p>
+                        </div>
+                        <div class="col-4">
+                            <strong>Phê duyệt</strong>
+                            <br/><br/><br/><br/>
+                            <p>(Ký, ghi rõ họ tên)</p>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -168,9 +168,9 @@ class DocumentsDocumentInherit(models.Model):
     # =====================================================================
 
     _CONFIDENTIAL_TO_ACCESS = {
-        "public": "edit",  # Tất cả internal user đều thấy
-        "restricted": "none",  # Chỉ owner + người được share
-        "only me": "none",  # Chỉ owner
+        "public": "edit",  # Tất cả internal user đều thấy + sửa
+        "restricted": "view",  # Tất cả thấy file, nhưng nội dung bị khóa trừ khi được share
+        "only me": "none",  # Chỉ owner thấy
     }
 
     @api.model_create_multi
@@ -206,6 +206,121 @@ class DocumentsDocumentInherit(models.Model):
                 rec.days_to_expire = delta.days
             else:
                 rec.days_to_expire = 0
+
+    # =====================================================================
+    # CAN ACCESS CONTENT — Kiểm tra user có quyền xem nội dung file
+    # =====================================================================
+
+    can_access_content = fields.Boolean(
+        string="Có quyền truy cập nội dung",
+        compute="_compute_can_access_content",
+    )
+
+    is_owner = fields.Boolean(
+        string="Là chủ sở hữu",
+        compute="_compute_is_owner",
+    )
+
+    @api.depends_context("uid")
+    @api.depends("owner_id", "create_uid")
+    def _compute_is_owner(self):
+        user = self.env.user
+        is_admin = user.has_group("base.group_system")
+        is_manager = user.has_group("documents.group_documents_manager")
+        for rec in self:
+            if is_admin or is_manager:
+                rec.is_owner = True
+            elif rec.owner_id == user or rec.create_uid == user:
+                rec.is_owner = True
+            else:
+                rec.is_owner = False
+
+    @api.depends_context("uid")
+    @api.depends("confidential_level", "owner_id", "access_ids")
+    def _compute_can_access_content(self):
+        user = self.env.user
+        partner = user.partner_id
+        is_manager = user.has_group("documents.group_documents_manager")
+        is_admin = user.has_group("base.group_system")
+        for rec in self:
+            if rec.type == "folder":
+                rec.can_access_content = True
+                continue
+            if is_admin or is_manager:
+                rec.can_access_content = True
+                continue
+            if rec.confidential_level != "restricted":
+                rec.can_access_content = True
+                continue
+            # restricted: chỉ owner hoặc người được share mới có quyền
+            if rec.owner_id == user or rec.create_uid == user:
+                rec.can_access_content = True
+                continue
+            # Kiểm tra documents.access — có bản ghi share cho partner hiện tại không
+            has_access = rec.access_ids.filtered(lambda a: a.partner_id == partner)
+            rec.can_access_content = bool(has_access)
+
+    # =====================================================================
+    # ACCESS REQUEST — Xin quyền truy cập file giới hạn
+    # =====================================================================
+
+    def action_request_access(self):
+        """User xin quyền truy cập file giới hạn.
+        Gửi thông báo chatter cho owner + tạo Activity nhắc việc.
+        """
+        self.ensure_one()
+        user = self.env.user
+        owner = self.owner_id or self.create_uid
+
+        if not owner:
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": _("Lỗi"),
+                    "message": _("Không tìm thấy chủ sở hữu file."),
+                    "type": "danger",
+                    "sticky": False,
+                },
+            }
+
+        # Gửi message chatter cho owner
+        self.sudo().message_post(
+            body=_(
+                "🔑 <b>%s</b> muốn truy cập tài liệu này. "
+                "Vui lòng nhấn <b>Share</b> để cấp quyền."
+            )
+            % user.name,
+            subject=_("Yêu cầu truy cập: %s") % self.name,
+            partner_ids=[owner.partner_id.id],
+            message_type="notification",
+        )
+
+        # Tạo Activity nhắc việc cho owner
+        self.sudo().activity_schedule(
+            "mail.mail_activity_data_todo",
+            user_id=owner.id,
+            summary=_("Xin truy cập: %s") % self.name,
+            note=_(
+                "<b>%s</b> yêu cầu truy cập tài liệu <b>%s</b>. "
+                "Vui lòng vào file và nhấn Share để cấp quyền cho họ."
+            )
+            % (user.name, self.name),
+        )
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Đã gửi yêu cầu"),
+                "message": _(
+                    "Yêu cầu truy cập đã được gửi tới %s. Vui lòng chờ phê duyệt."
+                )
+                % owner.name,
+                "type": "success",
+                "sticky": False,
+            },
+        }
 
     # =====================================================================
     # CRON — Cảnh báo hết hạn (B5) & Đóng VB hết hiệu lực (B12)
@@ -262,17 +377,11 @@ class DocumentsDocumentInherit(models.Model):
 
         for doc in expired_docs:
             doc.write({"doc_state": "expired"})
-            doc.message_post(
+            doc._message_log(
                 body=_(
                     "📛 Tài liệu đã hết hiệu lực từ ngày %s. Đã tự động chuyển trạng thái."
                 )
                 % doc.validity_date.strftime("%d/%m/%Y"),
-                subject=_("Tài liệu hết hiệu lực"),
-                partner_ids=doc.department_id.member_ids.mapped(
-                    "user_id.partner_id"
-                ).ids
-                if doc.department_id
-                else [],
             )
 
     # =====================================================================
@@ -280,28 +389,21 @@ class DocumentsDocumentInherit(models.Model):
     # =====================================================================
 
     def action_revoke_document(self):
-        """Thu hồi văn bản — gửi thông báo tới phòng ban liên quan"""
+        """Thu hồi văn bản — ghi log chatter (không dùng message_post
+        vì Documents tự tạo documents.access → đổi owner)"""
         for rec in self:
             rec.write({"doc_state": "revoked"})
-            partner_ids = []
-            if rec.department_id:
-                partner_ids = rec.department_id.member_ids.mapped(
-                    "user_id.partner_id"
-                ).ids
-            rec.message_post(
+            rec._message_log(
                 body=_(
                     "🔒 Tài liệu '%s' đã bị thu hồi. Vui lòng không sử dụng phiên bản này."
                 )
                 % rec.name,
-                subject=_("Thu hồi văn bản: %s") % rec.name,
-                partner_ids=partner_ids,
             )
 
     def action_reactivate_document(self):
         """Kích hoạt lại tài liệu đã thu hồi"""
         for rec in self:
             rec.write({"doc_state": "active"})
-            rec.message_post(
+            rec._message_log(
                 body=_("✅ Tài liệu '%s' đã được kích hoạt lại.") % rec.name,
-                subject=_("Kích hoạt lại tài liệu"),
             )
