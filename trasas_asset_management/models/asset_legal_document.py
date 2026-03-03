@@ -103,6 +103,11 @@ class TrasasAssetLegalDocument(models.Model):
         string="Nội dung chi tiết",
         help="Nội dung chi tiết về giấy tờ pháp lý",
     )
+    upload_date = fields.Date(
+        string="Ngày upload",
+        default=fields.Date.context_today,
+        help="Ngày upload tài liệu lên hệ thống",
+    )
     attachment_ids = fields.Many2many(
         "ir.attachment",
         "asset_legal_doc_attachment_rel",

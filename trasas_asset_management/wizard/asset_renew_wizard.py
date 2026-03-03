@@ -66,7 +66,11 @@ class TrasasAssetRenewWizard(models.TransientModel):
         # Cập nhật thông tin gốc (tùy chọn)
         # Nếu muốn cập nhật vào asset.py luôn thì có thể thêm các field tương ứng.
         # Nhưng quan trọng nhất là cập nhật state
-        asset.state = "leased"
+        # Trả về state tương ứng: lease_in nếu thuê ngoài, leased nếu cho thuê
+        if asset.asset_classification == 'lease_in':
+            asset.state = "lease_in"
+        else:
+            asset.state = "leased"
 
         # Thêm log note
         msg = f"Đã tái ký hợp đồng. Hiệu lực từ {self.start_date} đến {self.end_date}."

@@ -905,12 +905,8 @@ class TrasasAsset(models.Model):
         for rec in self:
             if rec.state != "draft":
                 raise UserError(_("Chỉ tài sản trạng thái Mới!"))
-            if not rec.legal_document_ids.filtered(lambda doc: doc.attachment_ids):
-                raise UserError(
-                    _(
-                        "Vui lòng đính kèm ít nhất 01 file trong Hồ sơ chứng từ trước khi Thuê ngoài!"
-                    )
-                )
+            # Thuê ngoài không yêu cầu đính kèm file trong Hồ sơ chứng từ
+            # vì bước đầu là lập hợp đồng, thông tin sẽ lưu trong Lịch sử hợp đồng
             rec.write({"state": "lease_in"})
             rec._close_activities()
             rec.message_post(
@@ -958,11 +954,11 @@ class TrasasAsset(models.Model):
             rec._send_state_change_notification()
 
     def action_contract_ended(self):
-        """Cho thuê / Sắp hết hạn → Kết thúc HĐ thuê"""
+        """Cho thuê / Thuê ngoài / Sắp hết hạn → Kết thúc HĐ"""
         for rec in self:
-            if rec.state not in ("leased", "expiring"):
+            if rec.state not in ("leased", "lease_in", "expiring"):
                 raise UserError(
-                    _("Chỉ tài sản Cho thuê hoặc Sắp hết hạn mới có thể Kết thúc HĐ!")
+                    _("Chỉ tài sản Cho thuê, Thuê ngoài hoặc Sắp hết hạn mới có thể Kết thúc HĐ!")
                 )
             rec.write({"state": "contract_ended"})
             rec.message_post(
@@ -986,6 +982,20 @@ class TrasasAsset(models.Model):
             "target": "new",
             "context": {"default_asset_id": self.id},
         }
+
+    def action_return_to_new(self):
+        """Hoàn thành → Mới (Đưa tài sản về trạng thái Mới, không qua wizard)"""
+        for rec in self:
+            if rec.state != "completed":
+                raise UserError(
+                    _("Chỉ tài sản Hoàn thành mới có thể đưa về trạng thái Mới!")
+                )
+            rec.write({"state": "draft"})
+            rec.message_post(
+                body=_("🔄 Tài sản đã được đưa về trạng thái Mới."),
+                subject=_("Đưa về Mới"),
+            )
+            rec._send_state_change_notification()
 
     # =====================================================================
     # ACTIVITY SCHEDULING

@@ -32,14 +32,14 @@
 
                     <button name="action_return_from_renovation" string="Hoàn tất cải tạo" type="object" class="btn-success" invisible="state != 'renovation' or not renovation_cost_ready" groups="trasas_asset_management.group_asset_manager"/>
 
-                    <button name="action_contract_ended" string="Kết thúc HĐ" type="object" class="btn-danger" invisible="state not in ('leased', 'expiring')" groups="trasas_asset_management.group_asset_manager" confirm="Xác nhận kết thúc hợp đồng?"/>
+                    <button name="action_contract_ended" string="Kết thúc HĐ" type="object" class="btn-danger" invisible="state not in ('leased', 'lease_in', 'expiring')" groups="trasas_asset_management.group_asset_manager" confirm="Xác nhận kết thúc hợp đồng?"/>
 
-                    <button name="%(trasas_asset_management.action_asset_renew_wizard)d" string="Tái ký" type="action" class="btn-primary" invisible="state not in ('contract_ended', 'expiring') or asset_group != 'nxct'" groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="%(trasas_asset_management.action_asset_renew_wizard)d" string="Tái ký" type="action" class="btn-primary" invisible="state not in ('contract_ended', 'expiring')" groups="trasas_asset_management.group_asset_manager"/>
 
                     <!-- === CHUNG: Hoàn thành / Đặt về Mới === -->
                     <button name="action_completed" string="Hoàn thành" type="object" class="btn-primary" invisible="state not in ('contract_ended', 'in_use')" groups="trasas_asset_management.group_asset_manager" confirm="Xác nhận hoàn thành tài sản?"/>
 
-                    <button name="action_return_to_use_from_lease" string="Tái sử dụng" type="object" class="btn-success" invisible="state != 'completed' or asset_group != 'nxct'" groups="trasas_asset_management.group_asset_manager"/>
+                    <button name="action_return_to_new" string="Đưa về mới" type="object" class="btn-success" invisible="state != 'completed'" groups="trasas_asset_management.group_asset_manager"/>
 
                     <button name="action_set_to_draft" string="Đặt về Mới" type="object" invisible="1" groups="trasas_asset_management.group_asset_manager"/>
 
