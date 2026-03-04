@@ -338,6 +338,7 @@ class TrasasDispatchIncoming(models.Model):
                         "attachment_id": attachment.id,
                         "folder_id": self.document_folder_id.id,
                         "name": attachment.name,
+                        "confidential_level": "public",
                     }
                 )
 

@@ -135,7 +135,7 @@ class DocumentsDocumentInherit(models.Model):
             ("only me", "Chỉ mình tôi"),
         ],
         string="Độ mật",
-        default="only me",
+        default="public",
         tracking=True,
     )
 
@@ -183,8 +183,8 @@ class DocumentsDocumentInherit(models.Model):
                 cl = vals["confidential_level"]
                 vals["access_internal"] = self._CONFIDENTIAL_TO_ACCESS.get(cl, "none")
             elif "access_internal" not in vals:
-                # Default confidential_level = "only me" → access_internal = "none"
-                vals["access_internal"] = "none"
+                # Default confidential_level = "public" → access_internal = "edit"
+                vals["access_internal"] = "edit"
         return super().create(vals_list)
 
     def write(self, vals):
