@@ -427,6 +427,45 @@ class TrasasDispatchOutgoing(models.Model):
 
             record.stage_id = stage_sent
 
+            # Tự động hoàn thành Công văn đến liên kết (nếu có)
+            if (
+                record.incoming_dispatch_id
+                and record.incoming_dispatch_id.state != "done"
+            ):
+                incoming = record.incoming_dispatch_id
+                # Copy file chính thức sang response_file của CV đến
+                if record.official_file and not incoming.response_file:
+                    incoming.write(
+                        {
+                            "response_file": record.official_file,
+                            "response_filename": record.official_filename
+                            or "Phan_hoi_%s.pdf" % incoming.name,
+                        }
+                    )
+                if not incoming.response_date:
+                    incoming.write({"response_date": fields.Date.today()})
+
+                # Chuyển CV đến sang Hoàn thành
+                stage_done_incoming = self.env.ref(
+                    "trasas_dispatch_management.stage_done", raise_if_not_found=False
+                )
+                if stage_done_incoming:
+                    # Đóng tất cả activity còn lại
+                    activity_ids = self.env["mail.activity"].search(
+                        [
+                            ("res_model", "=", "trasas.dispatch.incoming"),
+                            ("res_id", "=", incoming.id),
+                        ]
+                    )
+                    activity_ids.action_done()
+
+                    incoming.write({"stage_id": stage_done_incoming.id})
+                    incoming.message_post(
+                        body="Công văn đến đã được tự động hoàn thành do Công văn đi phản hồi '%s' đã gửi thành công."
+                        % record.name,
+                        subtype_xmlid="mail.mt_note",
+                    )
+
     def action_done(self):
         stage_done = self._get_stage("outgoing_stage_done")
         if not stage_done:
