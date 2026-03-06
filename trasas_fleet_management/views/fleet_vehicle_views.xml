@@ -63,11 +63,27 @@
                 <attribute name="invisible">1</attribute>
             </xpath>
 
+            <!-- Ẩn tab Model (không cần thiết cho xe văn phòng) -->
+            <xpath expr="//page[@name='page_model']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Ẩn driver_id và future_driver_id từ core (đội xe có hệ thống riêng) -->
+            <xpath expr="//field[@name='driver_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='driver_employee_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='future_driver_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
             <!-- Thêm tab Giấy tờ hồ sơ vào notebook -->
             <xpath expr="//notebook" position="inside">
                 <page string="Giấy tờ hồ sơ" name="documents">
                     <field name="legal_document_ids">
-                        <list editable="bottom">
+                        <list>
                             <field name="sequence" widget="handle"/>
                             <field name="document_type"/>
                             <field name="name"/>
@@ -83,9 +99,35 @@
                                    decoration-muted="state == 'revoked'"
                                    widget="badge"/>
                             <field name="upload_date" string="Thời gian upload" widget="datetime" readonly="1" force_save="1"/>
-                            <field name="attachment_ids" widget="many2many_binary"/>
-                            <field name="note"/>
+                            <field name="attachment_ids" widget="many2many_binary" string="Files" optional="show"/>
+                            <field name="note" optional="hide"/>
                         </list>
+                        <form>
+                            <sheet>
+                                <group>
+                                    <group>
+                                        <field name="document_type"/>
+                                        <field name="name"/>
+                                        <field name="document_date"/>
+                                        <field name="validity_date"/>
+                                        <field name="days_to_expire"/>
+                                    </group>
+                                    <group>
+                                        <field name="state"/>
+                                        <field name="upload_date" string="Thời gian upload" readonly="1"/>
+                                        <field name="sequence" invisible="1"/>
+                                    </group>
+                                </group>
+                                <notebook>
+                                    <page string="Files / Giấy tờ scan" name="attachments">
+                                        <field name="attachment_ids" widget="many2many_binary" nolabel="1" colspan="2"/>
+                                    </page>
+                                    <page string="Ghi chú" name="notes">
+                                        <field name="note" nolabel="1" placeholder="Ghi chú thêm..."/>
+                                    </page>
+                                </notebook>
+                            </sheet>
+                        </form>
                     </field>
                 </page>
             </xpath>

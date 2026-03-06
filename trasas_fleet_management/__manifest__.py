@@ -10,7 +10,7 @@
         - Cảnh báo đăng kiểm, bảo hiểm, bảo trì 30-15-7 ngày.
         - Quản lý hồ sơ pháp lý đính kèm xe.
     """,
-    "author": "TRASAS",
+    "author": "LiemPhong",
     "category": "Fleet",
     "depends": ["fleet", "mail", "documents"],
     "data": [

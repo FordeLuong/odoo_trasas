@@ -109,6 +109,11 @@
                             invisible="state != 'draft'"
                             groups="trasas_dispatch_management.group_dispatch_hcns,trasas_dispatch_management.group_dispatch_manager"/>
                     
+                    <!-- Quản lý: Phân công nhân viên -->
+                    <button name="action_manager_assign" string="Phân công nhân viên" type="object"
+                            class="oe_highlight"
+                            invisible="state != 'manager_assign' or not can_assign_manager"/>
+
                     <!-- Người xử lý: Submit phản hồi -->
                     <button name="action_submit_response" string="Gửi phản hồi" type="object"
                             class="oe_highlight"
@@ -160,6 +165,8 @@
 
                     <group>
                         <group string="Thông tin văn bản">
+                            <field name="is_manual_number"/>
+                            <field name="manual_number" invisible="not is_manual_number" required="is_manual_number"/>
                             <field name="sender_id"/>
                             <field name="type_id"/>
                             <field name="dispatch_date"/>
@@ -180,7 +187,10 @@
                             </group>
                             <group string="Thông tin xử lý">
                                 <group>
-                                    <field name="handler_ids" widget="many2many_tags_avatar" options="{'no_create': True}"/>
+                                    <field name="can_assign_manager" invisible="1"/>
+                                    <field name="is_via_manager" invisible="state != 'draft'"/>
+                                    <field name="manager_id" invisible="not is_via_manager" required="is_via_manager and state == 'draft'"/>
+                                    <field name="handler_ids" widget="many2many_tags_avatar" options="{'no_create': True}" invisible="is_via_manager and state == 'draft'"/>
                                     <field name="deadline"/>
                                 </group>
                                 <group>

@@ -1,6 +1,6 @@
 {
     'name': 'Cabal Contract Management',
-    'author': 'Redes Litorales SA de CV',
+    'author': 'LiemPhong',
         "version": "19.0.1.0.0",
     'category': 'Sales Management',
     'sequence': -100,

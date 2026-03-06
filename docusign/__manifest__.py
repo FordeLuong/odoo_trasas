@@ -29,7 +29,7 @@
         - Filterable by date range and responsible user
         - Quick action buttons to view records by status
     """,
-    'author': "Techloyce",
+    'author': "LiemPhong",
     'website': "http://www.techloyce.com",
     'category': 'Sale',
     'version': '19.0.1.0.0',

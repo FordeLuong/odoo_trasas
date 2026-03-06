@@ -52,6 +52,8 @@
         "views/contract_appendix_views.xml",
         "views/contract_views.xml",
         "views/contract_reject_wizard_views.xml",
+        "views/contract_cancel_wizard_views.xml",
+        "views/contract_draft_wizard_views.xml",
         "views/menu_views.xml",
     ],
     "installable": True,

@@ -62,9 +62,19 @@
             <field name="requirements">Hoàn tất ký kết. HCNS đóng dấu và lưu kho.</field>
         </record>
 
+        <record id="stage_archived" model="trasas.contract.stage">
+            <field name="name">Đã lưu kho</field>
+            <field name="sequence">7</field>
+            <field name="fold" eval="True"/>
+            <field name="legend_normal">Hoàn tất lưu trữ</field>
+            <field name="legend_blocked">Có vấn đề hồ sơ</field>
+            <field name="legend_done">Đã kiểm tra</field>
+            <field name="requirements">Bản cứng đã được đóng dấu, quét và lưu trữ an toàn.</field>
+        </record>
+
         <record id="stage_expired" model="trasas.contract.stage">
             <field name="name">Hết hạn</field>
-            <field name="sequence">7</field>
+            <field name="sequence">9</field>
             <field name="fold" eval="True"/>
             <field name="legend_normal">Hợp đồng đã hết hạn</field>
             <field name="legend_blocked">Cần gia hạn</field>

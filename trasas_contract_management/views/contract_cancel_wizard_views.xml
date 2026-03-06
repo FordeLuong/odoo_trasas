@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_trasas_contract_cancel_wizard_form" model="ir.ui.view">
+        <field name="name">trasas.contract.cancel.wizard.form</field>
+        <field name="model">trasas.contract.cancel.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Yêu cầu hủy Hợp đồng">
+                <group>
+                    <field name="contract_id" readonly="1"/>
+                    <field name="cancel_reason" placeholder="Nhập lý do hủy hợp đồng... (bắt buộc)&#10;Ví dụ: Khách hàng yêu cầu điều chỉnh điều khoản..."/>
+                </group>
+                <div class="alert alert-warning" role="alert">
+                    <i class="fa fa-exclamation-triangle"/> 
+                    Yêu cầu hủy sẽ được gửi cho <b>Trưởng phòng</b> duyệt, sau đó gửi cho <b>Ban Giám đốc</b> duyệt.
+                    Hợp đồng chỉ được hủy khi cả hai cấp đều đồng ý.
+                </div>
+                <footer>
+                    <button name="action_confirm_cancel_request" 
+                            string="Gửi yêu cầu hủy" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Đóng" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

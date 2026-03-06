@@ -17,7 +17,7 @@
         - Cron kiểm tra trạng thái định kỳ (fallback)
         - Nhà cung cấp Demo tích hợp sẵn để test
     """,
-    "author": "TRASAS",
+    "author": "LiemPhong",
     "website": "https://trasas.com",
     "depends": [
         "base",

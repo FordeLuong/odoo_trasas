@@ -10,7 +10,7 @@ class TrasasDispatchOutgoing(models.Model):
 
     # --- Thông tin chung ---
     name = fields.Char(
-        string="Mã hệ thống",
+        string="Số công văn đi",
         required=True,
         copy=False,
         readonly=True,
@@ -19,12 +19,8 @@ class TrasasDispatchOutgoing(models.Model):
     )
     subject = fields.Char(string="Trích yếu", required=True, tracking=True)
 
-    dispatch_number = fields.Char(
-        string="Số công văn đi",
-        tracking=True,
-        readonly=True,
-        help="Số chính thức do HCNS cấp sau khi đóng dấu",
-    )
+    is_manual_number = fields.Boolean(string="Cấp số thủ công", tracking=True)
+    manual_number = fields.Char(string="Số CV (Thủ công)", tracking=True)
 
     # --- Ngày tháng ---
     date_created = fields.Date(
@@ -59,6 +55,14 @@ class TrasasDispatchOutgoing(models.Model):
         tracking=True,
         domain="[('is_company', '=', True)]",
         help="Chọn công ty/đối tác từ danh bạ",
+    )
+
+    incoming_dispatch_id = fields.Many2one(
+        "trasas.dispatch.incoming",
+        string="Công văn đến gốc",
+        readonly=True,
+        tracking=True,
+        help="Công văn đến mà công văn đi này phản hồi (tự động gắn khi tạo từ CV đến)",
     )
 
     def _default_approver(self):
@@ -202,17 +206,53 @@ class TrasasDispatchOutgoing(models.Model):
         for record in self:
             record.is_user_approver = record.approver_id == self.env.user
 
+    @api.constrains("is_manual_number", "manual_number")
+    def _check_manual_number_unique(self):
+        for record in self:
+            if record.is_manual_number and record.manual_number:
+                domain = [
+                    ("is_manual_number", "=", True),
+                    ("manual_number", "=", record.manual_number),
+                    ("id", "!=", record.id),
+                ]
+                if self.search_count(domain) > 0:
+                    raise ValidationError(
+                        f"Số công văn thủ công '{record.manual_number}' đã tồn tại!"
+                    )
+
+    @api.onchange("is_manual_number", "manual_number")
+    def _onchange_manual_number(self):
+        if self.is_manual_number and self.manual_number:
+            domain = [
+                ("is_manual_number", "=", True),
+                ("manual_number", "=", self.manual_number),
+            ]
+            if isinstance(self.id, int):
+                domain.append(("id", "!=", self.id))
+            if self.search_count(domain) > 0:
+                return {
+                    "warning": {
+                        "title": "Cảnh báo trùng số",
+                        "message": f"Số công văn đi (thủ công) '{self.manual_number}' đã tồn tại hệ thống!",
+                    }
+                }
+
     # --- Sequence Logic ---
     @api.model_create_multi
     def create(self, vals_list):
+        """Cấp số công văn đi ngay khi tạo (sử dụng sequence chính thức)."""
         for vals in vals_list:
             if vals.get("name", "New") == "New":
-                vals["name"] = (
-                    self.env["ir.sequence"].next_by_code(
-                        "trasas.dispatch.outgoing.draft"
+                # Ưu tiên: số thủ công
+                if vals.get("is_manual_number") and vals.get("manual_number"):
+                    vals["name"] = vals["manual_number"]
+                else:
+                    vals["name"] = (
+                        self.env["ir.sequence"].next_by_code(
+                            "trasas.dispatch.outgoing.official"
+                        )
+                        or "New"
                     )
-                    or "New"
-                )
         return super().create(vals_list)
 
     # --- Helper: get stage by XML ID ---
@@ -223,24 +263,6 @@ class TrasasDispatchOutgoing(models.Model):
         )
 
     # --- Actions ---
-    def action_generate_number(self):
-        """Cấp số công văn chính thức (Chỉ dành cho HCNS)"""
-        stage_processing = self._get_stage("outgoing_stage_processing")
-        if not stage_processing:
-            raise UserError("Chưa cấu hình giai đoạn 'Đang xử lý'!")
-
-        for record in self:
-            if not record.dispatch_number:
-                record.dispatch_number = self.env["ir.sequence"].next_by_code(
-                    "trasas.dispatch.outgoing.official"
-                )
-            record.date_promulgated = fields.Date.today()
-            record.stage_id = stage_processing
-            record.message_post(
-                body="Đã cấp số công văn: %s" % record.dispatch_number,
-                subtype_xmlid="mail.mt_comment",
-            )
-
     def action_submit(self):
         stage_waiting = self._get_stage("outgoing_stage_waiting_approval")
         if not stage_waiting:

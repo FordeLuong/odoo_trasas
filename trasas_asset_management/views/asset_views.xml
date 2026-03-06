@@ -93,6 +93,9 @@
                             <field name="location"/>
                             <field name="responsible_user_id" widget="many2one_avatar_user"/>
                             <field name="ownership_type"/>
+                            <field name="document_holder"/>
+                            <field name="bank_holder_name" invisible="document_holder != 'bank'"/>
+                            <field name="reminder_days"/>
                         </group>
 
                         <group string="Kế hoạch bảo trì" invisible="(asset_group not in ('mmtb', 'tbvp') and asset_group_code != '002') or asset_group_code == '003'">

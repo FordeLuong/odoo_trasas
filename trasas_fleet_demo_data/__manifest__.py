@@ -8,7 +8,7 @@
         - Toyota, Hyundai, Kia, Ford, Mitsubishi, Isuzu, Hino, Thaco
         - Các dòng xe tải, xe khách, xe con thông dụng
     """,
-    "author": "TRASAS",
+    "author": "LiemPhong",
     "category": "Fleet",
     "depends": ["fleet"],
     "data": [

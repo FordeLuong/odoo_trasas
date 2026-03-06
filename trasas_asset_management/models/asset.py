@@ -200,7 +200,32 @@ class TrasasAsset(models.Model):
     next_maintenance_date = fields.Date(
         string="Ngày bảo trì tiếp theo",
         tracking=True,
-        help="Hệ thống sẽ cảnh báo trước 7 ngày và tự chuyển sang trạng thái Bảo trì khi đến hạn.",
+        help="Hệ thống sẽ cảnh báo trước N ngày (tùy chỉnh) và tự chuyển sang trạng thái Bảo trì khi đến hạn.",
+    )
+
+    # --- B.1: Nơi lưu giữ giấy tờ gốc ---
+    document_holder = fields.Selection(
+        [
+            ("company", "Công ty giữ"),
+            ("bank", "Ngân hàng giữ (Thế chấp)"),
+        ],
+        string="Nơi lưu giữ giấy tờ gốc",
+        default="company",
+        tracking=True,
+        help="Xác định giấy tờ gốc (sổ hồng, sổ đỏ...) đang được công ty giữ hay thế chấp tại ngân hàng.",
+    )
+    bank_holder_name = fields.Char(
+        string="Tên ngân hàng giữ",
+        tracking=True,
+        help="Tên ngân hàng đang giữ giấy tờ gốc (chỉ khi Thế chấp tại ngân hàng).",
+    )
+
+    # --- B.3: Số ngày nhắc nhở trước hạn ---
+    reminder_days = fields.Integer(
+        string="Nhắc trước (ngày)",
+        default=7,
+        tracking=True,
+        help="Số ngày hệ thống sẽ nhắc nhở trước ngày hết hạn hợp đồng/bảo trì.",
     )
 
     ownership_type = fields.Selection(
@@ -958,7 +983,9 @@ class TrasasAsset(models.Model):
         for rec in self:
             if rec.state not in ("leased", "lease_in", "expiring"):
                 raise UserError(
-                    _("Chỉ tài sản Cho thuê, Thuê ngoài hoặc Sắp hết hạn mới có thể Kết thúc HĐ!")
+                    _(
+                        "Chỉ tài sản Cho thuê, Thuê ngoài hoặc Sắp hết hạn mới có thể Kết thúc HĐ!"
+                    )
                 )
             rec.write({"state": "contract_ended"})
             rec.message_post(
@@ -1166,7 +1193,6 @@ class TrasasAsset(models.Model):
     def _cron_auto_maintenance(self):
         """Tự động cảnh báo & đổi trạng thái bảo trì cho MMTB, TBVP"""
         today = fields.Date.context_today(self)
-        warning_date = today + timedelta(days=7)
 
         # Lọc các tài sản đang sử dụng, thuộc nhóm MMTB, TBVP, có set ngày bảo trì
         assets = self.search(
@@ -1183,7 +1209,9 @@ class TrasasAsset(models.Model):
             if not rec.responsible_user_id:
                 continue
 
-            # 1. Cảnh báo trước 7 ngày
+            # 1. Cảnh báo trước N ngày (dùng reminder_days)
+            warn_days = rec.reminder_days or 7
+            warning_date = today + timedelta(days=warn_days)
             if rec.next_maintenance_date == warning_date:
                 rec.activity_schedule(
                     "mail.mail_activity_data_todo",
@@ -1219,7 +1247,6 @@ class TrasasAsset(models.Model):
     def _cron_check_contract_expiry(self):
         """Cảnh báo hợp đồng sắp hết hạn và tự động kết thúc hợp đồng khi đến hạn."""
         today = fields.Date.context_today(self)
-        warning_date = today + timedelta(days=7)
 
         assets = self.search(
             [
@@ -1241,6 +1268,8 @@ class TrasasAsset(models.Model):
 
             end_date = contract.end_date
 
+            warn_days = rec.reminder_days or 7
+            warning_date = today + timedelta(days=warn_days)
             if end_date == warning_date:
                 if rec.state != "expiring":
                     rec.write({"state": "expiring"})

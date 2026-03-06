@@ -10,7 +10,7 @@
         Tính năng chính:
         - Tích hợp API nhà cung cấp chữ ký số (VNPT SmartCA)
     """,
-     "author": "TRASAS",
+     "author": "LiemPhong",
     "website": "https://trasas.com",
     "depends": ["base", "mail", "web", "portal", "website"],
     "external_dependencies": {

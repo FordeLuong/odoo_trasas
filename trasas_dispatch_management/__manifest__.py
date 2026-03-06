@@ -11,7 +11,7 @@
         chỉ đạo, xử lý cho đến lưu trữ.
     """,
     "author": "LiemPhong",
-    "depends": ["base", "mail", "contacts", "portal", "portal_custom", "documents"],
+    "depends": ["base", "mail", "contacts", "portal", "portal_trasas", "documents"],
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",

@@ -100,7 +100,7 @@
         <record id="email_template_outgoing_released" model="mail.template">
             <field name="name">Công văn đi: Đã phát hành</field>
             <field name="model_id" ref="model_trasas_dispatch_outgoing"/>
-            <field name="subject">Đã phát hành công văn số: {{ object.dispatch_number }}</field>
+            <field name="subject">Đã phát hành công văn số: {{ object.name }}</field>
             <field name="email_from">{{ (user.email_formatted) }}</field>
             <field name="partner_to">{{ object.drafter_id.partner_id.id }}</field>
             <field name="description">Gửi thông báo khi công văn đã được cấp số và ban hành</field>
@@ -109,7 +109,7 @@
                     <p style="margin: 0px; padding: 0px; font-size: 13px;">
                         Kính gửi các bên liên quan,<br/><br/>
                         Công văn đi đã được HCNS cấp số và ban hành chính thức:<br/><br/>
-                        <strong>Số công văn:</strong> <t t-out="object.dispatch_number"/><br/>
+                        <strong>Số công văn:</strong> <t t-out="object.name"/><br/>
                         <strong>Ngày ban hành:</strong> <t t-out="object.date_promulgated"/><br/>
                         <strong>Trích yếu:</strong> <t t-out="object.subject"/><br/><br/>
                         
