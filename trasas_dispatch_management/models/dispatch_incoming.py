@@ -6,7 +6,7 @@ class TrasasDispatchIncoming(models.Model):
     _name = "trasas.dispatch.incoming"
     _description = "Công văn đến"
     _inherit = ["mail.thread", "mail.activity.mixin"]
-    _order = "date_received desc, priority desc"
+    _order = "date_received desc, urgency_id desc"
 
     # --- Default Fields ---
     name = fields.Char(
@@ -51,10 +51,12 @@ class TrasasDispatchIncoming(models.Model):
         tracking=True,
     )
 
-    priority = fields.Selection(
-        [("normal", "Thường"), ("urgent", "Khẩn"), ("very_urgent", "Hỏa tốc")],
+    urgency_id = fields.Many2one(
+        "trasas.dispatch.urgency",
         string="Độ khẩn",
-        default="normal",
+        default=lambda self: self.env.ref(
+            "trasas_dispatch_management.urgency_normal", raise_if_not_found=False
+        ),
         tracking=True,
     )
 
@@ -69,15 +71,8 @@ class TrasasDispatchIncoming(models.Model):
         domain="[('type', '=', 'folder')]",
         readonly=True,
     )
-    hard_copy_location = fields.Selection(
-        [
-            ("a1", "Tủ A1"),
-            ("a2", "Tủ A2"),
-            ("a3", "Tủ A3"),
-            ("b1", "Tủ B1"),
-            ("b2", "Tủ B2"),
-            ("b3", "Tủ B3"),
-        ],
+    location_id = fields.Many2one(
+        "trasas.dispatch.location",
         string="Nơi lưu bản giấy",
         tracking=True,
     )

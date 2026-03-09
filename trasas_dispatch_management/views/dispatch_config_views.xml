@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ DISPATCH LOCATION ============ -->
+    <record id="trasas_dispatch_location_view_list" model="ir.ui.view">
+        <field name="name">trasas.dispatch.location.list</field>
+        <field name="model">trasas.dispatch.location</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_trasas_dispatch_location" model="ir.actions.act_window">
+        <field name="name">Vị trí lưu trữ CV</field>
+        <field name="res_model">trasas.dispatch.location</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo vị trí lưu trữ công văn mới.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============ DISPATCH URGENCY ============ -->
+    <record id="trasas_dispatch_urgency_view_list" model="ir.ui.view">
+        <field name="name">trasas.dispatch.urgency.list</field>
+        <field name="model">trasas.dispatch.urgency</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="color" widget="color_picker"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_trasas_dispatch_urgency" model="ir.actions.act_window">
+        <field name="name">Độ khẩn CV</field>
+        <field name="res_model">trasas.dispatch.urgency</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo cấp độ khẩn mới cho công văn.
+            </p>
+        </field>
+    </record>
+</odoo>

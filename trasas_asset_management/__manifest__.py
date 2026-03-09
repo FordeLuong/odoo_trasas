@@ -36,10 +36,12 @@
         "data/ir_sequence_data.xml",
         "data/document_workspace_data.xml",
         "data/asset_type_data.xml",
+        "data/asset_document_type_data.xml",
         "data/asset_stage_data.xml",
         "data/ir_cron_data.xml",
         # Views
         "views/asset_legal_document_views.xml",
+        "views/asset_config_views.xml",
         "views/asset_type_views.xml",
         "wizard/asset_contract_wizard_views.xml",
         "wizard/asset_renew_wizard_views.xml",

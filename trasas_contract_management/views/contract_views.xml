@@ -232,6 +232,7 @@
                         <h2>
                             <field name="title" placeholder="Tiêu đề hợp đồng..."/>
                         </h2>
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="Thẻ hợp đồng..."/>
                     </div>
                     
                     <group>
@@ -401,6 +402,7 @@
                 <field name="title"/>
                 <field name="contract_type_id"/>
                 <field name="partner_id"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                 <field name="date_start"/>
                 <field name="date_end"/>
                 <field name="days_to_expire" optional="show"/>
@@ -445,6 +447,7 @@
                         <field name="partner_id"/>
                         <field name="contract_type_id" widget="badge"/>
                         <footer>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                             <field name="priority" widget="priority"/>
                             <field class="ms-1 align-items-center" name="activity_ids" widget="kanban_activity"/>
                             <div class="d-flex ms-auto align-items-center">

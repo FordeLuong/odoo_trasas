@@ -131,6 +131,19 @@ class TrasasContract(models.Model):
         help="Chọn loại hợp đồng",
     )
 
+    tag_ids = fields.Many2many(
+        "trasas.contract.tag",
+        string="Thẻ hợp đồng",
+        help="Gắn nhãn phân loại nhanh cho hợp đồng",
+    )
+
+    reject_reason_id = fields.Many2one(
+        "trasas.contract.reject.reason",
+        string="Lý do từ chối (danh mục)",
+        tracking=True,
+        help="Lý do từ chối được chọn từ danh mục cấu hình",
+    )
+
     partner_id = fields.Many2one(
         "res.partner",
         string="Đối tác",
@@ -1861,8 +1874,15 @@ class TrasasContract(models.Model):
         """
         today = fields.Date.context_today(self)
 
-        # [B20] Tìm hợp đồng sắp hết hạn trong 30 ngày
-        warning_date = today + timedelta(days=30)
+        # Lấy số ngày nhắc từ cấu hình (mặc định 30)
+        reminder_days = int(
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("trasas_contract_management.contract_reminder_days", 30)
+        )
+
+        # [B20] Tìm hợp đồng sắp hết hạn
+        warning_date = today + timedelta(days=reminder_days)
         expiring_contracts = self.search(
             [
                 ("state", "=", "signed"),

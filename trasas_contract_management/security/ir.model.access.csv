@@ -18,3 +18,7 @@ access_trasas_contract_cancel_wizard_manager,access.trasas.contract.cancel.wizar
 access_trasas_contract_draft_wizard_user,access.trasas.contract.draft.wizard.user,model_trasas_contract_draft_wizard,group_contract_user,1,1,1,1
 access_trasas_contract_draft_wizard_approver,access.trasas.contract.draft.wizard.approver,model_trasas_contract_draft_wizard,group_contract_approver,1,1,1,1
 access_trasas_contract_draft_wizard_manager,access.trasas.contract.draft.wizard.manager,model_trasas_contract_draft_wizard,group_contract_manager,1,1,1,1
+access_trasas_contract_reject_reason_user,access.trasas.contract.reject.reason.user,model_trasas_contract_reject_reason,group_contract_user,1,0,0,0
+access_trasas_contract_reject_reason_manager,access.trasas.contract.reject.reason.manager,model_trasas_contract_reject_reason,group_contract_manager,1,1,1,1
+access_trasas_contract_tag_user,access.trasas.contract.tag.user,model_trasas_contract_tag,group_contract_user,1,1,1,0
+access_trasas_contract_tag_manager,access.trasas.contract.tag.manager,model_trasas_contract_tag,group_contract_manager,1,1,1,1

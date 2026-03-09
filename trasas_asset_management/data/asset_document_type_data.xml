@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- NXCT: Nhà cửa / Công trình -->
+        <record id="doc_type_qsdd" model="trasas.asset.document.type">
+            <field name="name">Chứng nhận QSDĐ &amp; sở hữu nhà</field>
+            <field name="asset_group">nxct</field>
+            <field name="reminder_days">60</field>
+            <field name="sequence">10</field>
+        </record>
+        <record id="doc_type_gpxd" model="trasas.asset.document.type">
+            <field name="name">Giấy phép xây dựng</field>
+            <field name="asset_group">nxct</field>
+            <field name="reminder_days">30</field>
+            <field name="sequence">11</field>
+        </record>
+        <record id="doc_type_hue_nha" model="trasas.asset.document.type">
+            <field name="name">HĐ thuê nhà / mặt bằng / kho bãi</field>
+            <field name="asset_group">nxct</field>
+            <field name="reminder_days">30</field>
+            <field name="sequence">12</field>
+        </record>
+        <record id="doc_type_nghiemthu_ct" model="trasas.asset.document.type">
+            <field name="name">Biên bản nghiệm thu công trình</field>
+            <field name="asset_group">nxct</field>
+            <field name="reminder_days">0</field>
+            <field name="sequence">13</field>
+        </record>
+
+        <!-- MMTB: Máy móc thiết bị -->
+        <record id="doc_type_sohuu_ts" model="trasas.asset.document.type">
+            <field name="name">Chứng nhận sở hữu tài sản</field>
+            <field name="asset_group">mmtb</field>
+            <field name="reminder_days">30</field>
+            <field name="sequence">20</field>
+        </record>
+        <record id="doc_type_hoadon_mm" model="trasas.asset.document.type">
+            <field name="name">Hóa đơn mua máy móc</field>
+            <field name="asset_group">mmtb</field>
+            <field name="reminder_days">0</field>
+            <field name="sequence">21</field>
+        </record>
+        <record id="doc_type_baohanh_mm" model="trasas.asset.document.type">
+            <field name="name">Giấy tờ bảo hành (Máy móc)</field>
+            <field name="asset_group">mmtb</field>
+            <field name="reminder_days">15</field>
+            <field name="sequence">22</field>
+        </record>
+
+        <!-- TBVP: Thiết bị văn phòng -->
+        <record id="doc_type_hoadon_vp" model="trasas.asset.document.type">
+            <field name="name">Hóa đơn mua bán (VP)</field>
+            <field name="asset_group">tbvp</field>
+            <field name="reminder_days">0</field>
+            <field name="sequence">30</field>
+        </record>
+        <record id="doc_type_baohiem_ts" model="trasas.asset.document.type">
+            <field name="name">Giấy tờ bảo hiểm tài sản</field>
+            <field name="asset_group">tbvp</field>
+            <field name="reminder_days">15</field>
+            <field name="sequence">31</field>
+        </record>
+
+        <!-- TSVH: Tài sản vô hình -->
+        <record id="doc_type_shtt" model="trasas.asset.document.type">
+            <field name="name">Giấy chứng nhận sở hữu trí tuệ</field>
+            <field name="asset_group">tsvh</field>
+            <field name="reminder_days">90</field>
+            <field name="sequence">40</field>
+        </record>
+        <record id="doc_type_gp_phanmem" model="trasas.asset.document.type">
+            <field name="name">Giấy phép sử dụng phần mềm</field>
+            <field name="asset_group">tsvh</field>
+            <field name="reminder_days">30</field>
+            <field name="sequence">41</field>
+        </record>
+
+        <!-- Khác -->
+        <record id="doc_type_other" model="trasas.asset.document.type">
+            <field name="name">Loại giấy tờ khác</field>
+            <field name="asset_group">other</field>
+            <field name="reminder_days">7</field>
+            <field name="sequence">99</field>
+        </record>
+    </data>
+</odoo>

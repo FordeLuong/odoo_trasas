@@ -36,10 +36,10 @@
                 <field name="asset_group_id" column_invisible="1"/>
                 <field name="asset_group" column_invisible="1"/>
                 <field name="asset_id"/>
-                <field name="document_type"/>
+                <field name="document_type_id"/>
                 <field name="name"/>
                 <field name="document_date"/>
-                <field name="issuing_authority"/>
+                <field name="issuing_authority_id"/>
                 <field name="certificate_number"/>
                 <field name="validity_date" class="fw-bold" decoration-danger="state == 'expired'" decoration-warning="state == 'expiring_soon'"/>
                 <field name="days_to_expire" class="fw-bold" decoration-danger="state == 'expired'" decoration-warning="state == 'expiring_soon'"/>

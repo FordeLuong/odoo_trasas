@@ -23,3 +23,9 @@ access_asset_repair_wizard_manager,access.trasas.asset.repair.wizard.manager,mod
 access_asset_repair_wizard_director,access.trasas.asset.repair.wizard.director,model_trasas_asset_repair_wizard,group_asset_director,1,0,0,0
 access_asset_reuse_wizard_manager,access.trasas.asset.reuse.wizard.manager,model_trasas_asset_reuse_wizard,group_asset_manager,1,1,1,1
 access_asset_reuse_wizard_director,access.trasas.asset.reuse.wizard.director,model_trasas_asset_reuse_wizard,group_asset_director,1,0,0,0
+access_asset_location_manager,access.trasas.asset.location.manager,model_trasas_asset_location,group_asset_manager,1,1,1,1
+access_asset_location_director,access.trasas.asset.location.director,model_trasas_asset_location,group_asset_director,1,0,0,0
+access_asset_authority_manager,access.trasas.asset.authority.manager,model_trasas_asset_authority,group_asset_manager,1,1,1,1
+access_asset_authority_director,access.trasas.asset.authority.director,model_trasas_asset_authority,group_asset_director,1,0,0,0
+access_asset_doc_type_manager,access.trasas.asset.document.type.manager,model_trasas_asset_document_type,group_asset_manager,1,1,1,1
+access_asset_doc_type_director,access.trasas.asset.document.type.director,model_trasas_asset_document_type,group_asset_director,1,0,0,0

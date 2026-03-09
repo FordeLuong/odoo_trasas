@@ -18,4 +18,10 @@
               parent="trasas_dispatch_management.menu_dispatch_configuration"
               action="action_dispatch_outgoing_stage"
               sequence="30"/>
+
+    <menuitem id="menu_dispatch_outgoing_reject_reason_action"
+              name="Lý do từ chối CV đi"
+              parent="trasas_dispatch_management.menu_dispatch_configuration"
+              action="action_trasas_dispatch_outgoing_reject_reason"
+              sequence="50"/>
 </odoo>

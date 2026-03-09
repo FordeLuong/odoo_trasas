@@ -107,8 +107,11 @@ class TrasasDispatchOutgoing(models.Model):
     note = fields.Text(string="Ghi chú")
 
     # --- Lưu trữ ---
-    hard_copy_location = fields.Char(
-        string="Nơi lưu bản giấy", help="Vị trí lưu trữ hồ sơ giấy (Tủ/Kệ/File...)"
+    location_id = fields.Many2one(
+        "trasas.dispatch.location",
+        string="Nơi lưu bản giấy",
+        help="Vị trí lưu trữ hồ sơ giấy (Tủ/Kệ/File...)",
+        tracking=True,
     )
 
     # --- Stage (Dynamic) ---

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, _
+from odoo import models, fields, api, _
 
 
 class ContractRejectWizard(models.TransientModel):
@@ -16,10 +16,21 @@ class ContractRejectWizard(models.TransientModel):
     )
 
     rejection_reason = fields.Text(
-        string="Lý do từ chối",
+        string="Lý do chi tiết",
         required=True,
         help="Nhập lý do từ chối hợp đồng",
     )
+
+    reason_id = fields.Many2one(
+        "trasas.contract.reject.reason",
+        string="Lý do cấu hình",
+        help="Chọn lý do từ danh mục có sẵn",
+    )
+
+    @api.onchange("reason_id")
+    def _onchange_reason_id(self):
+        if self.reason_id:
+            self.rejection_reason = self.reason_id.name
 
     def action_confirm_reject(self):
         """Xác nhận từ chối với lý do"""
@@ -35,6 +46,7 @@ class ContractRejectWizard(models.TransientModel):
             {
                 "state": "draft",
                 "rejection_reason": self.rejection_reason,
+                "reject_reason_id": self.reason_id.id,
             }
         )
 

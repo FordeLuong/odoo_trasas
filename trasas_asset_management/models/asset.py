@@ -78,6 +78,24 @@ class TrasasAsset(models.Model):
         help="Đánh dấu nếu tài sản này đang được thế chấp",
     )
 
+    mortgage_bank = fields.Char(
+        string="Ngân hàng thế chấp",
+        tracking=True,
+    )
+    mortgage_contract_number = fields.Char(
+        string="Số hợp đồng thế chấp",
+        tracking=True,
+    )
+    mortgage_amount = fields.Monetary(
+        string="Giá trị thế chấp",
+        currency_field="currency_id",
+        tracking=True,
+    )
+    mortgage_date = fields.Date(
+        string="Ngày thế chấp",
+        tracking=True,
+    )
+
     description = fields.Html(
         string="Mô tả chi tiết",
     )
@@ -115,6 +133,13 @@ class TrasasAsset(models.Model):
         string="Tiền tệ",
         related="company_id.currency_id",
         store=True,
+    )
+
+    location_id = fields.Many2one(
+        "trasas.asset.location",
+        string="Vị trí tài sản",
+        tracking=True,
+        help="Nơi đặt tài sản (VP, Kho, Chi nhánh...)",
     )
 
     # =====================================================================

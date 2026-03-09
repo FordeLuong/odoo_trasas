@@ -58,7 +58,7 @@
                         </page>
                         <page string="Tài liệu đính kèm &amp; Lưu trữ">
                             <group>
-                                <field name="hard_copy_location"/>
+                                <field name="location_id" options="{'no_create': True}"/>
                             </group>
                             <field name="attachment_ids">
                                 <list>

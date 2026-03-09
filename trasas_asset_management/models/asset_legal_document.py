@@ -21,35 +21,10 @@ class TrasasAssetLegalDocument(models.Model):
 
     sequence = fields.Integer(string="STT", default=10)
 
-    document_type = fields.Selection(
-        [
-            # --- NXCT: Nhà cửa / Công trình ---
-            ("cn_qsdd", "Chứng nhận QSDĐ & sở hữu nhà"),
-            ("gpxd", "Giấy phép xây dựng"),
-            ("hd_thue_nha", "HĐ thuê nhà / mặt bằng / kho bãi"),
-            ("bb_nghiemthu_ct", "Biên bản nghiệm thu công trình"),
-            # --- MMTB: Máy móc thiết bị ---
-            ("cn_sohuuts", "Chứng nhận sở hữu tài sản"),
-            ("hoadon", "Hóa đơn"),
-            ("baohanh_mm", "Giấy tờ bảo hành (Máy móc)"),
-            ("hd_thue_tb", "Hợp đồng thuê thiết bị"),
-            ("bb_nghiemthu", "Biên bản nghiệm thu"),
-            # --- TBVP: Thiết bị văn phòng ---
-            ("hoadon_muaban", "Hóa đơn mua bán"),
-            ("baohanh_vp", "Giấy tờ bảo hành (Văn phòng)"),
-            ("hd_thue_tbvp", "HĐ thuê thiết bị văn phòng"),
-            ("baohiem_ts", "Giấy tờ bảo hiểm tài sản"),
-            # --- TSVH: Tài sản vô hình ---
-            ("cn_shtt", "Giấy chứng nhận sở hữu trí tuệ"),
-            ("gp_phanmem", "Giấy phép sử dụng phần mềm"),
-            ("hd_chuyen_nhuong_shtt", "HĐ chuyển nhượng quyền SHTT"),
-            ("bv_banquyen_pm", "Giấy bảo vệ bản quyền phần mềm"),
-            # --- Chung ---
-            ("other", "Khác"),
-        ],
+    document_type_id = fields.Many2one(
+        "trasas.asset.document.type",
         string="Loại chứng từ",
         required=True,
-        default="other",
         help="Chọn loại giấy tờ pháp lý. Danh sách gợi ý theo nhóm tài sản.",
     )
     name = fields.Char(
@@ -81,7 +56,8 @@ class TrasasAssetLegalDocument(models.Model):
         string="Ngày cấp",
         help="Ngày cấp / ngày phát hành giấy tờ",
     )
-    issuing_authority = fields.Char(
+    issuing_authority_id = fields.Many2one(
+        "trasas.asset.authority",
         string="Cơ quan cấp",
         help="Cơ quan phát hành giấy tờ",
     )
@@ -142,15 +118,12 @@ class TrasasAssetLegalDocument(models.Model):
             else:
                 rec.days_to_expire = 0
 
-    @api.onchange("document_type")
+    @api.onchange("document_type_id")
     def _onchange_document_type(self):
         """Tự điền tên giấy tờ từ loại chứng từ đã chọn"""
-        if self.document_type and self.document_type != "other":
-            type_label = dict(self._fields["document_type"].selection).get(
-                self.document_type, ""
-            )
+        if self.document_type_id:
             if not self.name:
-                self.name = type_label
+                self.name = self.document_type_id.name
 
     @api.model_create_multi
     def create(self, vals_list):
