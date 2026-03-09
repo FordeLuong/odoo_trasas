@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "TRASAS Contract Management",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.1",
     "category": "Contract Management",
     "summary": "Quản lý hợp đồng TRASAS - Từ soạn thảo đến ký kết và theo dõi",
     "description": """
@@ -52,6 +52,10 @@
         "views/contract_appendix_views.xml",
         "views/contract_views.xml",
         "views/contract_reject_wizard_views.xml",
+        "views/contract_cancel_wizard_views.xml",
+        "views/contract_draft_wizard_views.xml",
+        "views/contract_config_views.xml",
+        "views/res_config_settings_views.xml",
         "views/menu_views.xml",
     ],
     "installable": True,

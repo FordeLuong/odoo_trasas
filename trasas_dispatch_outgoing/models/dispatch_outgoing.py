@@ -10,7 +10,7 @@ class TrasasDispatchOutgoing(models.Model):
 
     # --- Thông tin chung ---
     name = fields.Char(
-        string="Mã hệ thống",
+        string="Số công văn đi",
         required=True,
         copy=False,
         readonly=True,
@@ -19,12 +19,8 @@ class TrasasDispatchOutgoing(models.Model):
     )
     subject = fields.Char(string="Trích yếu", required=True, tracking=True)
 
-    dispatch_number = fields.Char(
-        string="Số công văn đi",
-        tracking=True,
-        readonly=True,
-        help="Số chính thức do HCNS cấp sau khi đóng dấu",
-    )
+    is_manual_number = fields.Boolean(string="Cấp số thủ công", tracking=True)
+    manual_number = fields.Char(string="Số CV (Thủ công)", tracking=True)
 
     # --- Ngày tháng ---
     date_created = fields.Date(
@@ -59,6 +55,14 @@ class TrasasDispatchOutgoing(models.Model):
         tracking=True,
         domain="[('is_company', '=', True)]",
         help="Chọn công ty/đối tác từ danh bạ",
+    )
+
+    incoming_dispatch_id = fields.Many2one(
+        "trasas.dispatch.incoming",
+        string="Công văn đến gốc",
+        readonly=True,
+        tracking=True,
+        help="Công văn đến mà công văn đi này phản hồi (tự động gắn khi tạo từ CV đến)",
     )
 
     def _default_approver(self):
@@ -103,8 +107,11 @@ class TrasasDispatchOutgoing(models.Model):
     note = fields.Text(string="Ghi chú")
 
     # --- Lưu trữ ---
-    hard_copy_location = fields.Char(
-        string="Nơi lưu bản giấy", help="Vị trí lưu trữ hồ sơ giấy (Tủ/Kệ/File...)"
+    location_id = fields.Many2one(
+        "trasas.dispatch.location",
+        string="Nơi lưu bản giấy",
+        help="Vị trí lưu trữ hồ sơ giấy (Tủ/Kệ/File...)",
+        tracking=True,
     )
 
     # --- Stage (Dynamic) ---
@@ -125,7 +132,6 @@ class TrasasDispatchOutgoing(models.Model):
             ("waiting_approval", "Chờ duyệt"),
             ("approved", "Đã duyệt"),
             ("to_promulgate", "Chờ ban hành"),
-            ("processing", "Đang xử lý"),
             ("released", "Đã phát hành"),
             ("sent", "Đã gửi"),
             ("done", "Hoàn thành"),
@@ -161,7 +167,6 @@ class TrasasDispatchOutgoing(models.Model):
             "outgoing_stage_waiting_approval": "waiting_approval",
             "outgoing_stage_approved": "approved",
             "outgoing_stage_to_promulgate": "to_promulgate",
-            "outgoing_stage_processing": "processing",
             "outgoing_stage_released": "released",
             "outgoing_stage_sent": "sent",
             "outgoing_stage_done": "done",
@@ -187,8 +192,8 @@ class TrasasDispatchOutgoing(models.Model):
             elif record.stage_id.is_draft:
                 record.state = "draft"
             else:
-                # Custom stages default to processing
-                record.state = "processing"
+                # Custom stages default to draft if no match
+                record.state = "draft"
 
     @api.depends("drafter_id")
     def _compute_department_id(self):
@@ -202,17 +207,53 @@ class TrasasDispatchOutgoing(models.Model):
         for record in self:
             record.is_user_approver = record.approver_id == self.env.user
 
+    @api.constrains("is_manual_number", "manual_number")
+    def _check_manual_number_unique(self):
+        for record in self:
+            if record.is_manual_number and record.manual_number:
+                domain = [
+                    ("is_manual_number", "=", True),
+                    ("manual_number", "=", record.manual_number),
+                    ("id", "!=", record.id),
+                ]
+                if self.search_count(domain) > 0:
+                    raise ValidationError(
+                        f"Số công văn thủ công '{record.manual_number}' đã tồn tại!"
+                    )
+
+    @api.onchange("is_manual_number", "manual_number")
+    def _onchange_manual_number(self):
+        if self.is_manual_number and self.manual_number:
+            domain = [
+                ("is_manual_number", "=", True),
+                ("manual_number", "=", self.manual_number),
+            ]
+            if isinstance(self.id, int):
+                domain.append(("id", "!=", self.id))
+            if self.search_count(domain) > 0:
+                return {
+                    "warning": {
+                        "title": "Cảnh báo trùng số",
+                        "message": f"Số công văn đi (thủ công) '{self.manual_number}' đã tồn tại hệ thống!",
+                    }
+                }
+
     # --- Sequence Logic ---
     @api.model_create_multi
     def create(self, vals_list):
+        """Cấp số công văn đi ngay khi tạo (sử dụng sequence chính thức)."""
         for vals in vals_list:
             if vals.get("name", "New") == "New":
-                vals["name"] = (
-                    self.env["ir.sequence"].next_by_code(
-                        "trasas.dispatch.outgoing.draft"
+                # Ưu tiên: số thủ công
+                if vals.get("is_manual_number") and vals.get("manual_number"):
+                    vals["name"] = vals["manual_number"]
+                else:
+                    vals["name"] = (
+                        self.env["ir.sequence"].next_by_code(
+                            "trasas.dispatch.outgoing.official"
+                        )
+                        or "New"
                     )
-                    or "New"
-                )
         return super().create(vals_list)
 
     # --- Helper: get stage by XML ID ---
@@ -223,24 +264,6 @@ class TrasasDispatchOutgoing(models.Model):
         )
 
     # --- Actions ---
-    def action_generate_number(self):
-        """Cấp số công văn chính thức (Chỉ dành cho HCNS)"""
-        stage_processing = self._get_stage("outgoing_stage_processing")
-        if not stage_processing:
-            raise UserError("Chưa cấu hình giai đoạn 'Đang xử lý'!")
-
-        for record in self:
-            if not record.dispatch_number:
-                record.dispatch_number = self.env["ir.sequence"].next_by_code(
-                    "trasas.dispatch.outgoing.official"
-                )
-            record.date_promulgated = fields.Date.today()
-            record.stage_id = stage_processing
-            record.message_post(
-                body="Đã cấp số công văn: %s" % record.dispatch_number,
-                subtype_xmlid="mail.mt_comment",
-            )
-
     def action_submit(self):
         stage_waiting = self._get_stage("outgoing_stage_waiting_approval")
         if not stage_waiting:
@@ -314,7 +337,7 @@ class TrasasDispatchOutgoing(models.Model):
             raise UserError("Chưa cấu hình giai đoạn 'Chờ ban hành'!")
 
         for record in self:
-            # Tìm Trưởng phòng HCNS
+            # Tìm phòng HCNS
             hcns_dept = self.env.ref(
                 "trasas_demo_users.dep_hcns", raise_if_not_found=False
             )
@@ -323,22 +346,30 @@ class TrasasDispatchOutgoing(models.Model):
                     [("name", "ilike", "Hành chính")], limit=1
                 )
 
-            hcns_manager = False
-            if hcns_dept and hcns_dept.manager_id and hcns_dept.manager_id.user_id:
-                hcns_manager = hcns_dept.manager_id.user_id
-
-            if not hcns_manager:
+            if not hcns_dept:
                 raise ValidationError(
-                    "Không tìm thấy Trưởng phòng HCNS. Vui lòng kiểm tra cấu hình Phòng ban và gán Manager cho phòng HCNS."
+                    "Không tìm thấy phòng Hành chính Nhân sự. Vui lòng kiểm tra lại hệ thống phòng ban."
                 )
 
-            # Tạo Activity cho HCNS
-            record.activity_schedule(
-                "mail.mail_activity_data_todo",
-                user_id=hcns_manager.id,
-                summary="Ban hành công văn đi: %s" % record.subject,
-                note="Công văn đã được duyệt. Vui lòng cấp số và ban hành.",
+            # Lấy tất cả nhân viên trong phòng HCNS
+            hcns_employees = self.env["hr.employee"].search(
+                [("department_id", "=", hcns_dept.id), ("user_id", "!=", False)]
             )
+            hcns_users = hcns_employees.mapped("user_id")
+
+            if not hcns_users:
+                raise ValidationError(
+                    "Phòng Hành chính Nhân sự chưa có nhân viên nào được phân quyền User."
+                )
+
+            # Tạo Activity cho TẤT CẢ nhân viên trong phòng HCNS
+            for user in hcns_users:
+                record.activity_schedule(
+                    "mail.mail_activity_data_todo",
+                    user_id=user.id,
+                    summary="Ban hành công văn đi: %s" % record.subject,
+                    note="Công văn đã được duyệt. Vui lòng cấp số và ban hành.",
+                )
 
             record.stage_id = stage_to_promulgate
 
@@ -404,6 +435,45 @@ class TrasasDispatchOutgoing(models.Model):
             )
 
             record.stage_id = stage_sent
+
+            # Tự động hoàn thành Công văn đến liên kết (nếu có)
+            if (
+                record.incoming_dispatch_id
+                and record.incoming_dispatch_id.state != "done"
+            ):
+                incoming = record.incoming_dispatch_id
+                # Copy file chính thức sang response_file của CV đến
+                if record.official_file and not incoming.response_file:
+                    incoming.write(
+                        {
+                            "response_file": record.official_file,
+                            "response_filename": record.official_filename
+                            or "Phan_hoi_%s.pdf" % incoming.name,
+                        }
+                    )
+                if not incoming.response_date:
+                    incoming.write({"response_date": fields.Date.today()})
+
+                # Chuyển CV đến sang Hoàn thành
+                stage_done_incoming = self.env.ref(
+                    "trasas_dispatch_management.stage_done", raise_if_not_found=False
+                )
+                if stage_done_incoming:
+                    # Đóng tất cả activity còn lại
+                    activity_ids = self.env["mail.activity"].search(
+                        [
+                            ("res_model", "=", "trasas.dispatch.incoming"),
+                            ("res_id", "=", incoming.id),
+                        ]
+                    )
+                    activity_ids.action_done()
+
+                    incoming.write({"stage_id": stage_done_incoming.id})
+                    incoming.message_post(
+                        body="Công văn đến đã được tự động hoàn thành do Công văn đi phản hồi '%s' đã gửi thành công."
+                        % record.name,
+                        subtype_xmlid="mail.mt_note",
+                    )
 
     def action_done(self):
         stage_done = self._get_stage("outgoing_stage_done")

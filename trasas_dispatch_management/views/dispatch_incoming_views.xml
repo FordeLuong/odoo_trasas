@@ -23,7 +23,7 @@
                 <field name="dispatch_number"/>
                 <field name="sender_id"/>
                 <field name="deadline"/>
-                <field name="priority"/>
+                <field name="urgency_id"/>
                 <field name="state"/>
                 <field name="is_overdue"/>
                 <field name="handler_ids"/>
@@ -40,7 +40,7 @@
                                     </div>
                                 </div>
                                 <div class="o_kanban_record_top_right">
-                                    <field name="priority" widget="priority"/>
+                                    <field name="urgency_id" widget="color_picker" readonly="1"/>
                                 </div>
                             </div>
                             <div class="o_kanban_record_body">
@@ -76,10 +76,11 @@
                   decoration-info="state == 'draft'" 
                   decoration-warning="state == 'waiting_confirmation'"
                   decoration-muted="state == 'done'"
-                  default_order="date_received desc, priority desc">
-                <field name="priority" 
-                       decoration-warning="priority == 'urgent'"
-                       decoration-danger="priority == 'very_urgent'"/>
+                  default_order="date_received desc, urgency_id desc">
+                <field name="urgency_id" 
+                       decoration-warning="urgency_id != False"
+                       decoration-danger="urgency_id != False"
+                       widget="badge"/>
                 <field name="name"/>
                 <field name="dispatch_number"/>
                 <field name="extract_content" string="Trích yếu"/>
@@ -109,6 +110,11 @@
                             invisible="state != 'draft'"
                             groups="trasas_dispatch_management.group_dispatch_hcns,trasas_dispatch_management.group_dispatch_manager"/>
                     
+                    <!-- Quản lý: Phân công nhân viên -->
+                    <button name="action_manager_assign" string="Phân công nhân viên" type="object"
+                            class="oe_highlight"
+                            invisible="state != 'manager_assign' or not can_assign_manager"/>
+
                     <!-- Người xử lý: Submit phản hồi -->
                     <button name="action_submit_response" string="Gửi phản hồi" type="object"
                             class="oe_highlight"
@@ -160,6 +166,8 @@
 
                     <group>
                         <group string="Thông tin văn bản">
+                            <field name="is_manual_number"/>
+                            <field name="manual_number" invisible="not is_manual_number" required="is_manual_number"/>
                             <field name="sender_id"/>
                             <field name="type_id"/>
                             <field name="dispatch_date"/>
@@ -167,8 +175,8 @@
                         </group>
                         <group string="Phân loại &amp; Lưu trữ">
                             <field name="dispatch_mode" widget="radio" options="{'horizontal': true}"/>
-                            <field name="priority" widget="radio"/>
-                            <field name="hard_copy_location" invisible="dispatch_mode != 'hard_copy'"/>
+                            <field name="urgency_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="location_id" invisible="dispatch_mode != 'hard_copy'" options="{'no_create': True}"/>
                             <field name="is_overdue" invisible="1"/>
                         </group>
                     </group>
@@ -180,7 +188,10 @@
                             </group>
                             <group string="Thông tin xử lý">
                                 <group>
-                                    <field name="handler_ids" widget="many2many_tags_avatar" options="{'no_create': True}"/>
+                                    <field name="can_assign_manager" invisible="1"/>
+                                    <field name="is_via_manager" invisible="state != 'draft'"/>
+                                    <field name="manager_id" invisible="not is_via_manager" required="is_via_manager and state == 'draft'"/>
+                                    <field name="handler_ids" widget="many2many_tags_avatar" options="{'no_create': True}" invisible="is_via_manager and state == 'draft'"/>
                                     <field name="deadline"/>
                                 </group>
                                 <group>

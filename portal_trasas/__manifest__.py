@@ -7,7 +7,7 @@
         Bao gồm ứng dụng phê duyệt cho portal users.
     """,
     "category": "Website/Website",
-    "author": "TRASAS",
+    "author": "LiemPhong",
     "depends": ["portal", "website_blog", "website_slides", "hr"],
     "data": [
         "security/ir.model.access.csv",

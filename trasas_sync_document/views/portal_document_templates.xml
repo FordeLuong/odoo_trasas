@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========== PORTAL DOCUMENTS PAGE ========== -->
+    <template id="portal_documents_page" name="Portal Documents">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container py-4">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb bg-transparent px-0">
+                        <li class="breadcrumb-item">
+                            <a href="/my"><i class="fa fa-home"/> My Portal</a>
+                        </li>
+                        <t t-foreach="breadcrumb" t-as="crumb">
+                            <li t-attf-class="breadcrumb-item #{'active' if crumb_last else ''}">
+                                <a t-if="not crumb_last"
+                                   t-attf-href="/my/documents/#{crumb['id']}"
+                                   t-out="crumb['name']"/>
+                                <span t-if="crumb_last" t-out="crumb['name']"/>
+                            </li>
+                        </t>
+                    </ol>
+                </nav>
+
+                <div class="row">
+                    <!-- ===== CỘT TRÁI: CÂY THƯ MỤC ===== -->
+                    <div class="col-lg-3 d-none d-lg-block mb-4">
+                        <div class="doc-sidebar">
+                            <div class="doc-sidebar-header">
+                                <i class="fa fa-sitemap me-2"/>
+                                <span>Thư mục</span>
+                            </div>
+                            <div class="doc-tree">
+                                <!-- Root folder link -->
+                                <a t-attf-href="/my/documents/#{root_folder.id}"
+                                   t-attf-class="doc-tree-item root-item #{'active' if current_folder.id == root_folder.id else ''}">
+                                    <i class="fa fa-database me-2"/>
+                                    <span t-out="root_folder.name"/>
+                                </a>
+                                <!-- Render cây thư mục đệ quy -->
+                                <t t-call="trasas_sync_document.folder_tree_recursive">
+                                    <t t-set="tree_items" t-value="folder_tree"/>
+                                    <t t-set="depth" t-value="1"/>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== CỘT PHẢI: NỘI DUNG ===== -->
+                    <div class="col-lg-9">
+                        <!-- Header thư mục hiện tại -->
+                        <div class="doc-content-header mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fa fa-folder-open text-warning me-2 fs-4"/>
+                                <h4 class="mb-0" t-out="current_folder.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Mobile folder selector -->
+                        <div class="d-lg-none mb-3">
+                            <a href="/my/documents" class="btn btn-outline-secondary btn-sm mb-2">
+                                <i class="fa fa-arrow-left me-1"/> Về trang gốc
+                            </a>
+                        </div>
+
+                        <!-- Sub-folders (nếu có) -->
+                        <t t-if="sub_folders">
+                            <div class="doc-section-title mb-2">
+                                <i class="fa fa-folder me-1"/> Thư mục con
+                            </div>
+                            <div class="row g-2 mb-4">
+                                <t t-foreach="sub_folders" t-as="folder">
+                                    <div class="col-6 col-md-4 col-xl-3">
+                                        <a t-attf-href="/my/documents/#{folder.id}"
+                                           class="doc-folder-card">
+                                            <div class="doc-folder-icon">
+                                                <i class="fa fa-folder fa-2x text-warning"/>
+                                            </div>
+                                            <div class="doc-folder-name" t-out="folder.name"/>
+                                        </a>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- Files -->
+                        <t t-if="files">
+                            <div class="doc-section-title mb-2">
+                                <i class="fa fa-file me-1"/> Tài liệu
+                                <span class="badge bg-secondary ms-1" t-out="len(files)"/>
+                            </div>
+                            <div class="doc-file-list">
+                                <t t-foreach="files" t-as="file">
+                                    <div class="doc-file-row">
+                                        <div class="doc-file-icon">
+                                            <i t-att-class="file['icon'] + ' fa-lg'"/>
+                                        </div>
+                                        <div class="doc-file-info">
+                                            <div class="doc-file-name" t-out="file['name']"/>
+                                            <div class="doc-file-meta">
+                                                <span class="badge bg-light text-dark me-1"
+                                                      t-if="file['extension']"
+                                                      t-out="file['extension']"/>
+                                                <span class="text-muted small" t-out="file['size']"/>
+                                            </div>
+                                        </div>
+                                        <div class="doc-file-actions">
+                                            <!-- Preview button (chỉ cho PDF/Image) -->
+                                            <a t-if="file['can_preview']"
+                                               t-attf-href="/my/documents/preview/#{file['id']}"
+                                               target="_blank"
+                                               class="btn btn-sm btn-outline-primary me-1"
+                                               title="Xem trước">
+                                                <i class="fa fa-eye"/>
+                                                <span class="d-none d-md-inline ms-1">Xem</span>
+                                            </a>
+                                            <!-- URL link -->
+                                            <a t-if="file['type'] == 'url' and file['url']"
+                                               t-att-href="file['url']"
+                                               target="_blank"
+                                               class="btn btn-sm btn-outline-info me-1"
+                                               title="Mở link">
+                                                <i class="fa fa-external-link"/>
+                                                <span class="d-none d-md-inline ms-1">Mở</span>
+                                            </a>
+                                            <!-- Download button -->
+                                            <a t-if="file['type'] == 'binary'"
+                                               t-attf-href="/my/documents/download/#{file['id']}"
+                                               class="btn btn-sm btn-outline-success"
+                                               title="Tải xuống">
+                                                <i class="fa fa-download"/>
+                                                <span class="d-none d-md-inline ms-1">Tải</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- Empty state -->
+                        <t t-if="not files and not sub_folders">
+                            <div class="doc-empty-state">
+                                <i class="fa fa-folder-open-o fa-3x text-muted mb-3"/>
+                                <h5 class="text-muted">Thư mục trống</h5>
+                                <p class="text-muted">Chưa có tài liệu nào trong thư mục này.</p>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ========== RECURSIVE FOLDER TREE ========== -->
+    <template id="folder_tree_recursive" name="Folder Tree Recursive">
+        <t t-foreach="tree_items" t-as="item">
+            <div class="doc-tree-group">
+                <div t-attf-class="doc-tree-item #{'active' if current_folder.id == item['id'] else ''}"
+                     t-attf-style="padding-left: #{depth * 16 + 8}px;">
+                    <!-- Toggle arrow nếu có thư mục con -->
+                    <span t-if="item['children']"
+                          class="doc-tree-toggle me-1"
+                          t-attf-data-target="tree-children-#{item['id']}">
+                        <i class="fa fa-caret-right"/>
+                    </span>
+                    <span t-if="not item['children']" class="me-1" style="width:14px; display:inline-block;"/>
+                    <a t-attf-href="/my/documents/#{item['id']}" class="doc-tree-link">
+                        <i class="fa fa-folder me-1 text-warning"/>
+                        <span t-out="item['name']"/>
+                    </a>
+                </div>
+                <!-- Thư mục con (ẩn mặc định, toggle bằng JS) -->
+                <div t-if="item['children']"
+                     t-attf-id="tree-children-#{item['id']}"
+                     class="doc-tree-children"
+                     style="display: none;">
+                    <t t-call="trasas_sync_document.folder_tree_recursive">
+                        <t t-set="tree_items" t-value="item['children']"/>
+                        <t t-set="depth" t-value="depth + 1"/>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

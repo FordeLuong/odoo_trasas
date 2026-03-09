@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ ASSET LOCATION ============ -->
+    <record id="trasas_asset_location_view_list" model="ir.ui.view">
+        <field name="name">trasas.asset.location.list</field>
+        <field name="model">trasas.asset.location</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_trasas_asset_location" model="ir.actions.act_window">
+        <field name="name">Vị trí tài sản</field>
+        <field name="res_model">trasas.asset.location</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo vị trí tài sản mới.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============ ASSET AUTHORITY ============ -->
+    <record id="trasas_asset_authority_view_list" model="ir.ui.view">
+        <field name="name">trasas.asset.authority.list</field>
+        <field name="model">trasas.asset.authority</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_trasas_asset_authority" model="ir.actions.act_window">
+        <field name="name">Cơ quan cấp phát</field>
+        <field name="res_model">trasas.asset.authority</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo cơ quan cấp phát mới.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============ ASSET DOCUMENT TYPE ============ -->
+    <record id="trasas_asset_document_type_view_list" model="ir.ui.view">
+        <field name="name">trasas.asset.document.type.list</field>
+        <field name="model">trasas.asset.document.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="asset_group"/>
+                <field name="reminder_days"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_trasas_asset_document_type" model="ir.actions.act_window">
+        <field name="name">Loại giấy tờ</field>
+        <field name="res_model">trasas.asset.document.type</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo loại giấy tờ mới.
+            </p>
+        </field>
+    </record>
+</odoo>

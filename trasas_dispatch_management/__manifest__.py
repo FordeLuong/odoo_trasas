@@ -11,14 +11,16 @@
         chỉ đạo, xử lý cho đến lưu trữ.
     """,
     "author": "LiemPhong",
-    "depends": ["base", "mail", "contacts", "portal", "portal_custom", "documents"],
+    "depends": ["base", "mail", "contacts", "portal", "portal_trasas", "documents"],
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
         "data/dispatch_data.xml",
         "data/dispatch_stage_data.xml",
+        "data/dispatch_config_data.xml",
         "data/ir_cron_data.xml",
         "data/mail_template_data.xml",
+        "views/dispatch_config_views.xml",
         "views/dispatch_stage_views.xml",
         "views/dispatch_incoming_views.xml",
         "views/dispatch_type_views.xml",

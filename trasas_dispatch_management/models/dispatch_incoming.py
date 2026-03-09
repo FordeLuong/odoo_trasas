@@ -6,7 +6,7 @@ class TrasasDispatchIncoming(models.Model):
     _name = "trasas.dispatch.incoming"
     _description = "Công văn đến"
     _inherit = ["mail.thread", "mail.activity.mixin"]
-    _order = "date_received desc, priority desc"
+    _order = "date_received desc, urgency_id desc"
 
     # --- Default Fields ---
     name = fields.Char(
@@ -19,6 +19,8 @@ class TrasasDispatchIncoming(models.Model):
     active = fields.Boolean(default=True)
 
     # --- Thông tin chung ---
+    is_manual_number = fields.Boolean(string="Cấp số thủ công", tracking=True)
+    manual_number = fields.Char(string="Số CV (Thủ công)", tracking=True)
     dispatch_number = fields.Char(
         string="Số hiệu văn bản gốc", required=True, tracking=True
     )
@@ -49,10 +51,12 @@ class TrasasDispatchIncoming(models.Model):
         tracking=True,
     )
 
-    priority = fields.Selection(
-        [("normal", "Thường"), ("urgent", "Khẩn"), ("very_urgent", "Hỏa tốc")],
+    urgency_id = fields.Many2one(
+        "trasas.dispatch.urgency",
         string="Độ khẩn",
-        default="normal",
+        default=lambda self: self.env.ref(
+            "trasas_dispatch_management.urgency_normal", raise_if_not_found=False
+        ),
         tracking=True,
     )
 
@@ -67,20 +71,20 @@ class TrasasDispatchIncoming(models.Model):
         domain="[('type', '=', 'folder')]",
         readonly=True,
     )
-    hard_copy_location = fields.Selection(
-        [
-            ("a1", "Tủ A1"),
-            ("a2", "Tủ A2"),
-            ("a3", "Tủ A3"),
-            ("b1", "Tủ B1"),
-            ("b2", "Tủ B2"),
-            ("b3", "Tủ B3"),
-        ],
+    location_id = fields.Many2one(
+        "trasas.dispatch.location",
         string="Nơi lưu bản giấy",
         tracking=True,
     )
 
     # --- Xử lý ---
+    is_via_manager = fields.Boolean(string="Chỉ định qua Quản lý", tracking=True)
+    manager_id = fields.Many2one(
+        "res.users",
+        string="Trưởng/Phó phòng",
+        domain="[('share', '=', False)]",
+        tracking=True,
+    )
     handler_ids = fields.Many2many("res.users", string="Người xử lý", tracking=True)
     deadline = fields.Date(string="Hạn xử lý", tracking=True)
     response_required = fields.Boolean(
@@ -112,6 +116,7 @@ class TrasasDispatchIncoming(models.Model):
     state = fields.Selection(
         [
             ("draft", "Mới"),
+            ("manager_assign", "Chờ quản lý phân công"),
             ("processing", "Đang xử lý"),
             ("waiting_confirmation", "Chờ xác nhận HCNS"),
             ("done", "Hoàn thành"),
@@ -124,6 +129,19 @@ class TrasasDispatchIncoming(models.Model):
     )
 
     # --- Computed ---
+    can_assign_manager = fields.Boolean(
+        string="Có quyền phân công", compute="_compute_can_assign_manager"
+    )
+
+    def _compute_can_assign_manager(self):
+        is_admin_or_manager = self.env.user.has_group(
+            "trasas_dispatch_management.group_dispatch_manager"
+        )
+        for record in self:
+            record.can_assign_manager = is_admin_or_manager or (
+                record.manager_id and record.manager_id == self.env.user
+            )
+
     is_overdue = fields.Boolean(
         string="Quá hạn", compute="_compute_is_overdue", store=True
     )
@@ -156,6 +174,9 @@ class TrasasDispatchIncoming(models.Model):
         stage_waiting = self.env.ref(
             "trasas_dispatch_management.stage_waiting", raise_if_not_found=False
         )
+        stage_manager_assign = self.env.ref(
+            "trasas_dispatch_management.stage_manager_assign", raise_if_not_found=False
+        )
         for record in self:
             if not record.stage_id:
                 record.state = "draft"
@@ -163,6 +184,8 @@ class TrasasDispatchIncoming(models.Model):
                 record.state = "cancel"
             elif record.stage_id.is_done:
                 record.state = "done"
+            elif record.stage_id == stage_manager_assign:
+                record.state = "manager_assign"
             elif record.stage_id == stage_waiting:
                 record.state = "waiting_confirmation"
             elif record.stage_id == stage_draft:
@@ -197,6 +220,38 @@ class TrasasDispatchIncoming(models.Model):
         ),
     ]
 
+    @api.constrains("is_manual_number", "manual_number")
+    def _check_manual_number_unique(self):
+        for record in self:
+            if record.is_manual_number and record.manual_number:
+                domain = [
+                    ("is_manual_number", "=", True),
+                    ("manual_number", "=", record.manual_number),
+                    ("id", "!=", record.id),
+                ]
+                if self.search_count(domain) > 0:
+                    raise ValidationError(
+                        f"Số công văn thủ công '{record.manual_number}' đã tồn tại!"
+                    )
+
+    @api.onchange("is_manual_number", "manual_number")
+    def _onchange_manual_number(self):
+        if self.is_manual_number and self.manual_number:
+            domain = [
+                ("is_manual_number", "=", True),
+                ("manual_number", "=", self.manual_number),
+            ]
+            if isinstance(self.id, int):
+                domain.append(("id", "!=", self.id))
+            if self.search_count(domain) > 0:
+                return {
+                    "warning": {
+                        "title": "Cảnh báo trùng số",
+                        "message": f"Số công văn thủ công '{self.manual_number}' đã tồn tại trong hệ thống!",
+                    }
+                }
+            self.dispatch_number = self.manual_number
+
     @api.constrains("dispatch_date", "date_received", "deadline")
     def _check_dates(self):
         for record in self:
@@ -220,11 +275,15 @@ class TrasasDispatchIncoming(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if vals.get("name", "New") == "New":
-                vals["name"] = (
-                    self.env["ir.sequence"].next_by_code("trasas.dispatch.incoming")
-                    or "New"
-                )
+            if vals.get("name", "New") == "New" or vals.get("name") == _("New"):
+                if vals.get("is_manual_number") and vals.get("manual_number"):
+                    vals["name"] = vals["manual_number"]
+                    if not vals.get("dispatch_number"):
+                        vals["dispatch_number"] = vals["manual_number"]
+                else:
+                    vals["name"] = self.env["ir.sequence"].next_by_code(
+                        "trasas.dispatch.incoming"
+                    ) or _("New")
         records = super().create(vals_list)
         records._create_document_folder()
         return records
@@ -283,22 +342,48 @@ class TrasasDispatchIncoming(models.Model):
 
     def _create_document_folder(self):
         Document = self.env["documents.document"].sudo()
+        type_folders = self.mapped("type_id.document_folder_id")
+        root_incoming = type_folders.mapped("folder_id")[:1] if type_folders else False
+
         for rec in self:
-            if (
-                not rec.document_folder_id
-                and rec.type_id
-                and rec.type_id.document_folder_id
-            ):
-                folder_name = (
-                    f"{rec.name}_{rec.dispatch_number}"
-                    if rec.name and rec.dispatch_number
-                    else rec.name or rec.dispatch_number
-                )
+            if rec.document_folder_id:
+                continue
+
+            folder_name = (
+                f"{rec.name}_{rec.dispatch_number}"
+                if rec.name and rec.dispatch_number
+                else rec.name or rec.dispatch_number
+            )
+
+            parent_id = False
+            if rec.is_manual_number:
+                if root_incoming:
+                    manual_parent = Document.search(
+                        [
+                            ("name", "=", "Công văn đến (Thủ công)"),
+                            ("type", "=", "folder"),
+                            ("folder_id", "=", root_incoming.id),
+                        ],
+                        limit=1,
+                    )
+                    if not manual_parent:
+                        manual_parent = Document.create(
+                            {
+                                "name": "Công văn đến (Thủ công)",
+                                "type": "folder",
+                                "folder_id": root_incoming.id,
+                            }
+                        )
+                    parent_id = manual_parent.id
+            elif rec.type_id and rec.type_id.document_folder_id:
+                parent_id = rec.type_id.document_folder_id.id
+
+            if parent_id:
                 folder = Document.create(
                     {
                         "name": folder_name,
                         "type": "folder",
-                        "folder_id": rec.type_id.document_folder_id.id,
+                        "folder_id": parent_id,
                     }
                 )
                 rec.write({"document_folder_id": folder.id})
@@ -367,59 +452,154 @@ class TrasasDispatchIncoming(models.Model):
 
     # --- Actions ---
     def action_confirm(self):
-        """Chuyển sang giai đoạn Đang xử lý và gửi thông báo"""
+        """Chuyển sang giai đoạn Đang xử lý (hoặc chờ Quản lý phân công) và gửi thông báo"""
         stage_processing = self._get_stage("stage_processing")
-        if not stage_processing:
-            raise UserError("Chưa cấu hình giai đoạn 'Đang xử lý'!")
+        stage_manager_assign = self._get_stage("stage_manager_assign")
+        if not stage_processing or not stage_manager_assign:
+            raise UserError(
+                "Chưa cấu hình giai đoạn 'Đang xử lý' hoặc 'Chờ quản lý phân công'!"
+            )
 
         for record in self:
-            if record.response_required and not record.handler_ids:
-                raise UserError(
-                    "Vui lòng chọn Người xử lý trước khi tiếp nhận công văn cần phản hồi!"
-                )
-
             # Kiểm tra file đính kèm
             if not record.attachment_ids:
                 raise UserError("Vui lòng đính kèm file công văn trước khi tiếp nhận!")
 
-            record.stage_id = stage_processing
-
-            # Tạo hoạt động cho người xử lý
-            if record.handler_ids:
-                # Gửi email template nếu stage có cấu hình
-                if stage_processing.mail_template_id:
-                    for user in record.handler_ids:
-                        stage_processing.mail_template_id.send_mail(
-                            record.id, force_send=True
-                        )
-                else:
-                    template = self.env.ref(
-                        "trasas_dispatch_management.email_template_dispatch_assigned",
-                        raise_if_not_found=False,
+            if record.is_via_manager:
+                if not record.manager_id:
+                    raise UserError(
+                        "Vui lòng chọn Trưởng/Phó phòng khi tích 'Chỉ định qua Quản lý'!"
                     )
-                    if template:
-                        for user in record.handler_ids:
-                            template.send_mail(record.id, force_send=True)
 
-                # Tạo Activity
+                record.stage_id = stage_manager_assign
+
+                # Tạo Activity cho quản lý
                 activity_type = self.env.ref(
                     "mail.mail_activity_data_todo", raise_if_not_found=False
                 )
                 if not activity_type:
                     activity_type = self.env["mail.activity.type"].search([], limit=1)
 
-                for user_id in record.handler_ids.ids:
-                    self.env["mail.activity"].create(
-                        {
-                            "res_model_id": self.env["ir.model"]._get_id(self._name),
-                            "res_id": record.id,
-                            "activity_type_id": activity_type.id,
-                            "summary": f"Xử lý công văn: {record.dispatch_number}",
-                            "note": f"Được giao xử lý công văn số {record.dispatch_number}. Vui lòng kiểm tra và phản hồi trước {record.deadline or 'không có hạn'}.",
-                            "user_id": user_id,
-                            "date_deadline": record.deadline or fields.Date.today(),
-                        }
+                self.env["mail.activity"].create(
+                    {
+                        "res_model_id": self.env["ir.model"]._get_id(self._name),
+                        "res_id": record.id,
+                        "activity_type_id": activity_type.id,
+                        "summary": f"Yêu cầu phân công: {record.dispatch_number or record.name}",
+                        "note": f"Vui lòng phân công người xử lý cho công văn số {record.dispatch_number or record.name}.",
+                        "user_id": record.manager_id.id,
+                        "date_deadline": record.deadline or fields.Date.today(),
+                    }
+                )
+            else:
+                if record.response_required and not record.handler_ids:
+                    raise UserError(
+                        "Vui lòng chọn Người xử lý trước khi tiếp nhận công văn cần phản hồi!"
                     )
+
+                record.stage_id = stage_processing
+
+                # Tạo hoạt động cho người xử lý
+                if record.handler_ids:
+                    # Gửi email template nếu stage có cấu hình
+                    if stage_processing.mail_template_id:
+                        for user in record.handler_ids:
+                            stage_processing.mail_template_id.send_mail(
+                                record.id, force_send=True
+                            )
+                    else:
+                        template = self.env.ref(
+                            "trasas_dispatch_management.email_template_dispatch_assigned",
+                            raise_if_not_found=False,
+                        )
+                        if template:
+                            for user in record.handler_ids:
+                                template.send_mail(record.id, force_send=True)
+
+                    # Tạo Activity
+                    activity_type = self.env.ref(
+                        "mail.mail_activity_data_todo", raise_if_not_found=False
+                    )
+                    if not activity_type:
+                        activity_type = self.env["mail.activity.type"].search(
+                            [], limit=1
+                        )
+
+                    for user_id in record.handler_ids.ids:
+                        self.env["mail.activity"].create(
+                            {
+                                "res_model_id": self.env["ir.model"]._get_id(
+                                    self._name
+                                ),
+                                "res_id": record.id,
+                                "activity_type_id": activity_type.id,
+                                "summary": f"Xử lý công văn: {record.dispatch_number or record.name}",
+                                "note": f"Được giao xử lý công văn số {record.dispatch_number or record.name}. Vui lòng kiểm tra và phản hồi trước {record.deadline or 'không có hạn'}.",
+                                "user_id": user_id,
+                                "date_deadline": record.deadline or fields.Date.today(),
+                            }
+                        )
+
+    def action_manager_assign(self):
+        """Quản lý đã chọn người xử lý và tiến hành phân công"""
+        stage_processing = self._get_stage("stage_processing")
+        if not stage_processing:
+            raise UserError("Chưa cấu hình giai đoạn 'Đang xử lý'!")
+
+        for record in self:
+            if not record.can_assign_manager:
+                raise UserError(
+                    "Chỉ Quản lý được chỉ định hoặc Quản trị viên mới có quyền thực hiện thao tác này!"
+                )
+
+            if not record.handler_ids:
+                raise UserError("Vui lòng chọn Người xử lý trước khi phân công!")
+
+            record.stage_id = stage_processing
+
+            # Mark activity "Phân công xử lý" của manager là done
+            manager_activities = self.env["mail.activity"].search(
+                [
+                    ("res_model", "=", self._name),
+                    ("res_id", "=", record.id),
+                    ("user_id", "=", self.env.user.id),
+                ]
+            )
+            manager_activities.action_done()
+
+            # Tạo hoạt động cho người xử lý mới
+            if stage_processing.mail_template_id:
+                for user in record.handler_ids:
+                    stage_processing.mail_template_id.send_mail(
+                        record.id, force_send=True
+                    )
+            else:
+                template = self.env.ref(
+                    "trasas_dispatch_management.email_template_dispatch_assigned",
+                    raise_if_not_found=False,
+                )
+                if template:
+                    for user in record.handler_ids:
+                        template.send_mail(record.id, force_send=True)
+
+            activity_type = self.env.ref(
+                "mail.mail_activity_data_todo", raise_if_not_found=False
+            )
+            if not activity_type:
+                activity_type = self.env["mail.activity.type"].search([], limit=1)
+
+            for user_id in record.handler_ids.ids:
+                self.env["mail.activity"].create(
+                    {
+                        "res_model_id": self.env["ir.model"]._get_id(self._name),
+                        "res_id": record.id,
+                        "activity_type_id": activity_type.id,
+                        "summary": f"Xử lý công văn: {record.dispatch_number or record.name}",
+                        "note": f"Phân công từ Quản lý: Vui lòng kiểm tra và phản hồi công văn số {record.dispatch_number or record.name} trước {record.deadline or 'không có hạn'}.",
+                        "user_id": user_id,
+                        "date_deadline": record.deadline or fields.Date.today(),
+                    }
+                )
 
     def action_done(self):
         """Hoàn thành công văn (chỉ dùng cho công văn không cần phản hồi)"""

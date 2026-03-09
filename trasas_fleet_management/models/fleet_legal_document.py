@@ -13,21 +13,10 @@ class FleetLegalDocument(models.Model):
 
     sequence = fields.Integer(string="STT", default=10)
 
-    document_type = fields.Selection(
-        [
-            ("registration", "Giấy đăng ký xe"),
-            ("inspection", "Phiếu đăng kiểm"),
-            ("insurance", "Bảo hiểm xe"),
-            ("license_plate", "Giấy tờ biển số"),
-            ("ownership", "Chứng nhận sở hữu"),
-            ("customs", "Chứng từ hải quan / nhập khẩu"),
-            ("repair", "Biên bản sửa chữa / bảo dưỡng"),
-            ("accident", "Biên bản tai nạn / xử lý"),
-            ("other", "Khác"),
-        ],
+    document_type_id = fields.Many2one(
+        "fleet.legal.document.type",
         string="Loại giấy tờ",
         required=True,
-        default="other",
     )
 
     name = fields.Char(
@@ -47,7 +36,8 @@ class FleetLegalDocument(models.Model):
         string="Ngày cấp",
         help="Ngày cấp / ngày phát hành giấy tờ",
     )
-    issuing_authority = fields.Char(
+    authority_id = fields.Many2one(
+        "fleet.issuing.authority",
         string="Cơ quan cấp",
         help="Cơ quan phát hành giấy tờ",
     )
@@ -113,15 +103,12 @@ class FleetLegalDocument(models.Model):
             else:
                 rec.days_to_expire = 0
 
-    @api.onchange("document_type")
+    @api.onchange("document_type_id")
     def _onchange_document_type(self):
         """Tự điền tên giấy tờ từ loại chứng từ đã chọn"""
-        if self.document_type and self.document_type != "other":
-            type_label = dict(self._fields["document_type"].selection).get(
-                self.document_type, ""
-            )
+        if self.document_type_id:
             if not self.name:
-                self.name = type_label
+                self.name = self.document_type_id.name
 
     @api.model
     def _cron_check_document_expiry(self):
@@ -152,11 +139,7 @@ class FleetLegalDocument(models.Model):
             if new_state != doc.state:
                 doc.state = new_state
                 # Check if it's a mandatory document that just expired
-                if new_state == "expired" and doc.document_type in [
-                    "registration",
-                    "inspection",
-                    "insurance",
-                ]:
+                if new_state == "expired" and doc.document_type_id.is_mandatory:
                     expired_vehicles |= doc.vehicle_id
 
         # Update vehicle states

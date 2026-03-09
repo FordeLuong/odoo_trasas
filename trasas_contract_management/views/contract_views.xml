@@ -72,13 +72,13 @@
                             invisible="state != 'signing' or signing_flow != 'trasas_first' or not internal_sign_date or sent_to_partner_date"
                             groups="trasas_contract_management.group_contract_user"/>
                     
-                    <!-- B13: Xác nhận Hoàn tất (TRASAS First) -->
+                    <!-- B13: Xác nhận Hoàn tất (TRASAS First) - Chỉ HCNS -->
                     <button name="action_confirm_signed" 
                             string="Xác nhận Hoàn tất" 
                             type="object" 
                             class="btn-success"
                             invisible="state != 'signing' or signing_flow != 'trasas_first' or not sent_to_partner_date"
-                            groups="trasas_contract_management.group_contract_user"/>
+                            groups="trasas_contract_management.group_contract_manager"/>
 
                     <!-- ============ LUỒNG: ĐỐI TÁC KÝ TRƯỚC ============ -->
                     <!-- B14: Xác nhận Đối tác đã ký -->
@@ -97,44 +97,110 @@
                             invisible="state != 'signing' or signing_flow != 'partner_first' or not partner_sign_date or internal_sign_date or is_approver"
                             groups="trasas_contract_management.group_contract_user"/>
                     
-                    <!-- B13: Xác nhận Hoàn tất (Partner First) -->
+                    <!-- B13: Xác nhận Hoàn tất (Partner First) - Chỉ HCNS -->
                     <button name="action_confirm_signed" 
                             string="Xác nhận Hoàn tất" 
                             type="object" 
                             class="btn-success"
                             invisible="state != 'signing' or signing_flow != 'partner_first' or not internal_sign_date"
-                            groups="trasas_contract_management.group_contract_user"/>
+                            groups="trasas_contract_management.group_contract_manager"/>
 
-                    <!-- Nút: Gửi lại Email cho Đối tác (Manual) -->
-                    <button name="action_send_contract_to_partner"
-                            string="Gửi Email Đối tác"
-                            type="object"
-                            class="btn-secondary"
-                            invisible="state not in ['approved', 'signing', 'signed']"
-                            groups="trasas_contract_management.group_contract_user"/>
-
-                    
-                    <!-- Nút: Hủy -->
+                    <!-- B16: Đóng dấu & Lưu kho - Chỉ HCNS -->
+                    <button name="action_archive_contract" 
+                            string="Xác nhận Đóng dấu &amp; Lưu kho" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state != 'signed'"
+                            groups="trasas_contract_management.group_contract_manager"/>
+                            
+                    <!-- Nút: Hủy (trước khi duyệt - hủy trực tiếp) -->
                     <button name="action_cancel" 
                             string="Hủy" 
                             type="object"
                             confirm="Bạn có chắc muốn hủy hợp đồng này?"
-                            invisible="state in ['signed', 'expired', 'cancel']"
+                            invisible="state not in ['draft', 'in_review', 'waiting']"
                             groups="trasas_contract_management.group_contract_manager"/>
+
+                    <!-- Nút: Yêu cầu hủy (sau khi duyệt - cần phê duyệt) -->
+                    <button name="action_request_cancel" 
+                            string="Yêu cầu hủy" 
+                            type="object"
+                            class="btn-danger"
+                            invisible="state not in ['approved', 'signing', 'signed', 'archived'] or cancel_request_state in ['dept_pending', 'bgd_pending']"
+                            groups="trasas_contract_management.group_contract_user"/>
+
+                    <!-- Nút: Duyệt hủy (Trưởng phòng) -->
+                    <button name="action_approve_cancel_dept" 
+                            string="Duyệt hủy (Trưởng phòng)" 
+                            type="object"
+                            class="btn-warning"
+                            invisible="cancel_request_state != 'dept_pending' or not is_cancel_dept_approver"
+                            groups="trasas_contract_management.group_contract_user"/>
+
+                    <!-- Nút: Duyệt hủy (Ban Giám đốc) -->
+                    <button name="action_approve_cancel_bgd" 
+                            string="Duyệt hủy (Ban Giám đốc)" 
+                            type="object"
+                            class="btn-warning"
+                            invisible="cancel_request_state != 'bgd_pending' or not is_approver or cancel_dept_approver_id == uid"
+                            groups="trasas_contract_management.group_contract_approver"/>
+
+                    <!-- Nút: Từ chối hủy -->
+                    <button name="action_reject_cancel" 
+                            string="Từ chối hủy" 
+                            type="object"
+                            class="btn-secondary"
+                            invisible="cancel_request_state not in ['dept_pending', 'bgd_pending'] or (cancel_request_state == 'dept_pending' and not is_cancel_dept_approver) or (cancel_request_state == 'bgd_pending' and not is_approver) or (cancel_request_state == 'bgd_pending' and cancel_dept_approver_id == uid)"/>
                     
-                    <!-- Nút: Đặt về nháp -->
+                    <!-- Nút: Đặt về nháp (trước khi duyệt - trực tiếp) -->
                     <button name="action_set_to_draft" 
                             string="Đặt về nháp" 
                             type="object"
-                            invisible="state in ['draft', 'signed']"
+                            invisible="state in ['draft', 'approved', 'signing', 'signed', 'archived', 'expired', 'cancel']"
                             groups="trasas_contract_management.group_contract_manager"/>
+
+                    <!-- Nút: Yêu cầu về nháp (sau khi duyệt - cần phê duyệt) -->
+                    <button name="action_request_draft" 
+                            string="Yêu cầu về nháp" 
+                            type="object"
+                            invisible="state not in ['approved', 'signing', 'signed', 'archived'] or draft_request_state in ['dept_pending', 'bgd_pending']"
+                            groups="trasas_contract_management.group_contract_user"/>
+
+                    <!-- Nút: Duyệt về nháp (Trưởng phòng) -->
+                    <button name="action_approve_draft_dept" 
+                            string="Duyệt về nháp (Trưởng phòng)" 
+                            type="object"
+                            class="btn-warning"
+                            invisible="draft_request_state != 'dept_pending' or not is_draft_dept_approver"
+                            groups="trasas_contract_management.group_contract_user"/>
+
+                    <!-- Nút: Duyệt về nháp (Ban Giám đốc) -->
+                    <button name="action_approve_draft_bgd" 
+                            string="Duyệt về nháp (Ban Giám đốc)" 
+                            type="object"
+                            class="btn-warning"
+                            invisible="draft_request_state != 'bgd_pending' or not is_approver or draft_dept_approver_id == uid"
+                            groups="trasas_contract_management.group_contract_approver"/>
+
+                    <!-- Nút: Từ chối về nháp -->
+                    <button name="action_reject_draft" 
+                            string="Từ chối về nháp" 
+                            type="object"
+                            class="btn-secondary"
+                            invisible="draft_request_state not in ['dept_pending', 'bgd_pending'] or (draft_request_state == 'dept_pending' and not is_draft_dept_approver) or (draft_request_state == 'bgd_pending' and not is_approver) or (draft_request_state == 'bgd_pending' and draft_dept_approver_id == uid)"/>
                     
                     <!-- Statusbar -->
                     <field name="state" widget="statusbar" 
-                           statusbar_visible="draft,in_review,waiting,approved,signing,signed,expired"/>
+                           statusbar_visible="draft,in_review,waiting,approved,signing,signed,archived,expired"/>
                     <field name="is_approver" invisible="1"/>
                     <field name="is_reviewer" invisible="1"/>
                     <field name="is_current_approver" invisible="1"/>
+                    <field name="cancel_request_state" invisible="1"/>
+                    <field name="is_cancel_dept_approver" invisible="1"/>
+                    <field name="cancel_dept_approver_id" invisible="1"/>
+                    <field name="draft_request_state" invisible="1"/>
+                    <field name="is_draft_dept_approver" invisible="1"/>
+                    <field name="draft_dept_approver_id" invisible="1"/>
                 </header>
                 
                 <sheet>
@@ -166,6 +232,7 @@
                         <h2>
                             <field name="title" placeholder="Tiêu đề hợp đồng..."/>
                         </h2>
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="Thẻ hợp đồng..."/>
                     </div>
                     
                     <group>
@@ -201,7 +268,8 @@
                             <field name="signed_date" 
                                    readonly="1"
                                    invisible="state != 'signed'"/>
-                            <field name="storage_location" placeholder="VD: Tủ A, Kệ 2"/>
+                            <field name="stamped_filename" invisible="1"/>
+                            <field name="storage_location" readonly="state in ['archived', 'expired', 'cancel']" placeholder="VD: Tủ A, Kệ 2"/>
                         </group>
                     </group>
                     
@@ -238,6 +306,34 @@
                             </group>
                             <group invisible="not rejection_reason">
                                 <field name="rejection_reason" readonly="1" nolabel="1"/>
+                            </group>
+                            <group string="Yêu cầu hủy hợp đồng" invisible="not cancel_reason">
+                                <group>
+                                    <field name="cancel_requester_id" readonly="1"/>
+                                    <field name="cancel_request_state" readonly="1" widget="badge"
+                                           decoration-warning="cancel_request_state in ['dept_pending', 'bgd_pending']"
+                                           decoration-success="cancel_request_state == 'approved'"
+                                           decoration-danger="cancel_request_state == 'rejected'"/>
+                                </group>
+                                <group>
+                                    <field name="cancel_dept_approver_id" readonly="1"/>
+                                    <field name="cancel_bgd_approver_id" readonly="1"/>
+                                </group>
+                                <field name="cancel_reason" readonly="1" nolabel="1"/>
+                            </group>
+                            <group string="Yêu cầu đưa về nháp" invisible="not draft_reason">
+                                <group>
+                                    <field name="draft_requester_id" readonly="1"/>
+                                    <field name="draft_request_state" readonly="1" widget="badge"
+                                           decoration-warning="draft_request_state in ['dept_pending', 'bgd_pending']"
+                                           decoration-success="draft_request_state == 'approved'"
+                                           decoration-danger="draft_request_state == 'rejected'"/>
+                                </group>
+                                <group>
+                                    <field name="draft_dept_approver_id" readonly="1"/>
+                                    <field name="draft_bgd_approver_id" readonly="1"/>
+                                </group>
+                                <field name="draft_reason" readonly="1" nolabel="1"/>
                             </group>
                         </page>
                         
@@ -306,6 +402,7 @@
                 <field name="title"/>
                 <field name="contract_type_id"/>
                 <field name="partner_id"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                 <field name="date_start"/>
                 <field name="date_end"/>
                 <field name="days_to_expire" optional="show"/>
@@ -350,6 +447,7 @@
                         <field name="partner_id"/>
                         <field name="contract_type_id" widget="badge"/>
                         <footer>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                             <field name="priority" widget="priority"/>
                             <field class="ms-1 align-items-center" name="activity_ids" widget="kanban_activity"/>
                             <div class="d-flex ms-auto align-items-center">

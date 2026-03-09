@@ -94,6 +94,7 @@ class TrasasContract(models.Model):
             "approved": "stage_approved",
             "signing": "stage_signing",
             "signed": "stage_signed",
+            "archived": "stage_archived",
             "expired": "stage_expired",
             "cancel": "stage_cancel",
         }
@@ -128,6 +129,19 @@ class TrasasContract(models.Model):
         required=True,
         tracking=True,
         help="Chọn loại hợp đồng",
+    )
+
+    tag_ids = fields.Many2many(
+        "trasas.contract.tag",
+        string="Thẻ hợp đồng",
+        help="Gắn nhãn phân loại nhanh cho hợp đồng",
+    )
+
+    reject_reason_id = fields.Many2one(
+        "trasas.contract.reject.reason",
+        string="Lý do từ chối (danh mục)",
+        tracking=True,
+        help="Lý do từ chối được chọn từ danh mục cấu hình",
     )
 
     partner_id = fields.Many2one(
@@ -236,6 +250,7 @@ class TrasasContract(models.Model):
             ("approved", "Đã duyệt"),
             ("signing", "Đang ký"),
             ("signed", "Đã ký"),
+            ("archived", "Đã lưu kho"),
             ("expired", "Hết hạn"),
             ("cancel", "Đã hủy"),
         ],
@@ -344,6 +359,80 @@ class TrasasContract(models.Model):
         help="Lý do giám đốc từ chối phê duyệt",
     )
 
+    # ============ CANCEL REQUEST WORKFLOW ============
+    cancel_request_state = fields.Selection(
+        [
+            ("none", "Không có"),
+            ("dept_pending", "Chờ Trưởng phòng"),
+            ("bgd_pending", "Chờ Ban Giám đốc"),
+            ("approved", "Đã duyệt hủy"),
+            ("rejected", "Từ chối hủy"),
+        ],
+        string="Trạng thái yêu cầu hủy",
+        default="none",
+        tracking=True,
+    )
+    cancel_reason = fields.Text(
+        string="Lý do hủy",
+        tracking=True,
+    )
+    cancel_requester_id = fields.Many2one(
+        "res.users",
+        string="Người yêu cầu hủy",
+        readonly=True,
+    )
+    cancel_dept_approver_id = fields.Many2one(
+        "res.users",
+        string="Trưởng phòng duyệt hủy",
+        readonly=True,
+    )
+    cancel_bgd_approver_id = fields.Many2one(
+        "res.users",
+        string="BGĐ duyệt hủy",
+        readonly=True,
+    )
+    is_cancel_dept_approver = fields.Boolean(
+        string="Is Cancel Dept Approver",
+        compute="_compute_is_cancel_dept_approver",
+    )
+
+    # ============ YÊU CẦU ĐẶT VỀ NHÁP ============
+    draft_request_state = fields.Selection(
+        [
+            ("none", "Không có"),
+            ("dept_pending", "Chờ Trưởng phòng"),
+            ("bgd_pending", "Chờ Ban Giám đốc"),
+            ("approved", "Đã duyệt về nháp"),
+            ("rejected", "Từ chối về nháp"),
+        ],
+        string="Trạng thái yêu cầu về nháp",
+        default="none",
+        tracking=True,
+    )
+    draft_reason = fields.Text(
+        string="Lý do về nháp",
+        tracking=True,
+    )
+    draft_requester_id = fields.Many2one(
+        "res.users",
+        string="Người yêu cầu về nháp",
+        readonly=True,
+    )
+    draft_dept_approver_id = fields.Many2one(
+        "res.users",
+        string="Trưởng phòng duyệt nháp",
+        readonly=True,
+    )
+    draft_bgd_approver_id = fields.Many2one(
+        "res.users",
+        string="BGĐ duyệt nháp",
+        readonly=True,
+    )
+    is_draft_dept_approver = fields.Boolean(
+        string="Is Draft Dept Approver",
+        compute="_compute_is_draft_dept_approver",
+    )
+
     # ============ COMPUTED FIELDS ============
     def _compute_is_approver(self):
         """
@@ -355,9 +444,56 @@ class TrasasContract(models.Model):
         is_approver = user.has_group(
             "trasas_contract_management.group_contract_approver"
         )
-
         for record in self:
             record.is_approver = is_approver and not is_admin
+
+    def _compute_is_cancel_dept_approver(self):
+        """Kiểm tra user hiện tại có phải trưởng phòng của người yêu cầu hủy"""
+        for record in self:
+            if not record.cancel_requester_id:
+                record.is_cancel_dept_approver = False
+                continue
+            # Tìm employee của người yêu cầu hủy
+            employee = self.env["hr.employee"].search(
+                [("user_id", "=", record.cancel_requester_id.id)], limit=1
+            )
+            if employee and employee.parent_id and employee.parent_id.user_id:
+                record.is_cancel_dept_approver = (
+                    employee.parent_id.user_id.id == self.env.user.id
+                )
+            else:
+                # Nếu không tìm được trưởng phòng, cho manager duyệt
+                is_admin = self.env.user.has_group("base.group_system")
+                record.is_cancel_dept_approver = (
+                    self.env.user.has_group(
+                        "trasas_contract_management.group_contract_manager"
+                    )
+                    and not is_admin
+                )
+
+    def _compute_is_draft_dept_approver(self):
+        """Kiểm tra user hiện tại có phải trưởng phòng của người yêu cầu về nháp"""
+        for record in self:
+            if not record.draft_requester_id:
+                record.is_draft_dept_approver = False
+                continue
+            # Tìm employee của người yêu cầu về nháp
+            employee = self.env["hr.employee"].search(
+                [("user_id", "=", record.draft_requester_id.id)], limit=1
+            )
+            if employee and employee.parent_id and employee.parent_id.user_id:
+                record.is_draft_dept_approver = (
+                    employee.parent_id.user_id.id == self.env.user.id
+                )
+            else:
+                # Nếu không tìm được trưởng phòng, cho manager duyệt
+                is_admin = self.env.user.has_group("base.group_system")
+                record.is_draft_dept_approver = (
+                    self.env.user.has_group(
+                        "trasas_contract_management.group_contract_manager"
+                    )
+                    and not is_admin
+                )
 
     @api.depends("state", "activity_ids")
     def _compute_is_reviewer(self):
@@ -698,6 +834,20 @@ class TrasasContract(models.Model):
             if record.state != "draft":
                 raise UserError(_("Chỉ có thể gửi duyệt hợp đồng ở trạng thái Nháp!"))
 
+            # Kiểm tra file đính kèm trước khi gửi duyệt
+            attachment_count = self.env["ir.attachment"].search_count(
+                [
+                    ("res_model", "=", self._name),
+                    ("res_id", "=", record.id),
+                ]
+            )
+            if attachment_count == 0:
+                raise UserError(
+                    _(
+                        "Vui lòng đính kèm ít nhất một file hợp đồng trước khi gửi duyệt!"
+                    )
+                )
+
             record.write({"state": "waiting"})
 
             # Gửi email thông báo cho người phê duyệt
@@ -873,13 +1023,13 @@ class TrasasContract(models.Model):
         # Thông báo cho HCNS để đóng dấu
         self._send_seal_notification()
 
-        # [B16-B18] Gửi cho HCNS (nhóm Contract Manager) để đóng dấu/lưu kho
+        # [B16-B18] Gửi cho TẤT CẢ HCNS (nhóm Contract Manager) để đóng dấu/lưu kho
         managers = self._get_users_from_group(
             "trasas_contract_management.group_contract_manager"
         )
-        if managers:
+        for manager in managers:
             self._schedule_activity(
-                managers[0].id,
+                manager.id,
                 _("Đóng dấu & Lưu kho hợp đồng (B16-B18): %s") % self.name,
                 deadline=1,
                 note="Đóng dấu & Lưu kho",
@@ -1300,13 +1450,42 @@ class TrasasContract(models.Model):
         for record in self:
             record._complete_signing()
 
-    def action_cancel(self):
-        """Hủy hợp đồng"""
+    def action_archive_contract(self):
+        """
+        Xác nhận đã đóng dấu và lưu kho (Signed → Archived)
+        """
         for record in self:
-            if record.state in ["signed", "expired"]:
-                raise UserError(_("Không thể hủy hợp đồng đã ký hoặc hết hạn!"))
+            if record.state != "signed":
+                raise UserError(_("Chỉ có thể lưu kho hợp đồng đã ký!"))
 
+            if not record.stamped_file:
+                raise UserError(
+                    _(
+                        "Vui lòng upload bản đóng dấu (Bản cứng cuối cùng) trước khi lưu kho!"
+                    )
+                )
+
+            record.write({"state": "archived"})
+
+            record.message_post(
+                body=_("📦 Hợp đồng đã được đóng dấu và lưu kho bởi %s.")
+                % self.env.user.name,
+                subject=_("Lưu kho hợp đồng"),
+            )
+
+            record._close_activities()
+
+    def action_cancel(self):
+        """Hủy hợp đồng (chỉ cho trạng thái trước khi duyệt)"""
+        for record in self:
+            if record.state in ["approved", "signing", "signed", "archived", "expired"]:
+                raise UserError(
+                    _(
+                        "Hợp đồng đã được duyệt! Vui lòng dùng nút 'Yêu cầu hủy' để tạo yêu cầu hủy có phê duyệt."
+                    )
+                )
             record.write({"state": "cancel"})
+            record._close_activities()
 
             record.message_post(
                 body=_("Hợp đồng đã bị hủy bởi %s.") % self.env.user.name,
@@ -1314,23 +1493,331 @@ class TrasasContract(models.Model):
             )
 
     def action_set_to_draft(self):
-        """Đặt về nháp"""
+        """Đặt về nháp (chỉ cho trạng thái in_review, waiting)"""
         for record in self:
-            if record.state == "signed":
-                raise UserError(_("Không thể đặt về nháp hợp đồng đã ký!"))
-
+            if record.state in ["approved", "signing", "signed", "archived"]:
+                raise UserError(
+                    _(
+                        "Hợp đồng đã được duyệt! Vui lòng dùng nút 'Yêu cầu về nháp' để tạo yêu cầu có phê duyệt."
+                    )
+                )
             record.write(
                 {
                     "state": "draft",
                     "approver_id": False,
                     "approved_date": False,
-                    "rejection_reason": False,
+                    "reviewer_id": False,
+                    "review_date": False,
+                    "internal_sign_date": False,
                 }
             )
+            record._close_activities()
 
             record.message_post(
                 body=_("Hợp đồng đã được đặt về trạng thái Nháp."),
                 subject=_("Đặt về nháp"),
+            )
+
+    # ============ CANCEL REQUEST WORKFLOW ============
+    def action_request_cancel(self):
+        """Yêu cầu hủy hợp đồng (mở wizard nhập lý do)"""
+        self.ensure_one()
+        if self.state not in ["approved", "signing", "signed", "archived"]:
+            raise UserError(_("Chỉ có thể yêu cầu hủy hợp đồng đã được duyệt!"))
+
+        return {
+            "name": _("Yêu cầu hủy Hợp đồng"),
+            "type": "ir.actions.act_window",
+            "res_model": "trasas.contract.cancel.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_contract_id": self.id,
+            },
+        }
+
+    def _submit_cancel_request(self, reason):
+        """Gửi yêu cầu hủy (được gọi từ wizard)"""
+        self.ensure_one()
+
+        # Tìm trưởng phòng của người yêu cầu
+        employee = self.env["hr.employee"].search(
+            [("user_id", "=", self.env.user.id)], limit=1
+        )
+        dept_manager = False
+        if employee and employee.parent_id and employee.parent_id.user_id:
+            dept_manager = employee.parent_id.user_id
+
+        # Nếu không tìm thấy trưởng phòng, dùng manager group
+        if not dept_manager:
+            managers = self._get_users_from_group(
+                "trasas_contract_management.group_contract_manager"
+            )
+            if managers:
+                dept_manager = managers[0]
+
+        self.write(
+            {
+                "cancel_request_state": "dept_pending",
+                "cancel_reason": reason,
+                "cancel_requester_id": self.env.user.id,
+                "cancel_dept_approver_id": False,
+                "cancel_bgd_approver_id": False,
+            }
+        )
+
+        self.message_post(
+            body=_(
+                "📋 Yêu cầu hủy hợp đồng bởi %s.<br/>Lý do: %s<br/>Chờ Trưởng phòng duyệt."
+            )
+            % (self.env.user.name, reason),
+            subject=_("Yêu cầu hủy hợp đồng"),
+        )
+
+        # Gửi Activity cho trưởng phòng
+        if dept_manager:
+            self._schedule_activity(
+                dept_manager.id,
+                _("⚠️ Duyệt yêu cầu hủy hợp đồng: %s") % self.name,
+                deadline=1,
+                note="Yêu cầu hủy hợp đồng - Cần Trưởng phòng duyệt",
+            )
+
+    def action_approve_cancel_dept(self):
+        """Trưởng phòng duyệt yêu cầu hủy → chuyển sang chờ BGĐ"""
+        for record in self:
+            if record.cancel_request_state != "dept_pending":
+                raise UserError(_("Không có yêu cầu hủy đang chờ Trưởng phòng duyệt!"))
+
+            record.write(
+                {
+                    "cancel_request_state": "bgd_pending",
+                    "cancel_dept_approver_id": self.env.user.id,
+                }
+            )
+
+            record._close_activities()
+
+            record.message_post(
+                body=_(
+                    "✅ Trưởng phòng %s đã duyệt yêu cầu hủy. Chuyển sang chờ Ban Giám đốc."
+                )
+                % self.env.user.name,
+                subject=_("Trưởng phòng duyệt hủy"),
+            )
+
+            # Gửi Activity cho Ban Giám đốc
+            approvers = record._get_users_from_group(
+                "trasas_contract_management.group_contract_approver"
+            )
+            # Khôi phục trạng thái Hủy từ Lưu Kho cũng cần duyệt
+            if approvers:
+                record._schedule_activity(
+                    approvers[0].id,
+                    _("⚠️ Duyệt yêu cầu hủy hợp đồng (BGĐ): %s") % record.name,
+                    deadline=1,
+                    note="Yêu cầu hủy hợp đồng - Cần Ban Giám đốc duyệt",
+                )
+
+    def action_approve_cancel_bgd(self):
+        """Ban Giám đốc duyệt yêu cầu hủy → thực hiện hủy"""
+        if not self.env.user.has_group(
+            "trasas_contract_management.group_contract_approver"
+        ):
+            raise UserError(_("Chỉ Ban Giám đốc mới có quyền duyệt hủy!"))
+
+        for record in self:
+            if record.cancel_request_state != "bgd_pending":
+                raise UserError(_("Không có yêu cầu hủy đang chờ Ban Giám đốc duyệt!"))
+
+            record.write(
+                {
+                    "cancel_request_state": "approved",
+                    "cancel_bgd_approver_id": self.env.user.id,
+                    "state": "cancel",
+                }
+            )
+
+            record._close_activities()
+
+            record.message_post(
+                body=_(
+                    "✅ Ban Giám đốc %s đã duyệt yêu cầu hủy.<br/>"
+                    "Lý do hủy: %s<br/>"
+                    "Hợp đồng đã được hủy."
+                )
+                % (self.env.user.name, record.cancel_reason),
+                subject=_("Hợp đồng đã bị hủy"),
+            )
+
+    def action_reject_cancel(self):
+        """Từ chối yêu cầu hủy"""
+        for record in self:
+            if record.cancel_request_state not in ["dept_pending", "bgd_pending"]:
+                raise UserError(_("Không có yêu cầu hủy đang chờ duyệt!"))
+
+            old_state = record.cancel_request_state
+            record.write(
+                {
+                    "cancel_request_state": "rejected",
+                }
+            )
+
+            record._close_activities()
+
+            level = "Trưởng phòng" if old_state == "dept_pending" else "Ban Giám đốc"
+        record.message_post(
+            body=_("❌ %s %s đã từ chối yêu cầu hủy hợp đồng.")
+            % (level, self.env.user.name),
+            subject=_("Từ chối hủy hợp đồng"),
+        )
+
+    # ==========================================
+    # LUỒNG PHÊ DUYỆT ĐẶT VỀ NHÁP
+    # ==========================================
+    def action_request_draft(self):
+        """Yêu cầu đặt về nháp hợp đồng (mở wizard nhập lý do)"""
+        self.ensure_one()
+        if self.state not in ["approved", "signing", "signed", "archived"]:
+            raise UserError(_("Chỉ có thể yêu cầu về nháp hợp đồng đã được duyệt!"))
+
+        return {
+            "name": _("Yêu cầu đưa Hợp đồng về nháp"),
+            "type": "ir.actions.act_window",
+            "res_model": "trasas.contract.draft.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_contract_id": self.id,
+            },
+        }
+
+    def _submit_draft_request(self, reason):
+        """Được gọi từ wizard: Bắt đầu luồng duyệt đưa về nháp"""
+        self.ensure_one()
+
+        # Lấy employee manager/trưởng phòng nếu có
+        employee = self.env["hr.employee"].search(
+            [("user_id", "=", self.env.user.id)], limit=1
+        )
+        dept_manager = False
+        if employee and employee.parent_id and employee.parent_id.user_id:
+            dept_manager = employee.parent_id.user_id
+
+        # Nếu không có nhóm trưởng thì gửi manager
+        if not dept_manager:
+            managers = self._get_users_from_group(
+                "trasas_contract_management.group_contract_manager"
+            )
+            if managers:
+                dept_manager = managers[0]
+
+        self.write(
+            {
+                "draft_request_state": "dept_pending",
+                "draft_reason": reason,
+                "draft_requester_id": self.env.user.id,
+                "draft_dept_approver_id": False,
+                "draft_bgd_approver_id": False,
+            }
+        )
+
+        self.message_post(
+            body=_(
+                "📋 Yêu cầu đưa hợp đồng về nháp bởi %s.<br/>Lý do: %s<br/>Chờ Trưởng phòng duyệt."
+            )
+            % (self.env.user.name, reason),
+            subject=_("Yêu cầu đưa về nháp"),
+        )
+
+        if dept_manager:
+            self._schedule_activity(
+                dept_manager.id,
+                _("⚠️ Duyệt yêu cầu về nháp (Trưởng phòng): %s") % self.name,
+                deadline=1,
+                note="Nhân viên yêu cầu đưa hợp đồng về nháp - Cần Trưởng phòng duyệt",
+            )
+
+    def action_approve_draft_dept(self):
+        """Trưởng phòng duyệt đưa về nháp"""
+        for record in self:
+            if record.draft_request_state != "dept_pending":
+                raise UserError(_("Yêu cầu này không ở trạng thái Chờ Trưởng phòng!"))
+
+            record.write(
+                {
+                    "draft_request_state": "bgd_pending",
+                    "draft_dept_approver_id": self.env.user.id,
+                }
+            )
+            record._close_activities()
+
+            record.message_post(
+                body=_(
+                    "✅ Trưởng phòng %s đã duyệt yêu cầu đưa về nháp. Chuyển sang chờ Ban Giám đốc duyệt."
+                )
+                % self.env.user.name,
+                subject=_("Trưởng phòng Duyệt về nháp"),
+            )
+
+            # Gửi Activity cho Ban Giám đốc
+            approvers = record._get_users_from_group(
+                "trasas_contract_management.group_contract_approver"
+            )
+            if approvers:
+                record._schedule_activity(
+                    approvers[0].id,
+                    _("⚠️ Duyệt yêu cầu đưa hợp đồng về nháp (BGĐ): %s") % record.name,
+                    deadline=1,
+                    note="Yêu cầu đưa hợp đồng về nháp - Cần Ban Giám đốc duyệt",
+                )
+
+    def action_approve_draft_bgd(self):
+        """Ban Giám đốc duyệt đưa về nháp (Thực hiện đặt về nháp)"""
+        for record in self:
+            if record.draft_request_state != "bgd_pending":
+                raise UserError(_("Yêu cầu này không ở trạng thái Chờ Ban Giám đốc!"))
+
+            # Đặt hợp đồng về nháp (xóa bớt các field đã duyệt)
+            record.write(
+                {
+                    "state": "draft",
+                    "draft_request_state": "approved",
+                    "draft_bgd_approver_id": self.env.user.id,
+                    "approver_id": False,
+                    "approved_date": False,
+                    "reviewer_id": False,
+                    "review_date": False,
+                    "internal_sign_date": False,
+                }
+            )
+            record._close_activities()
+
+            record.message_post(
+                body=_(
+                    "✅ Ban Giám đốc %s đã duyệt yêu cầu đưa hợp đồng về nháp. Hợp đồng hiện đang ở trạng thái Nháp."
+                )
+                % self.env.user.name,
+                subject=_("BGĐ Duyệt về nháp"),
+            )
+
+    def action_reject_draft(self):
+        """Trưởng phòng hoặc Ban Giám đốc từ chối yêu cầu đưa về nháp"""
+        for record in self:
+            if record.draft_request_state not in ["dept_pending", "bgd_pending"]:
+                raise UserError(
+                    _("Chỉ có thể từ chối khi đang chờ yêu cầu được phê duyệt!")
+                )
+
+            old_state = record.draft_request_state
+            record.write({"draft_request_state": "rejected"})
+            record._close_activities()
+
+            level = "Trưởng phòng" if old_state == "dept_pending" else "Ban Giám đốc"
+            record.message_post(
+                body=_("❌ %s %s đã từ chối yêu cầu đưa hợp đồng về nháp.")
+                % (level, self.env.user.name),
+                subject=_("Từ chối về nháp"),
             )
 
     # ============ NOTIFICATION METHODS ============
@@ -1387,8 +1874,15 @@ class TrasasContract(models.Model):
         """
         today = fields.Date.context_today(self)
 
-        # [B20] Tìm hợp đồng sắp hết hạn trong 30 ngày
-        warning_date = today + timedelta(days=30)
+        # Lấy số ngày nhắc từ cấu hình (mặc định 30)
+        reminder_days = int(
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("trasas_contract_management.contract_reminder_days", 30)
+        )
+
+        # [B20] Tìm hợp đồng sắp hết hạn
+        warning_date = today + timedelta(days=reminder_days)
         expiring_contracts = self.search(
             [
                 ("state", "=", "signed"),

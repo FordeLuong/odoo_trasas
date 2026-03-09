@@ -22,10 +22,7 @@
             <field name="sequence">40</field>
         </record>
 
-        <record id="outgoing_stage_processing" model="trasas.dispatch.outgoing.stage">
-            <field name="name">Đang xử lý</field>
-            <field name="sequence">50</field>
-        </record>
+
 
         <record id="outgoing_stage_released" model="trasas.dispatch.outgoing.stage">
             <field name="name">Đã phát hành</field>

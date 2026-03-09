@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menus for Fleet Configuration -->
+    <menuitem id="menu_fleet_config_root"
+              name="Cấu hình phương tiện"
+              parent="fleet.fleet_configuration"
+              sequence="100"/>
+
+    <menuitem id="menu_fleet_maintenance_type"
+              name="Gói bảo dưỡng"
+              parent="menu_fleet_config_root"
+              action="action_fleet_maintenance_type"
+              sequence="10"/>
+
+    <menuitem id="menu_fleet_legal_document_type"
+              name="Loại hồ sơ xe"
+              parent="menu_fleet_config_root"
+              action="action_fleet_legal_document_type"
+              sequence="20"/>
+
+    <menuitem id="menu_fleet_issuing_authority"
+              name="Cơ quan cấp giầy tờ"
+              parent="menu_fleet_config_root"
+              action="action_fleet_issuing_authority"
+              sequence="30"/>
+</odoo>

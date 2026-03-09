@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "TRASAS Dispatch Outgoing",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.2",
     "category": "Document Management",
     "summary": "Module mở rộng: Quản lý Công văn đi",
     "description": """
@@ -16,6 +16,8 @@
         "base",
         "mail",
         "hr",
+        "portal",
+        "portal_trasas",
         "trasas_dispatch_management",
         "trasas_demo_users",
     ],
@@ -24,11 +26,15 @@
         "security/ir.model.access.csv",
         "data/dispatch_data.xml",
         "data/dispatch_outgoing_stage_data.xml",
+        "data/dispatch_config_data.xml",
         "data/mail_template_data.xml",
         "wizard/dispatch_outgoing_reject_wizard_views.xml",
+        "views/dispatch_config_views.xml",
         "views/dispatch_outgoing_stage_views.xml",
         "views/dispatch_outgoing_views.xml",
+        "views/dispatch_incoming_views_inherit.xml",
         "views/menu_views.xml",
+        "views/portal_templates.xml",
     ],
     "installable": True,
     "application": False,

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Rejection Reasons -->
+        <record id="reject_reason_format" model="trasas.dispatch.outgoing.reject.reason">
+            <field name="name">Sai thể thức văn bản</field>
+        </record>
+        <record id="reject_reason_attachments" model="trasas.dispatch.outgoing.reject.reason">
+            <field name="name">Thiếu tài liệu đính kèm</field>
+        </record>
+        <record id="reject_reason_content" model="trasas.dispatch.outgoing.reject.reason">
+            <field name="name">Nội dung trích yếu chưa rõ ràng</field>
+        </record>
+        <record id="reject_reason_recipient" model="trasas.dispatch.outgoing.reject.reason">
+            <field name="name">Sai thông tin nơi nhận</field>
+        </record>
+    </data>
+</odoo>

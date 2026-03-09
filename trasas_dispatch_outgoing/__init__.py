@@ -1,3 +1,4 @@
+from . import controllers
 from . import models
 from . import wizard
 
@@ -11,7 +12,6 @@ def _assign_outgoing_stages(env):
         "waiting_approval": "outgoing_stage_waiting_approval",
         "approved": "outgoing_stage_approved",
         "to_promulgate": "outgoing_stage_to_promulgate",
-        "processing": "outgoing_stage_processing",
         "released": "outgoing_stage_released",
         "sent": "outgoing_stage_sent",
         "done": "outgoing_stage_done",
@@ -40,6 +40,23 @@ def _assign_outgoing_stages(env):
             UPDATE trasas_dispatch_outgoing
             SET stage_id = %s
             WHERE stage_id IS NULL
+            WHERE stage_id IS NULL
             """,
             (draft_stage.id,),
         )
+
+    # Force noupdate=False for specific mail templates so they can be overwritten
+    # and fix the object.dispatch_number error.
+    try:
+        data_model = env["ir.model.data"].sudo()
+        template_records = data_model.search(
+            [
+                ("module", "=", "trasas_dispatch_outgoing"),
+                ("model", "=", "mail.template"),
+            ]
+        )
+        for rec in template_records:
+            rec.noupdate = False
+
+    except Exception:
+        pass

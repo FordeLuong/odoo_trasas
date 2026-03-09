@@ -8,6 +8,11 @@
             <field name="is_draft" eval="True"/>
         </record>
 
+        <record id="stage_manager_assign" model="trasas.dispatch.stage">
+            <field name="name">Chờ quản lý phân công</field>
+            <field name="sequence">15</field>
+        </record>
+
         <record id="stage_processing" model="trasas.dispatch.stage">
             <field name="name">Đang xử lý</field>
             <field name="sequence">20</field>

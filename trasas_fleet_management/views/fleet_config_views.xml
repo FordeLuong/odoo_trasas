@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Maintenance Type Views -->
+    <record id="view_fleet_maintenance_type_list" model="ir.ui.view">
+        <field name="name">fleet.maintenance.type.list</field>
+        <field name="model">fleet.maintenance.type</field>
+        <field name="arch" type="xml">
+            <list string="Gói bảo dưỡng" editable="bottom">
+                <field name="name"/>
+                <field name="months"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_fleet_maintenance_type" model="ir.actions.act_window">
+        <field name="name">Gói bảo dưỡng</field>
+        <field name="res_model">fleet.maintenance.type</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Thiết lập gói bảo dưỡng định kỳ
+            </p>
+        </field>
+    </record>
+
+    <!-- Legal Document Type Views -->
+    <record id="view_fleet_legal_document_type_list" model="ir.ui.view">
+        <field name="name">fleet.legal.document.type.list</field>
+        <field name="model">fleet.legal.document.type</field>
+        <field name="arch" type="xml">
+            <list string="Loại hồ sơ xe" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="is_mandatory"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_fleet_legal_document_type" model="ir.actions.act_window">
+        <field name="name">Loại hồ sơ xe</field>
+        <field name="res_model">fleet.legal.document.type</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Thiết lập các loại hồ sơ xe (Đăng ký, Đăng kiểm...)
+            </p>
+        </field>
+    </record>
+
+    <!-- Issuing Authority Views -->
+    <record id="view_fleet_issuing_authority_list" model="ir.ui.view">
+        <field name="name">fleet.issuing.authority.list</field>
+        <field name="model">fleet.issuing.authority</field>
+        <field name="arch" type="xml">
+            <list string="Cơ quan cấp" editable="bottom">
+                <field name="name"/>
+                <field name="address"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_fleet_issuing_authority" model="ir.actions.act_window">
+        <field name="name">Cơ quan cấp giầy tờ</field>
+        <field name="res_model">fleet.issuing.authority</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Thiết lập danh mục cơ quan cấp giấy tờ
+            </p>
+        </field>
+    </record>
+</odoo>

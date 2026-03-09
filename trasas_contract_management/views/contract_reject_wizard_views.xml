@@ -8,8 +8,9 @@
             <form string="Từ chối Hợp đồng">
                 <group>
                     <field name="contract_id" readonly="1"/>
+                    <field name="reason_id" options="{'no_create': True, 'no_open': True}"/>
                     <field name="rejection_reason" 
-                           placeholder="Nhập lý do từ chối hợp đồng..."
+                           placeholder="Nhập lý do chi tiết..."
                            widget="text"/>
                 </group>
                 <footer>

@@ -19,7 +19,7 @@
         * Ghi nhận lịch sử truy cập (Audit Trail)
         * Báo cáo ISO (Danh mục hiệu lực, Ma trận phân phối, LS truy cập)
     """,
-    "author": "TRASAS",
+    "author": "LiemPhong",
     "website": "https://www.trasas.vn",
     "license": "LGPL-3",
     "depends": [

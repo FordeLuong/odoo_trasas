@@ -38,8 +38,8 @@ class FleetVehicle(models.Model):
 
     start_use_date = fields.Date(string="Ngày bắt đầu sử dụng", tracking=True)
 
-    maintenance_type = fields.Selection(
-        [("3", "3 tháng"), ("6", "6 tháng"), ("12", "12 tháng")],
+    maintenance_type_id = fields.Many2one(
+        "fleet.maintenance.type",
         string="Loại bảo dưỡng định kỳ",
         tracking=True,
     )
@@ -254,11 +254,11 @@ class FleetVehicle(models.Model):
             self._compute_vehicle_range()
             self._compute_model_year()
 
-    @api.depends("start_use_date", "maintenance_type")
+    @api.depends("start_use_date", "maintenance_type_id")
     def _compute_next_maintenance_date(self):
         for rec in self:
-            if rec.start_use_date and rec.maintenance_type:
-                months = int(rec.maintenance_type)
+            if rec.start_use_date and rec.maintenance_type_id:
+                months = rec.maintenance_type_id.months
                 rec.next_maintenance_date = rec.start_use_date + relativedelta(
                     months=months
                 )
@@ -294,7 +294,7 @@ class FleetVehicle(models.Model):
                 if new_state == "in_use" and rec.state != "in_use":
                     if (
                         not vals.get("start_use_date", rec.start_use_date)
-                        or not vals.get("maintenance_type", rec.maintenance_type)
+                        or not vals.get("maintenance_type_id", rec.maintenance_type_id)
                         or not vals.get("driver_id", rec.driver_id)
                     ):
                         raise UserError(
@@ -313,33 +313,31 @@ class FleetVehicle(models.Model):
             raise UserError(_("Vui lòng nhập Biển số xe."))
 
         today = fields.Date.today()
-        required_docs = {
-            "registration": "Giấy đăng ký xe",
-            "inspection": "Phiếu đăng kiểm",
-            "insurance": "Bảo hiểm xe",
-            "license_plate": "Giấy tờ biển số",
-        }
+        # Lấy danh sách các loại giấy tờ bắt buộc từ cấu hình
+        mandatory_types = self.env["fleet.legal.document.type"].search(
+            [("is_mandatory", "=", True)]
+        )
 
         missing_docs = []
-        for doc_type, label in required_docs.items():
+        for m_type in mandatory_types:
             # Tìm giấy tờ tương ứng
             docs = self.legal_document_ids.filtered(
-                lambda d: d.document_type == doc_type
+                lambda d: d.document_type_id == m_type
             )
 
             if not docs:
-                missing_docs.append(f"- Thiếu {label}")
+                missing_docs.append(f"- Thiếu {m_type.name}")
             else:
                 # Kiểm tra xem có file đính kèm không
                 if not any(d.attachment_ids for d in docs):
-                    missing_docs.append(f"- {label} chưa có file đính kèm")
+                    missing_docs.append(f"- {m_type.name} chưa có file đính kèm")
 
                 # Kiểm tra xem có bản nào còn hạn không
                 active_docs = docs.filtered(
                     lambda d: not d.validity_date or d.validity_date >= today
                 )
                 if not active_docs:
-                    missing_docs.append(f"- {label} đã hết hạn hiệu lực")
+                    missing_docs.append(f"- {m_type.name} đã hết hạn hiệu lực")
 
         if missing_docs:
             raise UserError(

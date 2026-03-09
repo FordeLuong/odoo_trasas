@@ -74,6 +74,7 @@
                             <field name="asset_group_id"/>
                             <field name="asset_group" invisible="1"/>
                             <field name="asset_classification" invisible="asset_group not in ('nxct', 'mmtb')"/>
+                            <field name="is_mortgaged"/>
                         </group>
                         <group string="Mua sắm – Ghi nhận">
                             <field name="supplier_id"/>
@@ -90,9 +91,12 @@
                         </group>
                         <group string="Quản lý sử dụng">
                             <field name="department_id"/>
-                            <field name="location"/>
+                            <field name="location_id"/>
                             <field name="responsible_user_id" widget="many2one_avatar_user"/>
                             <field name="ownership_type"/>
+                            <field name="document_holder"/>
+                            <field name="bank_holder_name" invisible="document_holder != 'bank'"/>
+                            <field name="reminder_days"/>
                         </group>
 
                         <group string="Kế hoạch bảo trì" invisible="(asset_group not in ('mmtb', 'tbvp') and asset_group_code != '002') or asset_group_code == '003'">
@@ -126,10 +130,10 @@
                             <field name="legal_document_ids">
                                 <list editable="bottom">
                                     <field name="sequence" widget="handle"/>
-                                    <field name="document_type"/>
+                                    <field name="document_type_id"/>
                                     <field name="name"/>
                                     <field name="document_date"/>
-                                    <field name="issuing_authority"/>
+                                    <field name="issuing_authority_id"/>
                                     <field name="certificate_number"/>
                                     <field name="validity_date"/>
                                     <field name="days_to_expire" decoration-danger="days_to_expire &lt; 0" decoration-warning="days_to_expire &gt;= 0 and days_to_expire &lt;= 30"/>
@@ -138,6 +142,20 @@
                                     <field name="note"/>
                                 </list>
                             </field>
+                        </page>
+
+                        <!-- TAB: Thông tin Thế chấp -->
+                        <page string="Thế chấp" name="mortgage_info" invisible="not is_mortgaged">
+                            <group>
+                                <group>
+                                    <field name="mortgage_bank"/>
+                                    <field name="mortgage_contract_number"/>
+                                </group>
+                                <group>
+                                    <field name="mortgage_amount"/>
+                                    <field name="mortgage_date"/>
+                                </group>
+                            </group>
                         </page>
 
                         <!-- TAB 3: Trường riêng NXCT -->
@@ -330,7 +348,7 @@
                 <field name="code"/>
                 <field name="name"/>
                 <field name="responsible_user_id"/>
-                <field name="location"/>
+                <field name="location_id"/>
                 <progressbar field="kanban_state" colors='{"done": "success", "blocked": "danger"}'/>
                 <templates>
                     <t t-name="card">
@@ -366,7 +384,7 @@
                                     <i class="fa fa-calendar me-1"/>
                                     <field name="acquisition_date"/>
                                 </div>
-                                <field name="location" class="text-muted d-block" invisible="not location"/>
+                                <field name="location_id" class="text-muted d-block" invisible="not location_id"/>
                             </div>
                             <div class="o_kanban_record_bottom">
                                 <div class="oe_kanban_bottom_left">
@@ -395,7 +413,8 @@
                 <field name="asset_group_id"/>
 
                 <field name="ownership_type" optional="show"/>
-                <field name="location"/>
+                <field name="is_mortgaged" optional="hide"/>
+                <field name="location_id"/>
                 <field name="original_value"/>
                 <field name="residual_value" optional="show"/>
                 <field name="acquisition_date"/>
@@ -414,6 +433,9 @@
                 <field name="name"/>
                 <field name="code"/>
                 <field name="asset_group_id"/>
+                <field name="is_mortgaged"/>
+                <separator/>
+                <filter string="Đang thế chấp" name="mortgaged" domain="[('is_mortgaged', '=', True)]"/>
                 <separator/>
                 <filter name="group_by_asset_group" string="Nhóm tài sản" context="{'group_by':'asset_group_id'}"/>
             </search>

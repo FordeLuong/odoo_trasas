@@ -12,33 +12,29 @@
         </xpath>
     </template>
 
-    <!-- Add to Sidebar (Like portal_custom) -->
-    <template id="portal_sidebar_dispatch" name="Portal Sidebar: Dispatch"
-              inherit_id="portal_custom.portal_my_home_inherit" priority="10">
-        <xpath expr="//div[hasclass('text-muted')][hasclass('fw-bold')][contains(., 'ỨNG DỤNG')]" position="after">
-            <a href="/my/dispatches" class="sidebar-link">
-                <div class="app-icon-wrapper me-3" style="background: #fff3e0; color: #ff6f00;">
-                    <i class="fa fa-file-text-o"/>
-                </div>
-                <span>Công văn</span>
-            </a>
+    <!-- Add Dispatch Card to New Portal App Grid -->
+    <template id="portal_sidebar_dispatch" name="Portal Apps: Incoming Dispatch"
+              inherit_id="portal_trasas.portal_my_home_inherit" priority="10">
+        <xpath expr="//div[@id='portal_app_grid']" position="inside">
+            <div class="col-12 col-md-6 col-xl-4 mb-3">
+                <a href="/my/dispatches" class="app-card" style="border-left: 4px solid #6a1b9a;">
+                    <div class="app-icon" style="background-color: #6a1b9a;">
+                        <i class="fa fa-arrow-down"/>
+                    </div>
+                    <div class="app-info">
+                        <span class="app-title">Công văn đến</span>
+                        <span class="app-subtitle">Tiếp nhận &amp; Cập nhật</span>
+                    </div>
+                </a>
+            </div>
         </xpath>
     </template>
 
-    <!-- Add to Mobile App Grid (Commented out temporarily to avoid ParseError) -->
-    <!--
-    <template id="portal_mobile_dispatch" name="Portal Mobile: Dispatch"
-              inherit_id="portal_custom.portal_my_home_inherit" priority="10">
-        <xpath expr="//div[hasclass('mobile-app-grid')]" position="inside">
-            <a href="/my/dispatches" class="mobile-app-item">
-                <div class="mobile-app-icon" style="background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);">
-                    <i class="fa fa-file-text-o"/>
-                </div>
-                <span class="mobile-app-label">Công văn</span>
-            </a>
+    <!-- Empty template to override old mobile grid without parse error -->
+    <template id="portal_mobile_dispatch" inherit_id="portal_trasas.portal_my_home_inherit">
+        <xpath expr="." position="inside">
         </xpath>
     </template>
-    -->
 
     <!-- List View -->
     <template id="portal_my_dispatches" name="My Dispatches">

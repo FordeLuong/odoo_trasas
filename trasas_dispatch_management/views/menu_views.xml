@@ -39,5 +39,17 @@
               parent="menu_dispatch_configuration"
               action="action_trasas_dispatch_stage"
               sequence="20"/>
+
+    <menuitem id="menu_dispatch_urgency_action"
+              name="Độ khẩn CV"
+              parent="menu_dispatch_configuration"
+              action="action_trasas_dispatch_urgency"
+              sequence="30"/>
+
+    <menuitem id="menu_dispatch_location_action"
+              name="Vị trí lưu trữ"
+              parent="menu_dispatch_configuration"
+              action="action_trasas_dispatch_location"
+              sequence="40"/>
 </odoo>
 

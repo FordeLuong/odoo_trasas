@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ REJECT REASON ============ -->
+    <record id="trasas_dispatch_outgoing_reject_reason_view_list" model="ir.ui.view">
+        <field name="name">trasas.dispatch.outgoing.reject.reason.list</field>
+        <field name="model">trasas.dispatch.outgoing.reject.reason</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_trasas_dispatch_outgoing_reject_reason" model="ir.actions.act_window">
+        <field name="name">Lý do từ chối CV</field>
+        <field name="res_model">trasas.dispatch.outgoing.reject.reason</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo lý do từ chối mới cho quy trình duyệt Công văn đi.
+            </p>
+        </field>
+    </record>
+</odoo>
