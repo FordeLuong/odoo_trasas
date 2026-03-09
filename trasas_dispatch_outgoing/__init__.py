@@ -57,5 +57,6 @@ def _assign_outgoing_stages(env):
         )
         for rec in template_records:
             rec.noupdate = False
+
     except Exception:
         pass

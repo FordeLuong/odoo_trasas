@@ -72,6 +72,12 @@ class TrasasAsset(models.Model):
         help="Phân loại tài sản: chỉ áp dụng cho nhóm Nhà cửa/CT và Máy móc TB SX",
     )
 
+    is_mortgaged = fields.Boolean(
+        string="Đang thế chấp",
+        tracking=True,
+        help="Đánh dấu nếu tài sản này đang được thế chấp",
+    )
+
     description = fields.Html(
         string="Mô tả chi tiết",
     )

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
 
         <!-- 1. Email Gửi duyệt (To Approver) -->
         <record id="email_template_outgoing_to_approve" model="mail.template">

@@ -74,6 +74,7 @@
                             <field name="asset_group_id"/>
                             <field name="asset_group" invisible="1"/>
                             <field name="asset_classification" invisible="asset_group not in ('nxct', 'mmtb')"/>
+                            <field name="is_mortgaged"/>
                         </group>
                         <group string="Mua sắm – Ghi nhận">
                             <field name="supplier_id"/>
@@ -398,6 +399,7 @@
                 <field name="asset_group_id"/>
 
                 <field name="ownership_type" optional="show"/>
+                <field name="is_mortgaged" optional="hide"/>
                 <field name="location"/>
                 <field name="original_value"/>
                 <field name="residual_value" optional="show"/>
@@ -417,6 +419,9 @@
                 <field name="name"/>
                 <field name="code"/>
                 <field name="asset_group_id"/>
+                <field name="is_mortgaged"/>
+                <separator/>
+                <filter string="Đang thế chấp" name="mortgaged" domain="[('is_mortgaged', '=', True)]"/>
                 <separator/>
                 <filter name="group_by_asset_group" string="Nhóm tài sản" context="{'group_by':'asset_group_id'}"/>
             </search>
