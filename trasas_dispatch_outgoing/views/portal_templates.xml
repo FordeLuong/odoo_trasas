@@ -60,9 +60,9 @@
                        t-attf-class="btn btn-sm #{'btn-info' if filterby == 'waiting_approval' else 'btn-outline-info'}">
                         Chờ duyệt
                     </a>
-                    <a t-attf-href="/my/outgoing_dispatches?filterby=processing" 
-                       t-attf-class="btn btn-sm #{'btn-warning' if filterby == 'processing' else 'btn-outline-warning'}">
-                        Đang xử lý
+                    <a t-attf-href="/my/outgoing_dispatches?filterby=to_promulgate" 
+                       t-attf-class="btn btn-sm #{'btn-warning' if filterby == 'to_promulgate' else 'btn-outline-warning'}">
+                        Hành chính duyệt
                     </a>
                     <a t-attf-href="/my/outgoing_dispatches?filterby=sent" 
                        t-attf-class="btn btn-sm #{'btn-success' if filterby == 'sent' else 'btn-outline-success'}">
@@ -100,8 +100,7 @@
                                             <span t-if="dispatch.state == 'draft'" class="badge bg-secondary">Dự thảo</span>
                                             <span t-elif="dispatch.state == 'waiting_approval'" class="badge bg-info">Chờ duyệt</span>
                                             <span t-elif="dispatch.state == 'approved'" class="badge bg-primary">Đã duyệt</span>
-                                            <span t-elif="dispatch.state == 'processing'" class="badge bg-warning">HCNS Đang xử lý</span>
-                                            <span t-elif="dispatch.state == 'to_promulgate'" class="badge bg-warning">Chờ ban hành</span>
+                                            <span t-elif="dispatch.state == 'to_promulgate'" class="badge bg-warning">Hành chính Chờ ban hành</span>
                                             <span t-elif="dispatch.state == 'released'" class="badge bg-info">Đã ban hành</span>
                                             <span t-elif="dispatch.state == 'sent'" class="badge bg-success">Đã gửi</span>
                                             <span t-elif="dispatch.state == 'done'" class="badge bg-success">Hoàn thành</span>
@@ -142,6 +141,20 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"/>
                     </div>
                 </t>
+                <t t-if="request.params.get('message') == 'sent_to_hcns'">
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="fa fa-check-circle me-2"/>
+                        Đã chuyển công văn qua Hành chính Nhân sự để ban hành!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('message') == 'sent'">
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="fa fa-check-circle me-2"/>
+                        Công văn đã được đánh dấu Đã gửi thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
 
                 <!-- Back Button -->
                 <a href="/my/outgoing_dispatches" class="btn btn-light mb-3">
@@ -159,8 +172,7 @@
                             <span t-if="dispatch.state == 'draft'" class="badge bg-secondary fs-6">Dự thảo</span>
                             <span t-elif="dispatch.state == 'waiting_approval'" class="badge bg-info text-dark fs-6">Chờ duyệt</span>
                             <span t-elif="dispatch.state == 'approved'" class="badge bg-primary fs-6">Đã duyệt</span>
-                            <span t-elif="dispatch.state == 'processing'" class="badge bg-warning text-dark fs-6">Đang xử lý</span>
-                            <span t-elif="dispatch.state == 'to_promulgate'" class="badge bg-warning text-dark fs-6">Chờ ban hành</span>
+                            <span t-elif="dispatch.state == 'to_promulgate'" class="badge bg-warning text-dark fs-6">HCNS Chờ ban hành</span>
                             <span t-elif="dispatch.state == 'released'" class="badge bg-info fs-6">Đã ban hành</span>
                             <span t-elif="dispatch.state == 'sent'" class="badge bg-success fs-6">Đã gửi</span>
                             <span t-elif="dispatch.state == 'done'" class="badge bg-success fs-6">Hoàn thành</span>
@@ -260,6 +272,46 @@
                                 <button type="submit" class="btn btn-primary btn-lg mt-2">
                                     <i class="fa fa-paper-plane me-2"/>
                                     Lưu &amp; Gửi Phê duyệt
+                                </button>
+                            </form>
+                        </t>
+
+                        <!-- Action Gửi HCNS (Only if in Approved state) -->
+                        <t t-if="dispatch.state == 'approved'">
+                            <hr class="my-4"/>
+                            <h5 class="mb-3 text-primary"><i class="fa fa-share me-2"/>Gửi Ban Hành</h5>
+                            <div class="alert alert-info">
+                                <i class="fa fa-info-circle me-1"/> 
+                                Công văn đã được Ban Giám đốc phê duyệt. Vui lòng chuyển cho <strong>Hành chính Nhân sự</strong> để ban hành (cấp số, đóng dấu).
+                            </div>
+                            
+                            <form method="POST" 
+                                  t-attf-action="/my/outgoing_dispatch/#{dispatch.id}/send_to_hcns" 
+                                  class="bg-light p-4 rounded border">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button type="submit" class="btn btn-primary btn-lg mt-2">
+                                    <i class="fa fa-paper-plane-o me-2"/>
+                                    Gửi cho HCNS
+                                </button>
+                            </form>
+                        </t>
+
+                        <!-- Action Gửi Đối tác (Only if in Released state) -->
+                        <t t-if="dispatch.state == 'released'">
+                            <hr class="my-4"/>
+                            <h5 class="mb-3 text-success"><i class="fa fa-send me-2"/>Gửi Đối tác / Khách hàng</h5>
+                            <div class="alert alert-success">
+                                <i class="fa fa-info-circle me-1"/> 
+                                Công văn đã được ban hành chính thức. Vui lòng gửi bản cứng hoặc bản mềm (đã ký số) cho đối tác. Sau khi hoàn tất, nhấn nút bên dưới để đóng hồ sơ.
+                            </div>
+                            
+                            <form method="POST" 
+                                  t-attf-action="/my/outgoing_dispatch/#{dispatch.id}/send" 
+                                  class="bg-light p-4 rounded border">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button type="submit" class="btn btn-success btn-lg mt-2">
+                                    <i class="fa fa-paper-plane me-2"/>
+                                    Đã Gửi đi (Hoàn thành)
                                 </button>
                             </form>
                         </t>

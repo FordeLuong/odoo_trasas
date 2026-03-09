@@ -11,7 +11,7 @@
                     <button name="action_approve" string="Duyệt" type="object" class="oe_highlight" invisible="state != 'waiting_approval' or not is_user_approver"/>
                     <button name="action_reject" string="Từ chối" type="object" invisible="state != 'waiting_approval' or not is_user_approver"/>
                     <button name="action_send_to_hcns" string="Gửi cho HCNS" type="object" class="oe_highlight" invisible="state != 'approved'"/>
-                    <button name="action_release" string="Phát hành" type="object" class="oe_highlight" invisible="state != 'processing'"/>
+                    <button name="action_release" string="Phát hành" type="object" class="oe_highlight" invisible="state != 'to_promulgate'"/>
                     <button name="action_send" string="Gửi đi" type="object" class="oe_highlight" invisible="state != 'released'"/>
                     <button name="action_done" string="Hoàn thành" type="object" class="oe_highlight" invisible="state != 'sent'"/>
                     <field name="stage_id" widget="statusbar" options="{'clickable': 1}"/>
@@ -48,7 +48,7 @@
                         <group string="Tài liệu đính kèm">
                             <field name="draft_file" filename="draft_filename"/>
                             <field name="draft_filename" invisible="1"/>
-                            <field name="official_file" filename="official_filename" readonly="state != 'processing'"/>
+                            <field name="official_file" filename="official_filename" readonly="state != 'to_promulgate'"/>
                             <field name="official_filename" invisible="1"/>
                         </group>
                     </group>

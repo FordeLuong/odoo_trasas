@@ -129,7 +129,6 @@ class TrasasDispatchOutgoing(models.Model):
             ("waiting_approval", "Chờ duyệt"),
             ("approved", "Đã duyệt"),
             ("to_promulgate", "Chờ ban hành"),
-            ("processing", "Đang xử lý"),
             ("released", "Đã phát hành"),
             ("sent", "Đã gửi"),
             ("done", "Hoàn thành"),
@@ -165,7 +164,6 @@ class TrasasDispatchOutgoing(models.Model):
             "outgoing_stage_waiting_approval": "waiting_approval",
             "outgoing_stage_approved": "approved",
             "outgoing_stage_to_promulgate": "to_promulgate",
-            "outgoing_stage_processing": "processing",
             "outgoing_stage_released": "released",
             "outgoing_stage_sent": "sent",
             "outgoing_stage_done": "done",
@@ -191,8 +189,8 @@ class TrasasDispatchOutgoing(models.Model):
             elif record.stage_id.is_draft:
                 record.state = "draft"
             else:
-                # Custom stages default to processing
-                record.state = "processing"
+                # Custom stages default to draft if no match
+                record.state = "draft"
 
     @api.depends("drafter_id")
     def _compute_department_id(self):
@@ -336,7 +334,7 @@ class TrasasDispatchOutgoing(models.Model):
             raise UserError("Chưa cấu hình giai đoạn 'Chờ ban hành'!")
 
         for record in self:
-            # Tìm Trưởng phòng HCNS
+            # Tìm phòng HCNS
             hcns_dept = self.env.ref(
                 "trasas_demo_users.dep_hcns", raise_if_not_found=False
             )
@@ -345,22 +343,30 @@ class TrasasDispatchOutgoing(models.Model):
                     [("name", "ilike", "Hành chính")], limit=1
                 )
 
-            hcns_manager = False
-            if hcns_dept and hcns_dept.manager_id and hcns_dept.manager_id.user_id:
-                hcns_manager = hcns_dept.manager_id.user_id
-
-            if not hcns_manager:
+            if not hcns_dept:
                 raise ValidationError(
-                    "Không tìm thấy Trưởng phòng HCNS. Vui lòng kiểm tra cấu hình Phòng ban và gán Manager cho phòng HCNS."
+                    "Không tìm thấy phòng Hành chính Nhân sự. Vui lòng kiểm tra lại hệ thống phòng ban."
                 )
 
-            # Tạo Activity cho HCNS
-            record.activity_schedule(
-                "mail.mail_activity_data_todo",
-                user_id=hcns_manager.id,
-                summary="Ban hành công văn đi: %s" % record.subject,
-                note="Công văn đã được duyệt. Vui lòng cấp số và ban hành.",
+            # Lấy tất cả nhân viên trong phòng HCNS
+            hcns_employees = self.env["hr.employee"].search(
+                [("department_id", "=", hcns_dept.id), ("user_id", "!=", False)]
             )
+            hcns_users = hcns_employees.mapped("user_id")
+
+            if not hcns_users:
+                raise ValidationError(
+                    "Phòng Hành chính Nhân sự chưa có nhân viên nào được phân quyền User."
+                )
+
+            # Tạo Activity cho TẤT CẢ nhân viên trong phòng HCNS
+            for user in hcns_users:
+                record.activity_schedule(
+                    "mail.mail_activity_data_todo",
+                    user_id=user.id,
+                    summary="Ban hành công văn đi: %s" % record.subject,
+                    note="Công văn đã được duyệt. Vui lòng cấp số và ban hành.",
+                )
 
             record.stage_id = stage_to_promulgate
 

@@ -37,8 +37,8 @@ class OutgoingDispatchPortal(CustomerPortal):
             domain.append(("state", "=", "draft"))
         elif filterby == "waiting_approval":
             domain.append(("state", "=", "waiting_approval"))
-        elif filterby == "processing":
-            domain.append(("state", "=", "processing"))
+        elif filterby == "to_promulgate":
+            domain.append(("state", "=", "to_promulgate"))
         elif filterby == "sent":
             domain.append(("state", "=", "sent"))
 
@@ -160,6 +160,60 @@ class OutgoingDispatchPortal(CustomerPortal):
             return request.redirect(
                 f"/my/outgoing_dispatch/{dispatch_id}?message=submitted"
             )
+        except Exception as e:
+            return request.redirect(
+                f"/my/outgoing_dispatch/{dispatch_id}?error={str(e)}"
+            )
+
+    @http.route(
+        ["/my/outgoing_dispatch/<int:dispatch_id>/send_to_hcns"],
+        type="http",
+        auth="user",
+        website=True,
+        methods=["POST"],
+        csrf=True,
+    )
+    def portal_outgoing_dispatch_send_to_hcns(self, dispatch_id, **post):
+        """Người soạn gửi CV đi cho HCNS ban hành (từ trạng thái Đã duyệt)"""
+        try:
+            dispatch = (
+                request.env["trasas.dispatch.outgoing"].sudo().browse(dispatch_id)
+            )
+            if request.env.user.id != dispatch.drafter_id.id:
+                return request.redirect("/my")
+
+            if dispatch.state == "approved":
+                dispatch.action_send_to_hcns()
+
+            return request.redirect(
+                f"/my/outgoing_dispatch/{dispatch_id}?message=sent_to_hcns"
+            )
+        except Exception as e:
+            return request.redirect(
+                f"/my/outgoing_dispatch/{dispatch_id}?error={str(e)}"
+            )
+
+    @http.route(
+        ["/my/outgoing_dispatch/<int:dispatch_id>/send"],
+        type="http",
+        auth="user",
+        website=True,
+        methods=["POST"],
+        csrf=True,
+    )
+    def portal_outgoing_dispatch_send(self, dispatch_id, **post):
+        """Người soạn gửi CV đi cho đối tác (từ trạng thái Đã phát hành)"""
+        try:
+            dispatch = (
+                request.env["trasas.dispatch.outgoing"].sudo().browse(dispatch_id)
+            )
+            if request.env.user.id != dispatch.drafter_id.id:
+                return request.redirect("/my")
+
+            if dispatch.state == "released":
+                dispatch.action_send()
+
+            return request.redirect(f"/my/outgoing_dispatch/{dispatch_id}?message=sent")
         except Exception as e:
             return request.redirect(
                 f"/my/outgoing_dispatch/{dispatch_id}?error={str(e)}"
