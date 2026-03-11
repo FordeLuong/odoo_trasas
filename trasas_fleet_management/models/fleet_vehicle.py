@@ -82,7 +82,7 @@ class FleetVehicle(models.Model):
         for rec in self:
             # Inspection
             inspections = rec.legal_document_ids.filtered(
-                lambda d: d.document_type == "inspection" and d.state != "revoked"
+                lambda d: d.document_type_id.code == "INS" and d.state != "revoked"
             )
             if inspections:
                 # Get the one with the furthest validity_date
@@ -95,7 +95,7 @@ class FleetVehicle(models.Model):
 
             # Insurance
             insurances = rec.legal_document_ids.filtered(
-                lambda d: d.document_type == "insurance" and d.state != "revoked"
+                lambda d: d.document_type_id.code == "INSUR" and d.state != "revoked"
             )
             if insurances:
                 furthest_insurance = max(
