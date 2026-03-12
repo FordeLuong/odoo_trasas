@@ -47,13 +47,13 @@
     </record>
     
     <!-- Nhóm 4: HCNS/Admin - Contract Manager -->
-    <!-- KHÔNG kế thừa group_contract_approver -->
+    <!-- Kế thừa group_contract_user để có cả quyền Vận hành và HCNS -->
     <record id="group_contract_manager" model="res.groups">
         <field name="name">Contract Manager (HCNS)</field>
         <field name="privilege_id" ref="privilege_trasas_contract"/>
-        <!-- CHỈ kế thừa Sign để xem yêu cầu ký -->
-        <field name="implied_ids" eval="[(4, ref('sign.group_sign_user'))]"/>
-        <field name="comment">HCNS/Admin - Đóng dấu, upload scan, lưu kho, quản lý tất cả</field>
+        <!-- Kế thừa User (Vận hành) để bà Lai làm được cả 2 việc -->
+        <field name="implied_ids" eval="[(4, ref('group_contract_user')), (4, ref('sign.group_sign_user'))]"/>
+        <field name="comment">HCNS/Admin - Đóng dấu, upload scan, lưu kho, quản lý tất cả. Bao gồm cả quyền Vận hành.</field>
     </record>
 
     <!-- Admin automatically gets Manager rights -->

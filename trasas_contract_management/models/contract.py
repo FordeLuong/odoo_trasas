@@ -502,19 +502,26 @@ class TrasasContract(models.Model):
         Dựa trên:
         1. Trạng thái là 'in_review'
         2. Có một Activity 'To Do' chưa hoàn thành giao cho user hiện tại.
+        3. HOẶC user thuộc nhóm Manager/Reviewer thì thấy nút luôn để hỗ trợ.
         """
         current_user_id = self.env.user.id
         todo_type_id = self.env.ref("mail.mail_activity_data_todo").id
-        is_admin = self.env.user.has_group("base.group_system")
+        user = self.env.user
+        is_admin = user.has_group("base.group_system")
+        is_manager = user.has_group("trasas_contract_management.group_contract_manager")
+        is_prof_reviewer = user.has_group("trasas_contract_management.group_contract_reviewer")
+        
         for record in self:
-            if is_admin:
+            # Admin, Manager trang DMS, hoặc Reviewer chuyên trách được thấy nút rà soát của mọi hợp đồng
+            if is_admin or ((is_manager or is_prof_reviewer) and record.state == "in_review"):
                 record.is_reviewer = True
                 continue
+                
             if record.state != "in_review":
                 record.is_reviewer = False
                 continue
 
-            # Kiểm tra xem có activity rà soát nào đang giao cho user hiện tại không
+            # Với User thường, phải có activity giao đích danh
             activity = record.activity_ids.filtered(
                 lambda a: (
                     a.activity_type_id.id == todo_type_id
@@ -534,19 +541,25 @@ class TrasasContract(models.Model):
         Dựa trên:
         1. Trạng thái là 'waiting'
         2. Có một Activity 'To Do' chưa hoàn thành giao cho user hiện tại.
+        3. HOẶC user thuộc nhóm Approver thì thấy nút phê duyệt luôn.
         """
         current_user_id = self.env.user.id
         todo_type_id = self.env.ref("mail.mail_activity_data_todo").id
-        is_admin = self.env.user.has_group("base.group_system")
+        user = self.env.user
+        is_admin = user.has_group("base.group_system")
+        is_approver_group = user.has_group("trasas_contract_management.group_contract_approver")
+        
         for record in self:
-            if is_admin:
+            # Ban giám đốc được thấy nút phê duyệt của bất kỳ hợp đồng nào đang chờ
+            if is_admin or (is_approver_group and record.state == "waiting"):
                 record.is_current_approver = True
                 continue
+                
             if record.state != "waiting":
                 record.is_current_approver = False
                 continue
 
-            # Kiểm tra xem có activity phê duyệt nào đang giao cho user hiện tại không
+            # Fallback activity check
             activity = record.activity_ids.filtered(
                 lambda a: (
                     a.activity_type_id.id == todo_type_id
@@ -1078,6 +1091,8 @@ class TrasasContract(models.Model):
                 )
                 if employee and employee.parent_id and employee.parent_id.user_id:
                     reviewer = employee.parent_id.user_id
+                    # Gán vào field để Record Rule nhận diện người này có quyền Write
+                    record.suggested_reviewer_id = reviewer
 
             if reviewer:
                 # Nếu có người rà soát cụ thể (Đề xuất hoặc Trưởng phòng)
