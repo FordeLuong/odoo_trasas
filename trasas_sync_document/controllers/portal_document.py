@@ -93,9 +93,16 @@ class PortalDocuments(http.Controller):
         return f"{size:.1f} {units[unit_index]}"
 
     def _can_preview(self, document):
-        """Kiểm tra file có hỗ trợ xem trước không."""
-        mimetype = document.mimetype or ""
-        return "pdf" in mimetype or "image" in mimetype
+        """Kiểm tra file có hỗ trợ xem trước không.
+        Hỗ trợ PDF và các định dạng hình ảnh phổ biến.
+        """
+        mimetype = (document.mimetype or "").lower()
+        extension = (document.file_extension or "").lower()
+        if "pdf" in mimetype or extension == "pdf":
+            return True
+        if "image" in mimetype or extension in ["png", "jpg", "jpeg", "gif", "bmp", "webp"]:
+            return True
+        return False
 
     def _check_portal_access(self, document):
         """Kiểm tra portal user có quyền truy cập vào document restricted không.
@@ -382,8 +389,9 @@ class PortalDocuments(http.Controller):
             # Chuyển state sang submitted
             access_req.write({"state": "submitted"})
 
-            # Gửi thông báo cho HCNS Manager
+            # Gửi thông báo cho HCNS Manager và Chủ sở hữu tài liệu (Owner)
             try:
+                # 1. Thông báo cho HCNS Manager (Người duyệt chính)
                 manager_group = request.env.ref(
                     "trasas_document_management.group_doc_manager",
                     raise_if_not_found=False,
@@ -399,9 +407,32 @@ class PortalDocuments(http.Controller):
                             note="Người dùng portal %s yêu cầu xem tài liệu '%s'. Mục đích: %s"
                             % (request.env.user.name, document.name, purpose),
                         )
-                        _logger.info("Scheduled activity for user %s (id=%s)", mgr_user.name, mgr_user.id)
+                        _logger.info("Scheduled activity for manager %s (id=%s)", mgr_user.name, mgr_user.id)
+
+                # 2. Thông báo cho Chủ sở hữu tài liệu (Owner)
+                owner = document.owner_id or document.create_uid
+                if owner:
+                    # Tạo Activity trên bản ghi yêu cầu nhưng gán cho Owner
+                    access_req.activity_schedule(
+                        "mail.mail_activity_data_todo",
+                        user_id=owner.id,
+                        summary="Portal User muốn xem tài liệu của bạn: %s" % document.name,
+                        note="Người dùng %s yêu cầu truy cập tài liệu '%s' mà bạn sở hữu. Mục đích: %s"
+                        % (request.env.user.name, document.name, purpose),
+                    )
+                    
+                    # Ghi log vào Chatter của tài liệu để Owner dễ thấy
+                    document.message_post(
+                        body="🔑 <b>%s</b> (Portal) muốn truy cập tài liệu này. Mục đích: %s" 
+                        % (request.env.user.name, purpose),
+                        subject="Yêu cầu truy cập từ Portal",
+                        partner_ids=[owner.partner_id.id],
+                        message_type="notification",
+                    )
+                    _logger.info("Scheduled activity and posted message for owner %s (id=%s)", owner.name, owner.id)
+
             except Exception as e:
-                _logger.warning("Portal access request: Failed to schedule activity: %s", e, exc_info=True)
+                _logger.warning("Portal access request: Failed to schedule activity/message: %s", e, exc_info=True)
 
             try:
                 access_req.message_post(
@@ -409,7 +440,7 @@ class PortalDocuments(http.Controller):
                     subject="Yêu cầu truy cập từ Portal",
                 )
             except Exception as e:
-                _logger.warning("Portal access request: Failed to post message: %s", e)
+                _logger.warning("Portal access request: Failed to post message on request: %s", e)
 
             _logger.info("Portal access request created: %s for document %s", access_req.name, document_id)
 

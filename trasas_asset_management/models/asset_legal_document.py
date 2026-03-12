@@ -138,24 +138,48 @@ class TrasasAssetLegalDocument(models.Model):
         return res
 
     def _sync_attachments_to_document(self):
+        """Tạo documents.document cho mỗi attachment chưa đồng bộ.
+        Sử dụng cơ chế copy attachment để tránh vi phạm unique constraint của App Documents.
+        """
         Document = self.env["documents.document"].sudo()
+        Attachment = self.env["ir.attachment"].sudo()
         for rec in self:
-            if not rec.asset_id.document_folder_id:
+            if not rec.asset_id or not rec.asset_id.document_folder_id or not rec.attachment_ids:
                 continue
+            
             folder_id = rec.asset_id.document_folder_id.id
-
-            existing_docs = Document.search(
-                [("attachment_id", "in", rec.attachment_ids.ids)]
-            )
-            existing_attachment_ids = existing_docs.mapped("attachment_id").ids
+            
+            # Tìm các attachment đã được sync cho bản ghi này (dựa vào description lưu ID gốc)
+            existing_docs = Document.search([
+                ('folder_id', '=', folder_id),
+                ('res_model', '=', 'trasas.asset.legal.document'),
+                ('res_id', '=', rec.id)
+            ])
+            synced_att_ids = []
+            for d in existing_docs:
+                if d.attachment_id and d.attachment_id.description:
+                    synced_att_ids.append(d.attachment_id.description)
 
             for attachment in rec.attachment_ids:
-                if attachment.id not in existing_attachment_ids:
-                    Document.create(
-                        {
-                            "name": attachment.name,
-                            "folder_id": folder_id,
-                            "attachment_id": attachment.id,
-                            "owner_id": self.env.user.id,
-                        }
-                    )
+                att_key = str(attachment.id)
+                if att_key in synced_att_ids:
+                    continue
+                
+                # Tạo bản sao attachment để tách biệt "chủ sở hữu" (Tránh UniqueViolation)
+                new_att = Attachment.create({
+                    'name': attachment.name,
+                    'datas': attachment.datas,
+                    'mimetype': attachment.mimetype,
+                    'description': att_key, # Lưu lại ID gốc để nhận diện đã sync
+                    'res_model': 'trasas.asset.legal.document',
+                    'res_id': rec.id,
+                })
+
+                Document.create({
+                    "name": rec.name or attachment.name,
+                    "folder_id": folder_id,
+                    "attachment_id": new_att.id,
+                    "owner_id": self.env.user.id,
+                    "res_model": "trasas.asset",
+                    "res_id": rec.asset_id.id,
+                })
