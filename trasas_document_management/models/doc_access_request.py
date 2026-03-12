@@ -44,6 +44,13 @@ class TrasasDocAccessRequest(models.Model):
         tracking=True,
     )
 
+    is_portal_request = fields.Boolean(
+        string="Yêu cầu từ Portal",
+        default=False,
+        readonly=True,
+        help="Đánh dấu yêu cầu được gửi từ cổng Portal bởi người dùng bên ngoài",
+    )
+
     document_ids = fields.Many2many(
         "documents.document",
         string="Tài liệu cần truy cập",

@@ -1,5 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_trasas_contract_user,access.trasas.contract.user,model_trasas_contract,group_contract_user,1,1,1,0
+access_trasas_contract_reviewer,access.trasas.contract.reviewer,model_trasas_contract,group_contract_reviewer,1,1,1,0
 access_trasas_contract_approver,access.trasas.contract.approver,model_trasas_contract,group_contract_approver,1,1,0,0
 access_trasas_contract_manager,access.trasas.contract.manager,model_trasas_contract,group_contract_manager,1,1,1,1
 access_trasas_contract_type_user,access.trasas.contract.type.user,model_trasas_contract_type,group_contract_user,1,0,0,0

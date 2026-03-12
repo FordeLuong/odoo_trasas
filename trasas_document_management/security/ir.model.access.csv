@@ -8,3 +8,4 @@ access_doc_type_user,trasas.document.type.user,model_trasas_document_type,group_
 access_doc_type_manager,trasas.document.type.manager,model_trasas_document_type,group_doc_manager,1,1,1,1
 access_report_wizard_manager,trasas.doc.report.wizard.manager,model_trasas_doc_report_wizard,group_doc_manager,1,1,1,1
 access_report_wizard_director,trasas.doc.report.wizard.director,model_trasas_doc_report_wizard,group_doc_director,1,1,1,1
+access_doc_access_request_portal,trasas.doc.access.request.portal,model_trasas_doc_access_request,base.group_portal,1,1,1,0

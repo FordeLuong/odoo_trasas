@@ -1,5 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Nhân viên nội bộ: Xem toàn bộ tài liệu documents.document -->
+    <record id="ir_rule_doc_internal_read_all" model="ir.rule">
+        <field name="name">DMS: Nhân viên Xem tất cả tài liệu</field>
+        <field name="model_id" ref="documents.model_documents_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_doc_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- HCNS Manager: Toàn quyền trên tài liệu documents.document -->
+    <record id="ir_rule_doc_manager_all_access" model="ir.rule">
+        <field name="name">DMS: HCNS Toàn quyền tài liệu</field>
+        <field name="model_id" ref="documents.model_documents_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_doc_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
     <!-- BGĐ bypass: Xem toàn bộ tài liệu documents.document không hạn chế -->
     <record id="ir_rule_doc_director_all_access" model="ir.rule">
         <field name="name">BGĐ: Xem tất cả tài liệu</field>
@@ -34,5 +58,13 @@
         <field name="model_id" ref="model_trasas_doc_access_log"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="groups" eval="[(4, ref('group_doc_manager'))]"/>
+    </record>
+
+    <!-- Portal User: Chỉ xem yêu cầu của mình -->
+    <record id="ir_rule_access_request_portal" model="ir.rule">
+        <field name="name">Portal: Chỉ xem yêu cầu của mình</field>
+        <field name="model_id" ref="model_trasas_doc_access_request"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
     </record>
 </odoo>

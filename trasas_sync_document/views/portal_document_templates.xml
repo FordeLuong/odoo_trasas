@@ -45,6 +45,13 @@
                                     <t t-set="depth" t-value="1"/>
                                 </t>
                             </div>
+                            <!-- Link đến Yêu cầu của tôi -->
+                            <div class="doc-sidebar-footer">
+                                <a href="/my/documents/my-requests" class="doc-tree-item">
+                                    <i class="fa fa-list-alt me-2 text-primary"/>
+                                    <span>Yêu cầu của tôi</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
 
@@ -62,6 +69,9 @@
                         <div class="d-lg-none mb-3">
                             <a href="/my/documents" class="btn btn-outline-secondary btn-sm mb-2">
                                 <i class="fa fa-arrow-left me-1"/> Về trang gốc
+                            </a>
+                            <a href="/my/documents/my-requests" class="btn btn-outline-primary btn-sm mb-2 ms-1">
+                                <i class="fa fa-list-alt me-1"/> Yêu cầu của tôi
                             </a>
                         </div>
 
@@ -93,9 +103,15 @@
                             </div>
                             <div class="doc-file-list">
                                 <t t-foreach="files" t-as="file">
-                                    <div class="doc-file-row">
+                                    <div t-attf-class="doc-file-row #{'doc-file-restricted' if file['is_restricted'] and not file['has_access'] else ''}">
                                         <div class="doc-file-icon">
-                                            <i t-att-class="file['icon'] + ' fa-lg'"/>
+                                            <!-- Icon khóa cho file restricted chưa có quyền -->
+                                            <t t-if="file['is_restricted'] and not file['has_access']">
+                                                <i class="fa fa-lock fa-lg text-muted"/>
+                                            </t>
+                                            <t t-else="">
+                                                <i t-att-class="file['icon'] + ' fa-lg'"/>
+                                            </t>
                                         </div>
                                         <div class="doc-file-info">
                                             <div class="doc-file-name" t-out="file['name']"/>
@@ -104,35 +120,62 @@
                                                       t-if="file['extension']"
                                                       t-out="file['extension']"/>
                                                 <span class="text-muted small" t-out="file['size']"/>
+                                                <!-- Badge giới hạn -->
+                                                <t t-if="file['is_restricted'] and not file['has_access']">
+                                                    <span class="badge bg-warning text-dark ms-1">
+                                                        <i class="fa fa-shield me-1"/>Giới hạn
+                                                    </span>
+                                                </t>
                                             </div>
                                         </div>
                                         <div class="doc-file-actions">
-                                            <!-- Preview button (chỉ cho PDF/Image) -->
-                                            <a t-if="file['can_preview']"
-                                               t-attf-href="/my/documents/preview/#{file['id']}"
-                                               target="_blank"
-                                               class="btn btn-sm btn-outline-primary me-1"
-                                               title="Xem trước">
-                                                <i class="fa fa-eye"/>
-                                                <span class="d-none d-md-inline ms-1">Xem</span>
-                                            </a>
-                                            <!-- URL link -->
-                                            <a t-if="file['type'] == 'url' and file['url']"
-                                               t-att-href="file['url']"
-                                               target="_blank"
-                                               class="btn btn-sm btn-outline-info me-1"
-                                               title="Mở link">
-                                                <i class="fa fa-external-link"/>
-                                                <span class="d-none d-md-inline ms-1">Mở</span>
-                                            </a>
-                                            <!-- Download button -->
-                                            <a t-if="file['type'] == 'binary'"
-                                               t-attf-href="/my/documents/download/#{file['id']}"
-                                               class="btn btn-sm btn-outline-success"
-                                               title="Tải xuống">
-                                                <i class="fa fa-download"/>
-                                                <span class="d-none d-md-inline ms-1">Tải</span>
-                                            </a>
+                                            <t t-if="file['is_restricted'] and not file['has_access']">
+                                                <!-- File restricted chưa có quyền -->
+                                                <t t-if="file['has_pending']">
+                                                    <span class="btn btn-sm btn-outline-secondary disabled">
+                                                        <i class="fa fa-clock-o me-1"/>Đang chờ duyệt
+                                                    </span>
+                                                </t>
+                                                <t t-else="">
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-warning btn-request-access"
+                                                            t-att-data-doc-id="file['id']"
+                                                            t-att-data-doc-name="file['name']"
+                                                            title="Yêu cầu quyền xem">
+                                                        <i class="fa fa-key me-1"/>
+                                                        <span class="d-none d-md-inline">Yêu cầu quyền</span>
+                                                    </button>
+                                                </t>
+                                            </t>
+                                            <t t-else="">
+                                                <!-- File public hoặc đã có quyền -->
+                                                <!-- Preview button (chỉ cho PDF/Image) -->
+                                                <a t-if="file['can_preview']"
+                                                   t-attf-href="/my/documents/preview/#{file['id']}"
+                                                   target="_blank"
+                                                   class="btn btn-sm btn-outline-primary me-1"
+                                                   title="Xem trước">
+                                                    <i class="fa fa-eye"/>
+                                                    <span class="d-none d-md-inline ms-1">Xem</span>
+                                                </a>
+                                                <!-- URL link -->
+                                                <a t-if="file['type'] == 'url' and file['url']"
+                                                   t-att-href="file['url']"
+                                                   target="_blank"
+                                                   class="btn btn-sm btn-outline-info me-1"
+                                                   title="Mở link">
+                                                    <i class="fa fa-external-link"/>
+                                                    <span class="d-none d-md-inline ms-1">Mở</span>
+                                                </a>
+                                                <!-- Download button -->
+                                                <a t-if="file['type'] == 'binary'"
+                                                   t-attf-href="/my/documents/download/#{file['id']}"
+                                                   class="btn btn-sm btn-outline-success"
+                                                   title="Tải xuống">
+                                                    <i class="fa fa-download"/>
+                                                    <span class="d-none d-md-inline ms-1">Tải</span>
+                                                </a>
+                                            </t>
                                         </div>
                                     </div>
                                 </t>
@@ -147,6 +190,45 @@
                                 <p class="text-muted">Chưa có tài liệu nào trong thư mục này.</p>
                             </div>
                         </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== MODAL YÊU CẦU QUYỀN ========== -->
+            <div class="modal fade" id="requestAccessModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form method="POST" action="/my/documents/request-access" id="requestAccessForm">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="document_id" id="requestDocId"/>
+                            <input type="hidden" name="redirect_url" t-attf-value="/my/documents/#{current_folder.id}"/>
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fa fa-key text-warning me-2"/>Yêu cầu quyền xem
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"/>
+                            </div>
+                            <div class="modal-body">
+                                <p>Bạn đang yêu cầu quyền xem tài liệu:</p>
+                                <p class="fw-bold text-primary" id="requestDocName"></p>
+                                <div class="mb-3">
+                                    <label for="requestPurpose" class="form-label">Mục đích truy cập <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="requestPurpose" name="purpose"
+                                              rows="3" required=""
+                                              placeholder="Vui lòng mô tả lý do bạn cần truy cập tài liệu này..."/>
+                                </div>
+                                <div class="alert alert-info small mb-0">
+                                    <i class="fa fa-info-circle me-1"/>
+                                    Yêu cầu sẽ được gửi đến bộ phận HCNS để phê duyệt. Bạn sẽ nhận được thông báo khi yêu cầu được xử lý.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fa fa-paper-plane me-1"/>Gửi yêu cầu
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -181,6 +263,84 @@
                         <t t-set="depth" t-value="depth + 1"/>
                     </t>
                 </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ========== MY REQUESTS PAGE ========== -->
+    <template id="portal_my_requests_page" name="Portal My Requests">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container py-4">
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb bg-transparent px-0">
+                        <li class="breadcrumb-item">
+                            <a href="/my"><i class="fa fa-home"/> My Portal</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="/my/documents">Tài liệu</a>
+                        </li>
+                        <li class="breadcrumb-item active">Yêu cầu của tôi</li>
+                    </ol>
+                </nav>
+
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fa fa-list-alt text-primary me-2 fs-4"/>
+                    <h4 class="mb-0">Yêu cầu truy cập tài liệu</h4>
+                </div>
+
+                <t t-if="requests">
+                    <div class="doc-file-list">
+                        <t t-foreach="requests" t-as="req">
+                            <div class="doc-file-row">
+                                <div class="doc-file-icon">
+                                    <i class="fa fa-file-text-o fa-lg text-muted"/>
+                                </div>
+                                <div class="doc-file-info">
+                                    <div class="doc-file-name">
+                                        <span t-out="req['name']"/>
+                                        <span t-att-class="'badge ms-2 ' + req['state_badge']"
+                                              t-out="req['state_label']"/>
+                                    </div>
+                                    <div class="doc-file-meta">
+                                        <span class="text-muted small">
+                                            <i class="fa fa-file me-1"/>
+                                            <t t-out="req['documents']"/>
+                                        </span>
+                                    </div>
+                                    <div class="doc-file-meta mt-1">
+                                        <span class="text-muted small">
+                                            <i class="fa fa-clock-o me-1"/>Ngày gửi:
+                                            <t t-out="req['create_date']" t-options='{"widget": "datetime", "format": "dd/MM/yyyy HH:mm"}'/>
+                                        </span>
+                                        <t t-if="req['access_expiry_date']">
+                                            <span class="text-muted small ms-3">
+                                                <i class="fa fa-calendar me-1"/>Hết hạn:
+                                                <t t-out="req['access_expiry_date']" t-options='{"widget": "datetime", "format": "dd/MM/yyyy HH:mm"}'/>
+                                            </span>
+                                        </t>
+                                    </div>
+                                    <div class="text-muted small mt-1" t-if="req['purpose']">
+                                        <i class="fa fa-comment-o me-1"/>
+                                        <t t-out="req['purpose']"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <t t-if="not requests">
+                    <div class="doc-empty-state">
+                        <i class="fa fa-inbox fa-3x text-muted mb-3"/>
+                        <h5 class="text-muted">Chưa có yêu cầu nào</h5>
+                        <p class="text-muted">Bạn chưa gửi yêu cầu truy cập tài liệu nào.</p>
+                        <a href="/my/documents" class="btn btn-primary mt-2">
+                            <i class="fa fa-folder-open me-1"/>Xem tài liệu
+                        </a>
+                    </div>
+                </t>
             </div>
         </t>
     </template>
