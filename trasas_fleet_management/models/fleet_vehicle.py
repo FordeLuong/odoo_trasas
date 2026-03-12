@@ -21,6 +21,13 @@ class FleetVehicle(models.Model):
 
     license_plate = fields.Char(required=False, tracking=True)
 
+    driver_id = fields.Many2one(
+        "res.partner",
+        domain="['|', ('is_company', '=', False), ('parent_id', '!=', False)]",
+        help="Chỉ chọn cá nhân làm tài xế",
+    )
+
+
     state = fields.Selection(
         [
             ("draft", "Phương tiện mới"),
