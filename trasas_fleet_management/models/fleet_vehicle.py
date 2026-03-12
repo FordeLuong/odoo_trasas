@@ -295,11 +295,10 @@ class FleetVehicle(models.Model):
                     if (
                         not vals.get("start_use_date", rec.start_use_date)
                         or not vals.get("maintenance_type_id", rec.maintenance_type_id)
-                        or not vals.get("driver_id", rec.driver_id)
                     ):
                         raise UserError(
                             _(
-                                "Vui lòng nhập Ngày bắt đầu sử dụng, Loại bảo dưỡng định kỳ và Tài xế trước khi đưa vào sử dụng."
+                                "Vui lòng nhập Ngày bắt đầu sử dụng và Loại bảo dưỡng định kỳ trước khi đưa vào sử dụng."
                             )
                         )
 
