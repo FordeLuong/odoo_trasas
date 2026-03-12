@@ -63,11 +63,11 @@
     
     <!-- ============ RECORD RULES ============ -->
     
-    <!-- Rule: User chỉ được SỬA/XÓA hợp đồng của mình -->
+    <!-- Rule: User chỉ được SỬA/XÓA hợp đồng của mình hoặc hợp đồng mình được giao rà soát -->
     <record id="contract_user_rule" model="ir.rule">
-        <field name="name">Contract User: Edit Own Contracts</field>
+        <field name="name">Contract User: Edit Own or Assigned Contracts</field>
         <field name="model_id" ref="model_trasas_contract"/>
-        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="domain_force">['|', '|', ('user_id', '=', user.id), ('suggested_reviewer_id', '=', user.id), ('reviewer_id', '=', user.id)]</field>
         <field name="groups" eval="[(4, ref('group_contract_user'))]"/>
         <field name="perm_read" eval="False"/>
         <field name="perm_write" eval="True"/>
