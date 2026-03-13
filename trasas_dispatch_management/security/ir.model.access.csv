@@ -1,24 +1,17 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-# --- Dispatch Type ---
 access_dispatch_type_viewer,trasas.dispatch.type.viewer,model_trasas_dispatch_type,group_dispatch_viewer,1,0,0,0
 access_dispatch_type_user,trasas.dispatch.type.user,model_trasas_dispatch_type,group_dispatch_user,1,0,0,0
 access_dispatch_type_reviewer,trasas.dispatch.type.reviewer,model_trasas_dispatch_type,group_dispatch_reviewer,1,0,0,0
 access_dispatch_type_approver,trasas.dispatch.type.approver,model_trasas_dispatch_type,group_dispatch_approver,1,0,0,0
 access_dispatch_type_coordinator,trasas.dispatch.type.coordinator,model_trasas_dispatch_type,group_dispatch_coordinator,1,1,1,0
-
-# --- Dispatch Incoming ---
 access_dispatch_incoming_viewer,trasas.dispatch.incoming.viewer,model_trasas_dispatch_incoming,group_dispatch_viewer,1,0,0,0
 access_dispatch_incoming_user,trasas.dispatch.incoming.user,model_trasas_dispatch_incoming,group_dispatch_user,1,1,1,0
 access_dispatch_incoming_reviewer,trasas.dispatch.incoming.reviewer,model_trasas_dispatch_incoming,group_dispatch_reviewer,1,1,0,0
 access_dispatch_incoming_approver,trasas.dispatch.incoming.approver,model_trasas_dispatch_incoming,group_dispatch_approver,1,1,0,0
 access_dispatch_incoming_coordinator,trasas.dispatch.incoming.coordinator,model_trasas_dispatch_incoming,group_dispatch_coordinator,1,1,1,1
 access_dispatch_incoming_portal,trasas.dispatch.incoming.portal,model_trasas_dispatch_incoming,base.group_portal,1,1,0,0
-
-# --- Dispatch Stage ---
 access_dispatch_stage_all,trasas.dispatch.stage.all,model_trasas_dispatch_stage,base.group_user,1,0,0,0
 access_dispatch_stage_coordinator,trasas.dispatch.stage.coordinator,model_trasas_dispatch_stage,group_dispatch_coordinator,1,1,1,1
-
-# --- Dispatch Location & Urgency ---
 access_dispatch_location_all,trasas.dispatch.location.all,model_trasas_dispatch_location,base.group_user,1,0,0,0
 access_dispatch_location_coordinator,trasas.dispatch.location.coordinator,model_trasas_dispatch_location,group_dispatch_coordinator,1,1,1,1
 access_dispatch_urgency_all,trasas.dispatch.urgency.all,model_trasas_dispatch_urgency,base.group_user,1,0,0,0

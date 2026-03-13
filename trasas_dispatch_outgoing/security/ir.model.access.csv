@@ -1,15 +1,10 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-# --- Dispatch Outgoing ---
 access_dispatch_outgoing_viewer,trasas.dispatch.outgoing.viewer,model_trasas_dispatch_outgoing,trasas_dispatch_management.group_dispatch_viewer,1,0,0,0
 access_dispatch_outgoing_user,trasas.dispatch.outgoing.user,model_trasas_dispatch_outgoing,trasas_dispatch_management.group_dispatch_user,1,1,1,0
 access_dispatch_outgoing_reviewer,trasas.dispatch.outgoing.reviewer,model_trasas_dispatch_outgoing,trasas_dispatch_management.group_dispatch_reviewer,1,1,1,0
 access_dispatch_outgoing_approver,trasas.dispatch.outgoing.approver,model_trasas_dispatch_outgoing,trasas_dispatch_management.group_dispatch_approver,1,1,0,0
 access_dispatch_outgoing_coordinator,trasas.dispatch.outgoing.coordinator,model_trasas_dispatch_outgoing,trasas_dispatch_management.group_dispatch_coordinator,1,1,1,1
 access_dispatch_outgoing_portal,trasas.dispatch.outgoing.portal,model_trasas_dispatch_outgoing,base.group_portal,1,0,0,0
-
-# --- Dispatch Outgoing Stage ---
 access_dispatch_outgoing_stage_all,trasas.dispatch.outgoing.stage.all,model_trasas_dispatch_outgoing_stage,base.group_user,1,0,0,0
 access_dispatch_outgoing_stage_coordinator,trasas.dispatch.outgoing.stage.coordinator,model_trasas_dispatch_outgoing_stage,trasas_dispatch_management.group_dispatch_coordinator,1,1,1,1
-
-# --- Reject Wizard ---
 access_dispatch_outgoing_reject_wizard,trasas.dispatch.outgoing.reject.wizard.all,model_trasas_dispatch_outgoing_reject_wizard,base.group_user,1,1,1,1
