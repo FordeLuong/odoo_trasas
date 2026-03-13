@@ -514,7 +514,6 @@ class TrasasContract(models.Model):
         todo_type_id = self.env.ref("mail.mail_activity_data_todo").id
         user = self.env.user
         is_admin = user.has_group("base.group_system")
-        is_manager = user.has_group("trasas_contract_management.group_contract_manager")
         
         for record in self:
             if record.state != "in_review":
@@ -524,8 +523,8 @@ class TrasasContract(models.Model):
             # Kiểm tra xem user hiện tại có phải là người được chỉ định rà soát trên form không
             is_designated = current_user_id in [record.reviewer_id.id, record.suggested_reviewer_id.id]
             
-            # Admin, Manager hoặc Người được chỉ định đích danh
-            if is_admin or is_manager or is_designated:
+            # Chỉ Admin hoặc Người được chỉ định đích danh mới thấy nút
+            if is_admin or is_designated:
                 record.is_reviewer = True
                 continue
 
@@ -1094,47 +1093,26 @@ class TrasasContract(models.Model):
             # --- Activity Logic ---
             record._close_activities()
 
-            # [B3] Tạo Activity cho Reviewer hoặc nhóm Contract Manager
-            # Ưu tiên 1: Người rà soát đề xuất
-            # Ưu tiên 2: Trưởng bộ phận của người tạo
-            # Ưu tiên 3: Nhóm Contract Manager
+            # [B3] Tạo Activity cho Người rà soát đề xuất (Bắt buộc)
             reviewer = record.suggested_reviewer_id
             if not reviewer:
-                employee = self.env["hr.employee"].search(
-                    [("user_id", "=", record.user_id.id)], limit=1
-                )
-                if employee and employee.parent_id and employee.parent_id.user_id:
-                    reviewer = employee.parent_id.user_id
-                    # Gán vào field để Record Rule nhận diện người này có quyền Write
-                    record.suggested_reviewer_id = reviewer
+                raise UserError(_("Vui lòng chọn Người rà soát đề xuất trước khi gửi rà soát!"))
 
-            if reviewer:
-                # Nếu có người rà soát cụ thể (Đề xuất hoặc Trưởng phòng)
-                record._schedule_activity(
-                    reviewer.id,
-                    _("Rà soát hợp đồng: %s (B3)") % record.name,
-                    deadline=1,
-                    note="Vui lòng rà soát hợp đồng",
-                )
-                # Gửi email yêu cầu rà soát
-                template = self.env.ref(
-                    "trasas_contract_management.email_template_contract_review_request",
-                    raise_if_not_found=False,
-                )
-                if template:
-                    template.send_mail(record.id, force_send=True)
-            else:
-                # Nếu không, gửi cho nhóm Manager
-                managers = record._get_users_from_group(
-                    "trasas_contract_management.group_contract_manager"
-                )
-                for manager in managers:
-                    record._schedule_activity(
-                        manager.id,
-                        _("Rà soát hợp đồng: %s (B3)") % record.name,
-                        deadline=1,
-                        note="Vui lòng rà soát hợp đồng",
-                    )
+            # Tạo Activity rà soát
+            record._schedule_activity(
+                reviewer.id,
+                _("Rà soát hợp đồng: %s (B3)") % record.name,
+                deadline=1,
+                note="Vui lòng rà soát hợp đồng",
+            )
+            
+            # Gửi email yêu cầu rà soát
+            template = self.env.ref(
+                "trasas_contract_management.email_template_contract_review_request",
+                raise_if_not_found=False,
+            )
+            if template:
+                template.send_mail(record.id, force_send=True)
 
     def action_confirm_review(self):
         """

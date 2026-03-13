@@ -15,22 +15,22 @@
         </record>
 
         <!-- Groups -->
-        <!-- Group 1: Dispatch Approver (Ban Giám đốc) -->
+        <!-- Group 1: Dispatch Approver (Ban Giám đốc) - Cao nhất về duyệt -->
         <record id="group_dispatch_approver" model="res.groups">
             <field name="name">Dispatch Approver (Ban Giám đốc)</field>
             <field name="privilege_id" ref="privilege_dispatch_management"/>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
             <field name="comment">Ban Giám đốc: Chỉ có quyền Xem và Phê duyệt công văn.</field>
-            <field name="sequence">10</field>
+            <field name="sequence">1</field>
         </record>
 
-        <!-- Group 2: Dispatch Coordinator (Văn thư - HCNS) -->
+        <!-- Group 2: Dispatch Coordinator (Văn thư - HCNS) - Cao nhất về vận hành -->
         <record id="group_dispatch_coordinator" model="res.groups">
             <field name="name">Dispatch Coordinator (Văn thư - HCNS)</field>
             <field name="privilege_id" ref="privilege_dispatch_management"/>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
             <field name="comment">Phòng HCNS: Đầu mối tiếp nhận, điều phối, cấp số hiệu và đóng dấu.</field>
-            <field name="sequence">20</field>
+            <field name="sequence">2</field>
         </record>
 
         <!-- Group 3: Dispatch Reviewer (Quản lý/Trưởng bộ phận) -->
@@ -39,7 +39,7 @@
             <field name="privilege_id" ref="privilege_dispatch_management"/>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
             <field name="comment">Quản lý/Trưởng bộ phận: Rà soát, duyệt nội bộ và soạn thảo.</field>
-            <field name="sequence">30</field>
+            <field name="sequence">3</field>
         </record>
 
         <!-- Group 4: Dispatch User (Nhân viên nghiệp vụ) -->
@@ -48,7 +48,7 @@
             <field name="privilege_id" ref="privilege_dispatch_management"/>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
             <field name="comment">Nhân viên nghiệp vụ: Soạn thảo và theo dõi công văn.</field>
-            <field name="sequence">40</field>
+            <field name="sequence">4</field>
         </record>
 
         <!-- Group 5: Dispatch Viewer (Người xem) -->
@@ -57,7 +57,7 @@
             <field name="privilege_id" ref="privilege_dispatch_management"/>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
             <field name="comment">Chỉ xem thông tin tra cứu.</field>
-            <field name="sequence">50</field>
+            <field name="sequence">5</field>
         </record>
 
         <!-- Admin automatically gets all rights via Coordinator/Approver -->
