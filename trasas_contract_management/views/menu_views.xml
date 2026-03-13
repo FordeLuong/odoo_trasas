@@ -62,11 +62,6 @@
               action="action_contract_stage"
               sequence="20"/>
 
-    <menuitem id="menu_contract_reject_reasons"
-              name="Lý do từ chối"
-              parent="menu_contract_config"
-              action="action_contract_reject_reason"
-              sequence="30"/>
 
     <menuitem id="menu_contract_tags"
               name="Thẻ hợp đồng"

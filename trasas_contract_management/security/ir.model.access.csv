@@ -9,7 +9,6 @@ access_trasas_contract_type_manager,access.trasas.contract.type.manager,model_tr
 access_trasas_contract_appendix_user,access.trasas.contract.appendix.user,model_trasas_contract_appendix,group_contract_user,1,1,1,1
 access_trasas_contract_appendix_approver,access.trasas.contract.appendix.approver,model_trasas_contract_appendix,group_contract_approver,1,0,0,0
 access_trasas_contract_appendix_manager,access.trasas.contract.appendix.manager,model_trasas_contract_appendix,group_contract_manager,1,1,1,1
-access_trasas_contract_reject_wizard,access.trasas.contract.reject.wizard,model_trasas_contract_reject_wizard,group_contract_approver,1,1,1,1
 access_trasas_contract_stage_user,access.trasas.contract.stage.user,model_trasas_contract_stage,group_contract_user,1,0,0,0
 access_trasas_contract_stage_approver,access.trasas.contract.stage.approver,model_trasas_contract_stage,group_contract_approver,1,0,0,0
 access_trasas_contract_stage_manager,access.trasas.contract.stage.manager,model_trasas_contract_stage,group_contract_manager,1,1,1,1
@@ -19,8 +18,6 @@ access_trasas_contract_cancel_wizard_manager,access.trasas.contract.cancel.wizar
 access_trasas_contract_draft_wizard_user,access.trasas.contract.draft.wizard.user,model_trasas_contract_draft_wizard,group_contract_user,1,1,1,1
 access_trasas_contract_draft_wizard_approver,access.trasas.contract.draft.wizard.approver,model_trasas_contract_draft_wizard,group_contract_approver,1,1,1,1
 access_trasas_contract_draft_wizard_manager,access.trasas.contract.draft.wizard.manager,model_trasas_contract_draft_wizard,group_contract_manager,1,1,1,1
-access_trasas_contract_reject_reason_reviewer,access.trasas.contract.reject.reason.reviewer,model_trasas_contract_reject_reason,group_contract_reviewer,1,0,0,0
-access_trasas_contract_reject_reason_approver,access.trasas.contract.reject.reason.approver,model_trasas_contract_reject_reason,group_contract_approver,1,0,0,0
 access_trasas_contract_tag_user,access.trasas.contract.tag.user,model_trasas_contract_tag,group_contract_user,1,1,1,0
 access_trasas_contract_tag_reviewer,access.trasas.contract.tag.reviewer,model_trasas_contract_tag,group_contract_reviewer,1,0,0,0
 access_trasas_contract_tag_approver,access.trasas.contract.tag.approver,model_trasas_contract_tag,group_contract_approver,1,0,0,0

@@ -2,16 +2,6 @@
 from odoo import models, fields
 
 
-class ContractRejectReason(models.Model):
-    _name = "trasas.contract.reject.reason"
-    _description = "Lý do từ chối Hợp đồng"
-    _order = "sequence, id"
-
-    name = fields.Char(string="Lý do", required=True, translate=True)
-    sequence = fields.Integer(string="Thứ tự", default=10)
-    active = fields.Boolean(string="Đang dùng", default=True)
-
-
 class ContractTag(models.Model):
     _name = "trasas.contract.tag"
     _description = "Thẻ hợp đồng"

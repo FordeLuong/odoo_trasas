@@ -137,13 +137,6 @@ class TrasasContract(models.Model):
         help="Gắn nhãn phân loại nhanh cho hợp đồng",
     )
 
-    reject_reason_id = fields.Many2one(
-        "trasas.contract.reject.reason",
-        string="Lý do từ chối (danh mục)",
-        tracking=True,
-        help="Lý do từ chối được chọn từ danh mục cấu hình",
-    )
-
     partner_id = fields.Many2one(
         "res.partner",
         string="Đối tác",
