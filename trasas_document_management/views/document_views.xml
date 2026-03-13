@@ -41,7 +41,7 @@
                 <field name="doc_state" widget="badge" optional="show"
                        decoration-success="doc_state == 'active'" 
                        decoration-warning="doc_state == 'expiring_soon'" 
-                       decoration-danger="doc_state in ('expired', 'revoked')"/>
+                       decoration-danger="doc_state == 'expired'"/>
                 <field name="department_id" optional="hide"/>
                 <field name="responsible_user_id" widget="many2one_avatar_user" optional="hide"/>
             </xpath>
@@ -60,7 +60,6 @@
                 <filter string="Hiệu lực" name="filter_doc_active" domain="[('doc_state', '=', 'active')]"/>
                 <filter string="Sắp hết hạn" name="filter_doc_expiring" domain="[('doc_state', '=', 'expiring_soon')]"/>
                 <filter string="Hết hiệu lực" name="filter_doc_expired" domain="[('doc_state', '=', 'expired')]"/>
-                <filter string="Đã thu hồi" name="filter_doc_revoked" domain="[('doc_state', '=', 'revoked')]"/>
                 <separator/>
                 <filter string="Loại hồ sơ" name="group_by_doc_type" context="{'group_by':'document_type_id'}"/>
                 <filter string="Phòng ban" name="group_by_department" context="{'group_by':'department_id'}"/>
@@ -70,32 +69,6 @@
         </field>
     </record>
 
-    <!-- 4. Server Actions (Thu hồi / Kích hoạt) hiện trong menu ⚙️ -->
-    <record id="action_server_doc_revoke" model="ir.actions.server">
-        <field name="name">Thu hồi (Hết hiệu lực)</field>
-        <field name="model_id" ref="documents.model_documents_document"/>
-        <field name="binding_model_id" ref="documents.model_documents_document"/>
-        <field name="binding_view_types">list,kanban</field>
-        <field name="state">code</field>
-        <field name="code">
-            if records:
-                records.action_revoke_document()
-        </field>
-
-    </record>
-
-    <record id="action_server_doc_reactivate" model="ir.actions.server">
-        <field name="name">Kích hoạt lại</field>
-        <field name="model_id" ref="documents.model_documents_document"/>
-        <field name="binding_model_id" ref="documents.model_documents_document"/>
-        <field name="binding_view_types">list,kanban</field>
-        <field name="state">code</field>
-        <field name="code">
-            if records:
-                records.action_reactivate_document()
-        </field>
-
-    </record>
 
     <!-- 4. Ribbon "Đã thu hồi" trong Form View (Tạm thời vô hiệu hóa do External ID không khớp)
     <record id="documents_document_view_form_inherit_trasas" model="ir.ui.view">
