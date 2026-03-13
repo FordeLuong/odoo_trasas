@@ -26,7 +26,7 @@
               name="Cấu hình"
               parent="menu_dispatch_management_root"
               sequence="100"
-              groups="group_dispatch_manager"/>
+              groups="group_dispatch_coordinator"/>
 
     <menuitem id="menu_dispatch_type_action"
               name="Loại văn bản"

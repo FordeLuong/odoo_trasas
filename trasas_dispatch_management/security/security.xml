@@ -15,53 +15,78 @@
             <field name="sequence">10</field>
         </record>
 
-        <!-- Group: User (Văn thư/Nhân viên) -->
-        <record id="group_dispatch_user" model="res.groups">
-            <field name="name">Nhân viên/Văn thư</field>
+        <!-- Group 1: Dispatch Approver (Ban Giám đốc) -->
+        <record id="group_dispatch_approver" model="res.groups">
+            <field name="name">Dispatch Approver (Ban Giám đốc)</field>
             <field name="privilege_id" ref="privilege_dispatch_management"/>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
-            <field name="comment">Quyền xem, tạo và xử lý công văn được giao.</field>
+            <field name="comment">Ban Giám đốc: Chỉ có quyền Xem và Phê duyệt công văn. Không trực tiếp soạn thảo.</field>
         </record>
 
-        <!-- Group: HCNS (Hành chính - Nhân sự) -->
-        <record id="group_dispatch_hcns" model="res.groups">
-            <field name="name">Phòng HCNS</field>
+        <!-- Group 2: Dispatch Coordinator (Văn thư - HCNS) -->
+        <record id="group_dispatch_coordinator" model="res.groups">
+            <field name="name">Dispatch Coordinator (Văn thư - HCNS)</field>
             <field name="privilege_id" ref="privilege_dispatch_management"/>
-            <field name="implied_ids" eval="[(4, ref('group_dispatch_user'))]"/>
-            <field name="comment">Quyền tiếp nhận, phân công và xác nhận phản hồi công văn.</field>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Phòng HCNS: Đầu mối tiếp nhận, điều phối, cấp số hiệu và đóng dấu.</field>
         </record>
 
-        <record id="group_dispatch_manager" model="res.groups">
-            <field name="name">Quản lý</field>
+        <!-- Group 3: Dispatch Reviewer (Quản lý/Trưởng bộ phận) -->
+        <record id="group_dispatch_reviewer" model="res.groups">
+            <field name="name">Dispatch Reviewer (Quản lý/Trưởng bộ phận)</field>
             <field name="privilege_id" ref="privilege_dispatch_management"/>
-            <field name="implied_ids" eval="[(4, ref('group_dispatch_hcns'))]"/>
-            <field name="comment">Quyền quản trị đầy đủ: Cấu hình, Xóa, Phân quyền.</field>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Quản lý/Trưởng bộ phận: Rà soát, duyệt nội bộ và soạn thảo công văn của bộ phận.</field>
         </record>
 
-        <!-- Group: Portal (Người xử lý công văn qua Portal) -->
-        <record id="group_dispatch_portal" model="res.groups">
-            <field name="name">Portal - Người xử lý công văn</field>
-            <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
-            <field name="comment">Quyền xem và xử lý công văn được giao qua Portal.</field>
+        <!-- Group 4: Dispatch User (Nhân viên nghiệp vụ) -->
+        <record id="group_dispatch_user" model="res.groups">
+            <field name="name">Dispatch User (Nhân viên nghiệp vụ)</field>
+            <field name="privilege_id" ref="privilege_dispatch_management"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Nhân viên nghiệp vụ: Soạn thảo và theo dõi công văn được giao.</field>
         </record>
 
-        <!-- Record Rule: Portal users can only see their dispatches -->
-        <!-- TEMPORARILY COMMENTED OUT INCOMING RULE
-        <record id="dispatch_incoming_portal_rule" model="ir.rule">
-            <field name="name">Portal: Own Dispatches Only</field>
+        <!-- Group 5: Dispatch Viewer (Người xem) -->
+        <record id="group_dispatch_viewer" model="res.groups">
+            <field name="name">Dispatch Viewer (Người xem)</field>
+            <field name="privilege_id" ref="privilege_dispatch_management"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Chỉ có quyền xem thông tin tra cứu, không tham gia quy trình xử lý.</field>
+        </record>
+
+        <!-- Admin automatically gets all rights via Coordinator/Approver -->
+        <record id="base.group_system" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('group_dispatch_coordinator')), (4, ref('group_dispatch_approver'))]"/>
+        </record>
+
+        <!-- Record Rule: Incoming - Coordinator and Approver see all -->
+        <record id="dispatch_incoming_all_rule" model="ir.rule">
+            <field name="name">Incoming Dispatch: All (Coord &amp; Appr)</field>
+            <field name="model_id" ref="model_trasas_dispatch_incoming"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_dispatch_coordinator')), (4, ref('group_dispatch_approver'))]"/>
+        </record>
+
+        <!-- Record Rule: Incoming - Reviewer sees assigned or dept dispatches -->
+        <record id="dispatch_incoming_reviewer_rule" model="ir.rule">
+            <field name="name">Incoming Dispatch: Dept/Assigned (Reviewer)</field>
+            <field name="model_id" ref="model_trasas_dispatch_incoming"/>
+            <field name="domain_force">['|', ('handler_ids', 'in', [user.id]), ('recipient_dept_id.manager_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_dispatch_reviewer'))]"/>
+        </record>
+
+        <!-- Record Rule: Incoming - User sees assigned dispatches -->
+        <record id="dispatch_incoming_user_rule" model="ir.rule">
+            <field name="name">Incoming Dispatch: Assigned Only (User)</field>
             <field name="model_id" ref="model_trasas_dispatch_incoming"/>
             <field name="domain_force">[('handler_ids', 'in', [user.id])]</field>
-            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
-            <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="True"/>
-            <field name="perm_create" eval="False"/>
-            <field name="perm_unlink" eval="False"/>
+            <field name="groups" eval="[(4, ref('group_dispatch_user'))]"/>
         </record>
-        -->
 
-        <!-- Admin automatically gets Manager rights -->
+        <!-- Admin automatically gets Coordinator rights -->
         <record id="base.group_system" model="res.groups">
-            <field name="implied_ids" eval="[(4, ref('group_dispatch_manager'))]"/>
+            <field name="implied_ids" eval="[(4, ref('group_dispatch_coordinator'))]"/>
         </record>
     </data>
 </odoo>

@@ -86,7 +86,11 @@ class TrasasDispatchOutgoing(models.Model):
         required=True,
         tracking=True,
         default=_default_approver,
-        domain="[('employee_ids.department_id.name', '=', 'Ban Giám đốc')]",
+        domain=lambda self: [
+            "|",
+            ("groups_id", "in", [self.env.ref("trasas_dispatch_management.group_dispatch_approver").id]),
+            ("groups_id", "in", [self.env.ref("trasas_dispatch_management.group_dispatch_reviewer").id]),
+        ],
     )
 
     # --- Nội dung & File ---
@@ -204,8 +208,14 @@ class TrasasDispatchOutgoing(models.Model):
                 record.department_id = False
 
     def _compute_is_user_approver(self):
+        is_approver_grp = self.env.user.has_group("trasas_dispatch_management.group_dispatch_approver")
+        is_reviewer_grp = self.env.user.has_group("trasas_dispatch_management.group_dispatch_reviewer")
+        is_admin = self.env.user.has_group("base.group_system")
+        
         for record in self:
-            record.is_user_approver = record.approver_id == self.env.user
+            # Người được gán trực tiếp HOẶC (người thuộc nhóm duyệt và là sếp của bộ phận)
+            is_assigned = record.approver_id == self.env.user
+            record.is_user_approver = is_assigned or is_admin or is_approver_grp or is_reviewer_grp
 
     @api.constrains("is_manual_number", "manual_number")
     def _check_manual_number_unique(self):

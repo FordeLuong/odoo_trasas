@@ -9,11 +9,12 @@
             <field name="groups" eval="[(4, ref('trasas_dispatch_management.group_dispatch_user'))]"/>
         </record>
 
+        <!-- Coordinator, Approver and Reviewer see all for transparency or management -->
         <record id="dispatch_outgoing_all_rule" model="ir.rule">
             <field name="name">Outgoing Dispatch: All</field>
             <field name="model_id" ref="model_trasas_dispatch_outgoing"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="groups" eval="[(4, ref('trasas_dispatch_management.group_dispatch_hcns'))]"/>
+            <field name="groups" eval="[(4, ref('trasas_dispatch_management.group_dispatch_coordinator')), (4, ref('trasas_dispatch_management.group_dispatch_approver')), (4, ref('trasas_dispatch_management.group_dispatch_reviewer'))]"/>
         </record>
     </data>
 </odoo>
