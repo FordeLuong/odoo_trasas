@@ -230,9 +230,9 @@
                             <field name="name" readonly="1"/>
                         </h1>
                         <h2>
-                            <field name="title" placeholder="Tiêu đề hợp đồng..."/>
+                            <field name="title" placeholder="Tiêu đề hợp đồng..." readonly="state not in ['draft']"/>
                         </h2>
-                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="Thẻ hợp đồng..."/>
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="Thẻ hợp đồng..." readonly="state not in ['draft']"/>
                     </div>
                     
                     <group>

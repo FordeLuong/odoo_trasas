@@ -29,7 +29,7 @@
     ],
     "assets": {
         "web.assets_frontend": [
-            "portal_trasas/static/src/js/portal_approvals.js",
+            "trasas_portal/static/src/js/portal_approvals.js",
         ],
     },
     "demo": [],

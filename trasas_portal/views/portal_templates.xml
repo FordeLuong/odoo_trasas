@@ -3,7 +3,7 @@
     <!-- ========================================== -->
     <!-- CSS TÙY CHỈNH CHO GIỐNG FACEBOOK -->
     <!-- ========================================== -->
-    <template id="portal_trasas_css" inherit_id="portal.frontend_layout" priority="10">
+    <template id="trasas_portal_css" inherit_id="portal.frontend_layout" priority="10">
         <xpath expr="//head" position="inside">
             <style>body {
                     background-color: #f8f9fa; /* Light gray background */
