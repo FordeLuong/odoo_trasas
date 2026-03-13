@@ -11,10 +11,6 @@ class DispatchOutgoingRejectWizard(models.TransientModel):
         string="Công văn",
         required=True,
     )
-    reason_id = fields.Many2one(
-        "trasas.dispatch.outgoing.reject.reason",
-        string="Lý do mẫu",
-    )
     reason = fields.Text(
         string="Chi tiết lý do",
         required=True,
@@ -24,10 +20,8 @@ class DispatchOutgoingRejectWizard(models.TransientModel):
         self.ensure_one()
         dispatch = self.dispatch_id
 
-        # Combine reason_id and text reason
+        # Use only text reason
         reject_reason = self.reason
-        if self.reason_id:
-            reject_reason = f"[{self.reason_id.name}] {self.reason}"
 
         # Add reason as note
         note_msg = f"<b>Lý do từ chối:</b><br/>{reject_reason}"

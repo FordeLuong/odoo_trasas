@@ -7,7 +7,6 @@
             <form string="Lý do từ chối">
                 <group>
                     <field name="dispatch_id" invisible="1"/>
-                    <field name="reason_id" options="{'no_create': True, 'no_open': True}"/>
                     <field name="reason" placeholder="Giải thích thêm lý do từ chối..."/>
                 </group>
                 <footer>
