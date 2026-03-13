@@ -560,10 +560,11 @@ class TrasasContract(models.Model):
         user = self.env.user
         is_admin = user.has_group("base.group_system")
         is_approver_group = user.has_group("trasas_contract_management.group_contract_approver")
+        is_reviewer_group = user.has_group("trasas_contract_management.group_contract_reviewer")
         
         for record in self:
-            # Ban giám đốc được thấy nút phê duyệt của bất kỳ hợp đồng nào đang chờ
-            if is_admin or (is_approver_group and record.state == "waiting"):
+            # Ban giám đốc hoặc GĐ Nghiệp vụ được thấy nút phê duyệt của bất kỳ hợp đồng nào đang chờ
+            if is_admin or ((is_approver_group or is_reviewer_group) and record.state == "waiting"):
                 record.is_current_approver = True
                 continue
                 
@@ -1318,13 +1319,18 @@ class TrasasContract(models.Model):
             # [B10/B14] Tạo Activity theo luồng ký
             if record.signing_flow == "trasas_first":
                 # Luồng A: TRASAS ký trước [B11]
-                # Giao cho Giám đốc
-                approvers = record._get_users_from_group(
-                    "trasas_contract_management.group_contract_approver"
-                )
-                if approvers:
+                # Ưu tiên Người phê duyệt đề xuất
+                approver_user = record.suggested_approver_id
+                if not approver_user:
+                    approvers = record._get_users_from_group(
+                        "trasas_contract_management.group_contract_approver"
+                    )
+                    if approvers:
+                        approver_user = approvers[0]
+
+                if approver_user:
                     record._schedule_activity(
-                        approvers[0].id,
+                        approver_user.id,
                         _("🖊️ Ký hợp đồng TRASAS trước (B11): %s") % record.name,
                         deadline=2,  # +2 ngày
                         note="Ký hợp đồng TRASAS trước",
@@ -1459,13 +1465,19 @@ class TrasasContract(models.Model):
             # Luồng B: Tiếp theo là Giám đốc ký [B15]
             if record.signing_flow == "partner_first":
                 record._close_activities()
-                approvers = record._get_users_from_group(
-                    "trasas_contract_management.group_contract_approver"
-                )
-                if approvers:
+                # Ưu tiên Người phê duyệt đề xuất
+                approver_user = record.suggested_approver_id
+                if not approver_user:
+                    approvers = record._get_users_from_group(
+                        "trasas_contract_management.group_contract_approver"
+                    )
+                    if approvers:
+                        approver_user = approvers[0]
+
+                if approver_user:
                     # Tạo activity cho giám đốc
                     record._schedule_activity(
-                        approvers[0].id,
+                        approver_user.id,
                         _("Ký hợp đồng (đã có chữ ký đối tác) (B15): %s") % record.name,
                         deadline=2,
                         note="Ký hợp đồng (đã có chữ ký đối tác)",

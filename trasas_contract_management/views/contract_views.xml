@@ -37,7 +37,7 @@
                             type="object" 
                             class="btn-success"
                             invisible="state != 'waiting' or not is_current_approver"
-                            groups="trasas_contract_management.group_contract_approver"/>
+                            groups="trasas_contract_management.group_contract_approver,trasas_contract_management.group_contract_reviewer"/>
                     
                     <!-- Nút: Từ chối -->
                     <button name="action_reject" 
@@ -45,7 +45,7 @@
                             type="object" 
                             class="btn-danger"
                             invisible="state != 'waiting' or not is_current_approver"
-                            groups="trasas_contract_management.group_contract_approver"/>
+                            groups="trasas_contract_management.group_contract_approver,trasas_contract_management.group_contract_reviewer"/>
                     
                     <!-- Nút: Bắt đầu ký -->
                     <button name="action_start_signing" 
