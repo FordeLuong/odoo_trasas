@@ -13,6 +13,7 @@
     <record id="group_doc_user" model="res.groups">
         <field name="name">DMS Internal User (Xem)</field>
         <field name="privilege_id" ref="privilege_trasas_document"/>
+        <field name="implied_ids" eval="[(4, ref('documents.group_documents_user'))]"/>
         <field name="comment">Tất cả nhân viên nội bộ: Chỉ có quyền Xem tài liệu</field>
     </record>
 
@@ -20,7 +21,7 @@
     <record id="group_doc_manager" model="res.groups">
         <field name="name">DMS HCNS Manager (Toàn quyền)</field>
         <field name="privilege_id" ref="privilege_trasas_document"/>
-        <field name="implied_ids" eval="[(4, ref('group_doc_user'))]"/>
+        <field name="implied_ids" eval="[(4, ref('group_doc_user')), (4, ref('documents.group_documents_manager'))]"/>
         <field name="comment">HCNS (Lai, Kiều): CRUD tất cả tài liệu, Cấu hình, Truy cập</field>
     </record>
 

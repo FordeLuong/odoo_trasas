@@ -66,7 +66,7 @@ class TrasasDocumentType(models.Model):
                 "type": "folder",
                 "folder_id": root_folder.id,
                 "active": rec.active,
-                "access_internal": "edit",  # Tất cả internal users có thể xem + upload
+                "access_internal": "view",  # Tất cả internal users có thể xem
             }
             # Nếu documents.document có field sequence thì đồng bộ luôn
             if "sequence" in self.env["documents.document"]._fields:
@@ -167,7 +167,7 @@ class DocumentsDocumentInherit(models.Model):
     # =====================================================================
 
     _CONFIDENTIAL_TO_ACCESS = {
-        "public": "edit",  # Tất cả internal user đều thấy + sửa
+        "public": "view",  # Tất cả internal user đều thấy (Xem)
         "restricted": "view",  # Tất cả thấy file, nhưng nội dung bị khóa trừ khi được share
         "only me": "none",  # Chỉ owner thấy
     }
@@ -182,8 +182,8 @@ class DocumentsDocumentInherit(models.Model):
                 cl = vals["confidential_level"]
                 vals["access_internal"] = self._CONFIDENTIAL_TO_ACCESS.get(cl, "none")
             elif "access_internal" not in vals:
-                # Default confidential_level = "public" → access_internal = "edit"
-                vals["access_internal"] = "edit"
+                # Default confidential_level = "public" → access_internal = "view"
+                vals["access_internal"] = "view"
         return super().create(vals_list)
 
     def write(self, vals):
