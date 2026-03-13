@@ -500,33 +500,36 @@ class TrasasContract(models.Model):
                     and not is_admin
                 )
 
-    @api.depends("state", "activity_ids")
+    @api.depends("state", "activity_ids", "reviewer_id", "suggested_reviewer_id")
     def _compute_is_reviewer(self):
         """
         Kiểm tra user hiện tại có phải là người đang được giao rà soát không.
         Dựa trên:
         1. Trạng thái là 'in_review'
-        2. Có một Activity 'To Do' chưa hoàn thành giao cho user hiện tại.
-        3. HOẶC user thuộc nhóm Manager/Reviewer thì thấy nút luôn để hỗ trợ.
+        2. Là người được chỉ định trong form (reviewer_id hoặc suggested_reviewer_id)
+        3. HOẶC có một Activity 'To Do' giao đích danh (dùng cho uỷ quyền/bàn giao)
+        4. HOẶC là Admin/Manager (quyền quản trị)
         """
         current_user_id = self.env.user.id
         todo_type_id = self.env.ref("mail.mail_activity_data_todo").id
         user = self.env.user
         is_admin = user.has_group("base.group_system")
         is_manager = user.has_group("trasas_contract_management.group_contract_manager")
-        is_prof_reviewer = user.has_group("trasas_contract_management.group_contract_reviewer")
         
         for record in self:
-            # Admin, Manager trang DMS, hoặc Reviewer chuyên trách được thấy nút rà soát của mọi hợp đồng
-            if is_admin or ((is_manager or is_prof_reviewer) and record.state == "in_review"):
-                record.is_reviewer = True
-                continue
-                
             if record.state != "in_review":
                 record.is_reviewer = False
                 continue
 
-            # Với User thường, phải có activity giao đích danh
+            # Kiểm tra xem user hiện tại có phải là người được chỉ định rà soát trên form không
+            is_designated = current_user_id in [record.reviewer_id.id, record.suggested_reviewer_id.id]
+            
+            # Admin, Manager hoặc Người được chỉ định đích danh
+            if is_admin or is_manager or is_designated:
+                record.is_reviewer = True
+                continue
+
+            # Với User khác, phải có activity giao đích danh (trường hợp uỷ quyền rà soát)
             activity = record.activity_ids.filtered(
                 lambda a: (
                     a.activity_type_id.id == todo_type_id
