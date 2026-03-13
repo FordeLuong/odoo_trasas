@@ -41,8 +41,7 @@
                 <field name="doc_state" widget="badge" optional="show"
                        decoration-success="doc_state == 'active'" 
                        decoration-warning="doc_state == 'expiring_soon'" 
-                       decoration-danger="doc_state == 'expired'" 
-                       decoration-muted="doc_state == 'revoked'"/>
+                       decoration-danger="doc_state in ('expired', 'revoked')"/>
                 <field name="department_id" optional="hide"/>
                 <field name="responsible_user_id" widget="many2one_avatar_user" optional="hide"/>
             </xpath>
@@ -97,4 +96,17 @@
         </field>
 
     </record>
+
+    <!-- 4. Ribbon "Đã thu hồi" trong Form View (Tạm thời vô hiệu hóa do External ID không khớp)
+    <record id="documents_document_view_form_inherit_trasas" model="ir.ui.view">
+        <field name="name">documents.document.form.inherit.trasas</field>
+        <field name="model">documents.document</field>
+        <field name="inherit_id" ref="documents.view_document_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <widget name="web_ribbon" title="Đã thu hồi" bg_color="text-bg-danger" invisible="doc_state != 'revoked'"/>
+            </xpath>
+        </field>
+    </record>
+    -->
 </odoo>

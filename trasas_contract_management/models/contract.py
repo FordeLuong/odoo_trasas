@@ -291,6 +291,18 @@ class TrasasContract(models.Model):
         help="Người dùng có thể chọn người rà soát khi gửi hợp đồng. Nếu không chọn, hệ thống sẽ gửi cho Trưởng bộ phận.",
     )
 
+    suggested_approver_id = fields.Many2one(
+        "res.users",
+        string="Người phê duyệt đề xuất",
+        domain=lambda self: [
+            "|",
+            ("group_ids", "in", [self.env.ref("trasas_contract_management.group_contract_reviewer").id]),
+            ("group_ids", "in", [self.env.ref("trasas_contract_management.group_contract_approver").id]),
+        ],
+        tracking=True,
+        help="Chọn người phê duyệt từ nhóm Ban Giám đốc hoặc GĐ Nghiệp vụ",
+    )
+
     approved_date = fields.Datetime(
         string="Ngày phê duyệt", readonly=True, tracking=True
     )
@@ -869,13 +881,18 @@ class TrasasContract(models.Model):
             # --- Activity Logic ---
             record._close_activities()
 
-            # Tạo Activity cho Nhóm Approver (Giám đốc) - Chỉ giao cho người đầu tiên để tránh duplicate
-            approvers = record._get_users_from_group(
-                "trasas_contract_management.group_contract_approver"
-            )
-            if approvers:
+            # Tạo Activity cho Người phê duyệt đề xuất hoặc Nhóm Approver (Giám đốc)
+            approver_user = record.suggested_approver_id
+            if not approver_user:
+                approvers = record._get_users_from_group(
+                    "trasas_contract_management.group_contract_approver"
+                )
+                if approvers:
+                    approver_user = approvers[0]
+
+            if approver_user:
                 record._schedule_activity(
-                    approvers[0].id,
+                    approver_user.id,
                     _("⏳ Yêu cầu phê duyệt hợp đồng: %s") % record.name,
                     deadline=1,
                     note="Yêu cầu phê duyệt hợp đồng",
@@ -1148,13 +1165,18 @@ class TrasasContract(models.Model):
             # --- Activity Logic ---
             record._close_activities()
 
-            # [B4] Gửi cho Giám đốc (nhóm Contract Approver) - Chỉ giao cho 1 người
-            approvers = record._get_users_from_group(
-                "trasas_contract_management.group_contract_approver"
-            )
-            if approvers:
+            # [B4] Gửi cho Giám đốc - Ưu tiên người duyệt đề xuất
+            approver_user = record.suggested_approver_id
+            if not approver_user:
+                approvers = record._get_users_from_group(
+                    "trasas_contract_management.group_contract_approver"
+                )
+                if approvers:
+                    approver_user = approvers[0]
+
+            if approver_user:
                 record._schedule_activity(
-                    approvers[0].id,
+                    approver_user.id,
                     _("⏳ Yêu cầu phê duyệt hợp đồng: %s (B4)") % record.name,
                     deadline=2,  # +2 ngày
                 )

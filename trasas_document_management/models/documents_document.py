@@ -246,6 +246,9 @@ class DocumentsDocumentInherit(models.Model):
             if rec.type == "folder":
                 rec.can_access_content = True
                 continue
+            if rec.doc_state == "revoked":
+                rec.can_access_content = False
+                continue
             if is_admin or is_manager:
                 rec.can_access_content = True
                 continue

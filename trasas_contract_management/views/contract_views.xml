@@ -249,6 +249,9 @@
                             <field name="suggested_reviewer_id" 
                                    invisible="state != 'draft'"
                                    options="{'no_create': True}"/>
+                            <field name="suggested_approver_id"
+                                   invisible="state != 'draft'"
+                                   options="{'no_create': True}"/>
                             <field name="user_id" readonly="1"/>
                         </group>
                         
