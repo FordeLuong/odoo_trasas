@@ -10,7 +10,7 @@
 
         Tính năng chính:
         - Tích hợp API nhà cung cấp chữ ký số (configurable provider)
-        - Nhà cung cấp: VNPT-CA
+        - Nhà cung cấp mặc định: VNPT-CA
         - Luồng ký linh hoạt: TRASAS ký trước hoặc Đối tác ký trước
         - Tự động gửi email mời ký kèm link
         - Webhook callback nhận kết quả ký từ nhà cung cấp
@@ -18,7 +18,7 @@
         - Nhà cung cấp Demo tích hợp sẵn để test
     """,
     "author": "LiemPhong",
-    "website": "https://trasas.com",
+    "website": "https://www.psmerp.vn",
     "depends": [
         "base",
         "mail",
@@ -40,6 +40,7 @@
         "views/contract_views.xml",
         "views/menu_views.xml",
     ],
+    "demo": [],
     "installable": True,
     "application": False,
     "auto_install": False,

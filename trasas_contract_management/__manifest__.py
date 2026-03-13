@@ -7,7 +7,7 @@
     "description": """
         Hệ thống Quản lý Hợp đồng TRASAS
         ================================
-        
+
         Tính năng chính:
         - Quản lý vòng đời hợp đồng từ Draft → Signed
         - Quy trình phê duyệt đa cấp
@@ -16,7 +16,7 @@
         - Quản lý file PDF và bản scan
         - Báo cáo và tra cứu nâng cao
         - Tích hợp Chatter để trao đổi nội bộ
-        
+
         Quy trình:
         1. Nhân viên tạo hợp đồng (Draft)
         2. Gửi duyệt (Waiting)
@@ -27,14 +27,14 @@
         7. Hệ thống tự động nhắc nhở khi sắp hết hạn
     """,
     "author": "LiemPhong",
-    "website": "https://trasas.com",
+    "website": "https://www.psmerp.vn",
     "depends": [
         "base",
-        "mail",  # Để có Chatter và gửi email
-        "contacts",  # Để quản lý đối tác
-        "sign",  # Tích hợp chữ ký số
-        "documents",  # Tích hợp ứng dụng Tài liệu (Documents)
-        "hr",  # Để lấy thông tin Trưởng bộ phận
+        "mail",
+        "contacts",
+        "sign",
+        "documents",
+        "hr",
     ],
     "data": [
         # Security
@@ -58,6 +58,7 @@
         "views/res_config_settings_views.xml",
         "views/menu_views.xml",
     ],
+    "demo": [],
     "installable": True,
     "application": True,
     "auto_install": False,
