@@ -40,7 +40,6 @@ def _assign_outgoing_stages(env):
             UPDATE trasas_dispatch_outgoing
             SET stage_id = %s
             WHERE stage_id IS NULL
-            WHERE stage_id IS NULL
             """,
             (draft_stage.id,),
         )
