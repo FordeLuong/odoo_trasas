@@ -8,28 +8,17 @@
             
             <t t-if="record.data.type !== 'folder'">
 
-                <!-- BANNER: Tài liệu đã thu hồi -->
-                <t t-if="record.data.doc_state === 'revoked'">
-                    <div class="w-100 mt-3 p-3 border border-danger rounded bg-danger-subtle text-center">
-                        <i class="fa fa-ban fa-2x text-danger mb-2 d-block"/>
-                        <p class="mb-0 fw-bold text-danger" style="font-size: 1.1em;">TÀI LIỆU ĐÃ THU HỒI</p>
-                        <p class="mb-0 text-muted small">Vui lòng không sử dụng phiên bản tài liệu này.</p>
+                <!-- BANNER: Yêu cầu truy cập (khi chưa có quyền) -->
+                <t t-if="!record.data.can_access_content">
+                    <div class="w-100 mt-3 p-3 border border-warning rounded bg-warning-subtle text-center">
+                        <i class="fa fa-lock fa-2x text-warning mb-2 d-block"/>
+                        <p class="mb-2 fw-bold text-dark">Tài liệu này ở chế độ Giới hạn</p>
+                        <p class="mb-2 text-muted small">Bạn cần được chủ sở hữu cấp quyền để xem nội dung.</p>
+                        <button class="btn btn-warning btn-sm fw-bold"
+                                t-on-click="() => this.onRequestAccess()">
+                            <i class="fa fa-key me-1"/>Xin quyền truy cập
+                        </button>
                     </div>
-                </t>
-
-                <!-- BANNER: Yêu cầu truy cập (khi chưa có quyền và KHÔNG phải bị thu hồi) -->
-                <t t-else="">
-                    <t t-if="!record.data.can_access_content">
-                        <div class="w-100 mt-3 p-3 border border-warning rounded bg-warning-subtle text-center">
-                            <i class="fa fa-lock fa-2x text-warning mb-2 d-block"/>
-                            <p class="mb-2 fw-bold text-dark">Tài liệu này ở chế độ Giới hạn</p>
-                            <p class="mb-2 text-muted small">Bạn cần được chủ sở hữu cấp quyền để xem nội dung.</p>
-                            <button class="btn btn-warning btn-sm fw-bold"
-                                    t-on-click="() => this.onRequestAccess()">
-                                <i class="fa fa-key me-1"/>Xin quyền truy cập
-                            </button>
-                        </div>
-                    </t>
                 </t>
 
                 <!-- THÔNG TIN HỒ SƠ — Chỉ hiện khi có quyền truy cập nội dung -->

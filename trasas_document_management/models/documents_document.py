@@ -144,7 +144,6 @@ class DocumentsDocumentInherit(models.Model):
             ("active", "Hiệu lực"),
             ("expiring_soon", "Sắp hết hạn"),
             ("expired", "Hết hiệu lực"),
-            ("revoked", "Đã thu hồi"),
         ],
         string="Trạng thái hiệu lực",
         default="active",
@@ -245,9 +244,6 @@ class DocumentsDocumentInherit(models.Model):
         for rec in self:
             if rec.type == "folder":
                 rec.can_access_content = True
-                continue
-            if rec.doc_state == "revoked":
-                rec.can_access_content = False
                 continue
             if is_admin or is_manager:
                 rec.can_access_content = True
@@ -387,26 +383,3 @@ class DocumentsDocumentInherit(models.Model):
                 % doc.validity_date.strftime("%d/%m/%Y"),
             )
 
-    # =====================================================================
-    # THU HỒI VĂN BẢN (B12)
-    # =====================================================================
-
-    def action_revoke_document(self):
-        """Thu hồi văn bản — ghi log chatter (không dùng message_post
-        vì Documents tự tạo documents.access → đổi owner)"""
-        for rec in self:
-            rec.write({"doc_state": "revoked"})
-            rec._message_log(
-                body=_(
-                    "🔒 Tài liệu '%s' đã bị thu hồi. Vui lòng không sử dụng phiên bản này."
-                )
-                % rec.name,
-            )
-
-    def action_reactivate_document(self):
-        """Kích hoạt lại tài liệu đã thu hồi"""
-        for rec in self:
-            rec.write({"doc_state": "active"})
-            rec._message_log(
-                body=_("✅ Tài liệu '%s' đã được kích hoạt lại.") % rec.name,
-            )
