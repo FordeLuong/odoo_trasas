@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Thông báo">
+<rect x="0" y="0" width="512" height="512" rx="96" fill="white"/>
+<rect x="32" y="32" width="448" height="448" rx="80" fill="#F4F7FB"/>
+
+<path d="M256 126 C198 126 162 172 162 232 V274 L134 314 V334 H378 V314 L350 274 V232 C350 172 314 126 256 126 Z" fill="#F97316" opacity="0.9" stroke="#3B455A" stroke-width="10" stroke-linejoin="round"/>
+<circle cx="256" cy="364" r="24" fill="#3B455A"/>
+<circle cx="348" cy="156" r="42" fill="#EF4444"/>
+<text x="348" y="169" text-anchor="middle" font-size="42" font-family="Arial, sans-serif" font-weight="700" fill="white">3</text>
+
+</svg>
