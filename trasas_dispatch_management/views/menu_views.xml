@@ -12,7 +12,7 @@
               name="Công văn đến"
               parent="menu_dispatch_management_root"
               sequence="10"
-              groups="trasas_dispatch_management.group_dispatch_user"/>
+              groups="trasas_dispatch_management.group_dispatch_viewer"/>
 
     <menuitem id="menu_dispatch_incoming_action"
               name="Danh sách Công văn"

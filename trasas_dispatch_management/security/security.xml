@@ -15,11 +15,20 @@
         </record>
 
         <!-- Groups -->
+        <!-- Group 0: Dispatch Administrator (Admintrasistor) - Full Access -->
+        <record id="group_dispatch_administrator" model="res.groups">
+            <field name="name">Dispatch Administrator (Admintrasistor)</field>
+            <field name="privilege_id" ref="privilege_dispatch_management"/>
+            <field name="implied_ids" eval="[(4, ref('group_dispatch_coordinator'))]"/>
+            <field name="comment">Toàn quyền xem, xóa, sửa trên module công văn.</field>
+            <field name="sequence">0</field>
+        </record>
+
         <!-- Group 1: Dispatch Approver (Ban Giám đốc) - Cao nhất về duyệt -->
         <record id="group_dispatch_approver" model="res.groups">
             <field name="name">Dispatch Approver (Ban Giám đốc)</field>
             <field name="privilege_id" ref="privilege_dispatch_management"/>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="implied_ids" eval="[(4, ref('group_dispatch_user'))]"/>
             <field name="comment">Ban Giám đốc: Chỉ có quyền Xem và Phê duyệt công văn.</field>
             <field name="sequence">1</field>
         </record>
@@ -28,7 +37,7 @@
         <record id="group_dispatch_coordinator" model="res.groups">
             <field name="name">Dispatch Coordinator (Văn thư - HCNS)</field>
             <field name="privilege_id" ref="privilege_dispatch_management"/>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="implied_ids" eval="[(4, ref('group_dispatch_user'))]"/>
             <field name="comment">Phòng HCNS: Đầu mối tiếp nhận, điều phối, cấp số hiệu và đóng dấu.</field>
             <field name="sequence">2</field>
         </record>
@@ -37,7 +46,7 @@
         <record id="group_dispatch_reviewer" model="res.groups">
             <field name="name">Dispatch Reviewer (Quản lý/Trưởng bộ phận)</field>
             <field name="privilege_id" ref="privilege_dispatch_management"/>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="implied_ids" eval="[(4, ref('group_dispatch_user'))]"/>
             <field name="comment">Quản lý/Trưởng bộ phận: Rà soát, duyệt nội bộ và soạn thảo.</field>
             <field name="sequence">3</field>
         </record>
@@ -46,7 +55,7 @@
         <record id="group_dispatch_user" model="res.groups">
             <field name="name">Dispatch User (Nhân viên nghiệp vụ)</field>
             <field name="privilege_id" ref="privilege_dispatch_management"/>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="implied_ids" eval="[(4, ref('group_dispatch_viewer'))]"/>
             <field name="comment">Nhân viên nghiệp vụ: Soạn thảo và theo dõi công văn.</field>
             <field name="sequence">4</field>
         </record>
@@ -60,17 +69,17 @@
             <field name="sequence">5</field>
         </record>
 
-        <!-- Admin automatically gets all rights via Coordinator/Approver -->
+        <!-- Admin automatically gets all rights via Administrator group -->
         <record id="base.group_system" model="res.groups">
-            <field name="implied_ids" eval="[(4, ref('group_dispatch_coordinator')), (4, ref('group_dispatch_approver'))]"/>
+            <field name="implied_ids" eval="[(4, ref('group_dispatch_administrator'))]"/>
         </record>
 
-        <!-- Record Rule: Incoming - Coordinator and Approver see all -->
+        <!-- Record Rule: Incoming - Coordinator, Approver and Administrator see all -->
         <record id="dispatch_incoming_all_rule" model="ir.rule">
-            <field name="name">Incoming Dispatch: All (Coord &amp; Appr)</field>
+            <field name="name">Incoming Dispatch: All (Coord &amp; Appr &amp; Admin)</field>
             <field name="model_id" ref="model_trasas_dispatch_incoming"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="groups" eval="[(4, ref('group_dispatch_coordinator')), (4, ref('group_dispatch_approver'))]"/>
+            <field name="groups" eval="[(4, ref('group_dispatch_coordinator')), (4, ref('group_dispatch_approver')), (4, ref('group_dispatch_administrator'))]"/>
         </record>
 
         <!-- Record Rule: Incoming - Reviewer sees assigned or managed dispatches -->

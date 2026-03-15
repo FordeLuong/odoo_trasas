@@ -66,18 +66,12 @@ class TrasasDispatchOutgoing(models.Model):
     )
 
     def _default_approver(self):
-        """Mặc định chọn người duyệt đầu tiên tìm thấy trong Ban Giám đốc"""
-        try:
-            dept = self.env.ref(
-                "trasas_demo_users.dep_ban_giam_doc", raise_if_not_found=False
-            )
-            if dept:
-                employee = self.env["hr.employee"].search(
-                    [("department_id", "=", dept.id), ("user_id", "!=", False)], limit=1
-                )
-                return employee.user_id
-        except Exception:
-            return False
+        """Mặc định chọn người đầu tiên trong nhóm Ban Giám đốc"""
+        group_approver = self.env.ref("trasas_dispatch_management.group_dispatch_approver", raise_if_not_found=False)
+        if group_approver:
+            # Tìm trực tiếp qua res.users và field group_ids (Odoo 19 environment)
+            approver = self.env["res.users"].search([("group_ids", "in", [group_approver.id])], limit=1)
+            return approver
         return False
 
     approver_id = fields.Many2one(
@@ -87,9 +81,11 @@ class TrasasDispatchOutgoing(models.Model):
         tracking=True,
         default=_default_approver,
         domain=lambda self: [
-            "|",
-            ("groups_id", "in", [self.env.ref("trasas_dispatch_management.group_dispatch_approver").id]),
-            ("groups_id", "in", [self.env.ref("trasas_dispatch_management.group_dispatch_reviewer").id]),
+            (
+                "group_ids",
+                "in",
+                [self.env.ref("trasas_dispatch_management.group_dispatch_approver").id],
+            ),
         ],
     )
 
@@ -208,14 +204,23 @@ class TrasasDispatchOutgoing(models.Model):
                 record.department_id = False
 
     def _compute_is_user_approver(self):
-        is_approver_grp = self.env.user.has_group("trasas_dispatch_management.group_dispatch_approver")
-        is_reviewer_grp = self.env.user.has_group("trasas_dispatch_management.group_dispatch_reviewer")
+        is_approver_grp = self.env.user.has_group(
+            "trasas_dispatch_management.group_dispatch_approver"
+        )
+        is_reviewer_grp = self.env.user.has_group(
+            "trasas_dispatch_management.group_dispatch_reviewer"
+        )
+        is_dispatch_admin = self.env.user.has_group(
+            "trasas_dispatch_management.group_dispatch_administrator"
+        )
         is_admin = self.env.user.has_group("base.group_system")
-        
+
         for record in self:
-            # Người được gán trực tiếp HOẶC (người thuộc nhóm duyệt và là sếp của bộ phận)
+            # Người được gán trực tiếp HOẶC (người thuộc nhóm duyệt/admin)
             is_assigned = record.approver_id == self.env.user
-            record.is_user_approver = is_assigned or is_admin or is_approver_grp or is_reviewer_grp
+            record.is_user_approver = (
+                is_assigned or is_admin or is_dispatch_admin or is_approver_grp or is_reviewer_grp
+            )
 
     @api.constrains("is_manual_number", "manual_number")
     def _check_manual_number_unique(self):
