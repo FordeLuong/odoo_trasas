@@ -109,12 +109,17 @@ class OutgoingDispatchPortal(CustomerPortal):
                     f"/official_file/{dispatch.official_filename or 'official'}?download=true"
                 )
 
+            # Lấy danh sách Người duyệt (Ban Giám đốc)
+            group_approver = request.env.ref("trasas_dispatch_management.group_dispatch_approver", raise_if_not_found=False)
+            approvers = request.env["res.users"].sudo().search([("group_ids", "in", [group_approver.id])]) if group_approver else []
+
             values = {
                 "dispatch": dispatch,
                 "page_name": "outgoing_dispatch",
                 "user": request.env.user,
                 "draft_file_url": draft_file_url,
                 "official_file_url": official_file_url,
+                "approvers": approvers,
             }
             return request.render(
                 "trasas_dispatch_outgoing.portal_outgoing_dispatch_detail", values
@@ -149,6 +154,11 @@ class OutgoingDispatchPortal(CustomerPortal):
 
                 vals["draft_file"] = base64.b64encode(draft_file.read())
                 vals["draft_filename"] = draft_file.filename
+
+            # Handle approver selection
+            approver_id = post.get("approver_id")
+            if approver_id:
+                vals["approver_id"] = int(approver_id)
 
             if vals:
                 dispatch.write(vals)
