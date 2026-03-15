@@ -104,11 +104,15 @@
         <field name="arch" type="xml">
             <form string="Công văn đến">
                 <header>
+                    <field name="state" invisible="1"/>
+                    <field name="can_assign_manager" invisible="1"/>
+                    <field name="response_required" invisible="1"/>
+                    
                     <!-- HCNS: Tiếp nhận công văn -->
                     <button name="action_confirm" string="Tiếp nhận" type="object" 
                             class="oe_highlight" 
                             invisible="state != 'draft'"
-                            groups="trasas_dispatch_management.group_dispatch_hcns,trasas_dispatch_management.group_dispatch_manager"/>
+                            groups="trasas_dispatch_management.group_dispatch_coordinator,trasas_dispatch_management.group_dispatch_administrator"/>
                     
                     <!-- Quản lý: Phân công nhân viên -->
                     <button name="action_manager_assign" string="Phân công nhân viên" type="object"
@@ -124,21 +128,21 @@
                     <button name="action_confirm_response" string="Xác nhận phản hồi" type="object"
                             class="oe_highlight"
                             invisible="state != 'waiting_confirmation'"
-                            groups="trasas_dispatch_management.group_dispatch_hcns,trasas_dispatch_management.group_dispatch_manager"/>
+                            groups="trasas_dispatch_management.group_dispatch_coordinator,trasas_dispatch_management.group_dispatch_administrator"/>
                     
                     <!-- Manager/HCNS: Hoàn thành trực tiếp (công văn không cần phản hồi) -->
                     <button name="action_done" string="Hoàn thành" type="object"
                             class="oe_highlight"
                             invisible="state != 'processing' or response_required"
-                            groups="trasas_dispatch_management.group_dispatch_hcns,trasas_dispatch_management.group_dispatch_manager"/>
+                            groups="trasas_dispatch_management.group_dispatch_coordinator,trasas_dispatch_management.group_dispatch_administrator"/>
                     
                     <button name="action_cancel" string="Hủy bỏ" type="object" 
                             invisible="state == 'cancel'"
-                            groups="trasas_dispatch_management.group_dispatch_hcns,trasas_dispatch_management.group_dispatch_manager"/>
+                            groups="trasas_dispatch_management.group_dispatch_coordinator,trasas_dispatch_management.group_dispatch_administrator"/>
                     
                     <button name="action_draft" string="Về nháp" type="object" 
                             invisible="state == 'draft'"
-                            groups="trasas_dispatch_management.group_dispatch_manager"/>
+                            groups="trasas_dispatch_management.group_dispatch_reviewer,trasas_dispatch_management.group_dispatch_administrator"/>
                     
                     <field name="stage_id" widget="statusbar" 
                            options="{'clickable': 1}"/>

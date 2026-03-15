@@ -134,11 +134,13 @@ class TrasasDispatchIncoming(models.Model):
     )
 
     def _compute_can_assign_manager(self):
-        is_admin_or_manager = self.env.user.has_group(
-            "trasas_dispatch_management.group_dispatch_manager"
+        is_admin_or_reviewer = self.env.user.has_group(
+            "trasas_dispatch_management.group_dispatch_administrator"
+        ) or self.env.user.has_group(
+            "trasas_dispatch_management.group_dispatch_reviewer"
         )
         for record in self:
-            record.can_assign_manager = is_admin_or_manager or (
+            record.can_assign_manager = is_admin_or_reviewer or (
                 record.manager_id and record.manager_id == self.env.user
             )
 
