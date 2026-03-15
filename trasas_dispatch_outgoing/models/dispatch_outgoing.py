@@ -351,33 +351,20 @@ class TrasasDispatchOutgoing(models.Model):
         if not stage_to_promulgate:
             raise UserError("Chưa cấu hình giai đoạn 'Chờ ban hành'!")
 
+        # Tìm người dùng thuộc nhóm Dispatch Coordinator (Văn thư - HCNS)
+        group_hcns = self.env.ref("trasas_dispatch_management.group_dispatch_coordinator", raise_if_not_found=False)
+        if not group_hcns:
+            raise UserError("Không tìm thấy nhóm bảo mật 'Dispatch Coordinator (Văn thư - HCNS)'. Vui lòng kiểm tra lại cấu hình hệ thống.")
+
+        hcns_users = self.env["res.users"].search([("group_ids", "in", [group_hcns.id])])
+
+        if not hcns_users:
+            raise ValidationError(
+                "Chưa có nhân viên nào được phân vào nhóm 'Dispatch Coordinator (Văn thư - HCNS)'. Vui lòng gán nhóm trước khi thực hiện."
+            )
+
         for record in self:
-            # Tìm phòng HCNS
-            hcns_dept = self.env.ref(
-                "trasas_demo_users.dep_hcns", raise_if_not_found=False
-            )
-            if not hcns_dept:
-                hcns_dept = self.env["hr.department"].search(
-                    [("name", "ilike", "Hành chính")], limit=1
-                )
-
-            if not hcns_dept:
-                raise ValidationError(
-                    "Không tìm thấy phòng Hành chính Nhân sự. Vui lòng kiểm tra lại hệ thống phòng ban."
-                )
-
-            # Lấy tất cả nhân viên trong phòng HCNS
-            hcns_employees = self.env["hr.employee"].search(
-                [("department_id", "=", hcns_dept.id), ("user_id", "!=", False)]
-            )
-            hcns_users = hcns_employees.mapped("user_id")
-
-            if not hcns_users:
-                raise ValidationError(
-                    "Phòng Hành chính Nhân sự chưa có nhân viên nào được phân quyền User."
-                )
-
-            # Tạo Activity cho TẤT CẢ nhân viên trong phòng HCNS
+            # Tạo Activity cho TẤT CẢ nhân viên trong nhóm HCNS
             for user in hcns_users:
                 record.activity_schedule(
                     "mail.mail_activity_data_todo",
