@@ -5,11 +5,9 @@
     "category": "Document Management",
     "summary": "Module mở rộng: Quản lý Công văn đi",
     "description": """
-        Hệ thống Quản lý Công văn Đi TRASAS
+        Hệ thống Quản lý Công văn Đi
         ====================================
-
-        Mở rộng từ module Quản lý Công văn (trasas_dispatch_management).
-
+        
         Tính năng chính:
         - Soạn thảo, trình ký công văn đi
         - Quản lý quy trình phê duyệt & ban hành

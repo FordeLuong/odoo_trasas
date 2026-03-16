@@ -3,9 +3,9 @@
     "name": "TRASAS Digital Signature",
     "version": "19.0.1.0.0",
     "category": "Contract Management",
-    "summary": "Chữ ký số - Tích hợp API nhà cung cấp chữ ký số cho hợp đồng TRASAS",
+    "summary": "Chữ ký số - Tích hợp API nhà cung cấp chữ ký số",
     "description": """
-        Hệ thống Chữ ký số TRASAS
+        Hệ thống Chữ ký số
         ==========================
 
         Tính năng chính:

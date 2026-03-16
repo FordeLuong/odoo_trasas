@@ -3,11 +3,11 @@
     "name": "TRASAS Contract Management",
     "version": "19.0.1.0.1",
     "category": "Contract Management",
-    "summary": "Quản lý hợp đồng TRASAS - Từ soạn thảo đến ký kết và theo dõi",
+    "summary": "Quản lý hợp đồng",
     "description": """
-        Hệ thống Quản lý Hợp đồng TRASAS
+        Hệ thống Quản lý Hợp đồng
         ================================
-
+        
         Tính năng chính:
         - Quản lý vòng đời hợp đồng từ Draft → Signed
         - Quy trình phê duyệt đa cấp

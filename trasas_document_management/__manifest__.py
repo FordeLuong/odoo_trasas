@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
 {
-    "name": "TRASAS - Quản lý Hồ sơ & Tài liệu (DMS)",
+    "name": "TRASAS Quản lý hồ sơ, tài liệu",
     "version": "19.0.1.1.0",
     "category": "Document Management",
-    "summary": "Quản lý hồ sơ, tài liệu nội bộ với quy trình phê duyệt và truy cập có giới hạn",
+    "summary": "Quản lý hồ sơ, tài liệu nội bộ với quy trình phê duyệt và phần quyền truy cập",
     "description": """
-        Module Quản lý Hồ sơ TRASAS cho Odoo 19 Enterprise
+        Hệ thống Quản lý Hồ sơ 
         ====================================================
 
-        Tính năng:
-        - Kế thừa Documents Enterprise - tận dụng Workspace, Upload, Phiên bản
-        - Bổ sung thông tin cơ bản trên tài liệu (Loại chứng từ, Ngày cấp, Hiệu lực...)
+        Tính năng chính:
+        - Quản lý tài liệu, phiên bản,...
         - Quy trình yêu cầu truy cập có giới hạn thời gian
-        - Phê duyệt truy cập bởi HCNS
-        - BGĐ truy cập trực tiếp - bypass phê duyệt
+        - Phê duyệt truy cập trực tiếp đa cấp bậc
         - Tự động cảnh báo tài liệu sắp hết hiệu lực
-        - Thu hồi văn bản hết hiệu lực + thông báo phòng ban
-        - Ghi nhận lịch sử truy cập (Audit Trail)
-        - Báo cáo ISO (Danh mục hiệu lực, Ma trận phân phối, LS truy cập)
+        - Thu hồi văn bản hết hiệu lực và thông báo phòng ban
+        - Ghi nhận lịch sử truy cập
+        - Báo cáo ISO
     """,
     "author": "LiemPhong",
     "website": "https://www.psmerp.vn",

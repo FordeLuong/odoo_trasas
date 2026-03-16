@@ -3,9 +3,9 @@
     "name": "TRASAS Fleet Management",
     "version": "19.0.1.0.0",
     "category": "Fleet",
-    "summary": "Quản lý phương tiện nội bộ TRASAS",
+    "summary": "Quản lý phương tiện nội bộ",
     "description": """
-        Hệ thống Quản lý Phương tiện TRASAS
+        Hệ thống Quản lý Phương tiện
         ====================================
 
         Tính năng chính:

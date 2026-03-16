@@ -5,7 +5,7 @@
     "category": "Document Management",
     "summary": "Quản lý công văn đến và đi",
     "description": """
-        Hệ thống Quản lý Công văn TRASAS
+        Hệ thống Quản lý Công văn
         ================================
 
         Tính năng chính:

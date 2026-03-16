@@ -3,9 +3,9 @@
     "name": "TRASAS Portal",
     "version": "19.0.1.3.0",
     "category": "Website/Website",
-    "summary": "TRASAS Portal - Giao diện Portal cho nhân viên",
+    "summary": "Cổng thông tin cho nhân viên",
     "description": """
-        Portal TRASAS
+        Hệ thống Cổng thông tin
         =============
 
         Tính năng chính:

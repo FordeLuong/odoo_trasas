@@ -3,9 +3,9 @@
     "name": "TRASAS Asset Management",
     "version": "19.0.2.0.0",
     "category": "Asset Management",
-    "summary": "Quản lý thông tin tài sản TRASAS — Nhà cửa, máy móc, TBVP, vô hình",
+    "summary": "Quản lý thông tin tài sản",
     "description": """
-        Hệ thống Quản lý Thông tin Tài sản TRASAS
+        Hệ thống Quản lý Thông tin Tài sản
         ==========================================
 
         Tính năng chính:
