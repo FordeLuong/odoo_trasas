@@ -26,17 +26,7 @@
         <field name="comment">Phòng Vận hành - Tạo hợp đồng, gửi duyệt, theo dõi ký kết</field>
     </record>
     
-    <!-- Nhóm 2: GĐ Nghiệp vụ - Contract Reviewer -->
-    <!-- Kế thừa group_contract_user để có quyền Create từ ACL -->
-    <record id="group_contract_reviewer" model="res.groups">
-        <field name="name">Contract Reviewer (GĐ Nghiệp vụ)</field>
-        <field name="privilege_id" ref="privilege_trasas_contract"/>
-        <!-- Kế thừa từ Ban Giám đốc (Duyệt) và User (Tạo mới) -->
-        <field name="implied_ids" eval="[(4, ref('group_contract_user')), (4, ref('group_contract_approver'))]"/>
-        <field name="comment">GĐ Nghiệp vụ - Anh Bình: Rà soát, chỉnh sửa hợp đồng trước khi trình TGĐ</field>
-    </record>
-
-    <!-- Nhóm 3: Ban Giám đốc (TGĐ) - Contract Approver -->
+    <!-- Nhóm 2: Ban Giám đốc (TGĐ) - Contract Approver -->
     <!-- KHÔNG kế thừa group_contract_user để triệt tiêu quyền Create -->
     <record id="group_contract_approver" model="res.groups">
         <field name="name">Contract Approver (Ban Giám đốc)</field>
@@ -44,6 +34,16 @@
         <!-- CHỈ kế thừa Sign để xem yêu cầu ký, TUYỆT ĐỐI KHÔNG kế thừa User -->
         <field name="implied_ids" eval="[(4, ref('sign.group_sign_user'))]"/>
         <field name="comment">Ban Giám đốc - TGĐ: Mười, Huy - CHỈ phê duyệt/từ chối, ký hợp đồng</field>
+    </record>
+
+    <!-- Nhóm 3: GĐ Nghiệp vụ - Contract Reviewer -->
+    <!-- Kế thừa group_contract_user để có quyền Create từ ACL -->
+    <record id="group_contract_reviewer" model="res.groups">
+        <field name="name">Contract Reviewer (GĐ Nghiệp vụ)</field>
+        <field name="privilege_id" ref="privilege_trasas_contract"/>
+        <!-- Kế thừa từ Ban Giám đốc (Duyệt) và User (Tạo mới) -->
+        <field name="implied_ids" eval="[(4, ref('group_contract_user')), (4, ref('group_contract_approver'))]"/>
+        <field name="comment">GĐ Nghiệp vụ - Anh Bình: Rà soát, chỉnh sửa hợp đồng trước khi trình TGĐ</field>
     </record>
     
     <!-- Nhóm 4: HCNS/Admin - Contract Manager -->

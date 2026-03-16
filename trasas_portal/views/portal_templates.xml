@@ -39,6 +39,25 @@
                     transition: box-shadow 0.2s, transform 0.2s;
                     border: 1px solid #f0f0f0;
                     height: 100%;
+                    position: relative;
+                }
+                .app-badge {
+                    position: absolute;
+                    top: -8px;
+                    right: -8px;
+                    background-color: #dc3545;
+                    color: white;
+                    border-radius: 50%;
+                    width: 22px;
+                    height: 22px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 11px;
+                    font-weight: bold;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    border: 2px solid white;
+                    z-index: 10;
                 }
                 .app-card:hover {
                     box-shadow: 0 4px 12px rgba(0,0,0,0.08);

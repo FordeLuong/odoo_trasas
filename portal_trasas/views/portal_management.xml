@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <!-- Obsolete file, keeping empty so Odoo handles garbage collection of old views during upgrade -->
-</odoo>

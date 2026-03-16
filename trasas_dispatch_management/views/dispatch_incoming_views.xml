@@ -24,6 +24,7 @@
                 <field name="sender_id"/>
                 <field name="deadline"/>
                 <field name="urgency_id"/>
+                <field name="urgency_color"/>
                 <field name="state"/>
                 <field name="is_overdue"/>
                 <field name="handler_ids"/>
@@ -40,7 +41,7 @@
                                     </div>
                                 </div>
                                 <div class="o_kanban_record_top_right">
-                                    <field name="urgency_id" widget="color_picker" readonly="1"/>
+                                    <field name="urgency_color" widget="color_picker" readonly="1"/>
                                 </div>
                             </div>
                             <div class="o_kanban_record_body">

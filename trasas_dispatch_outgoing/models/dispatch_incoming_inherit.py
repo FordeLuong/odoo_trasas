@@ -32,34 +32,49 @@ class TrasasDispatchIncoming(models.Model):
         }
 
     def action_confirm(self):
-        """Override to auto-create outgoing dispatch if response is required"""
+        """Override to auto-create outgoing dispatch if response is required (Direct flow)"""
         res = super().action_confirm()
-
         for record in self:
-            # TH1: Tự động tạo công văn đi phản hồi khi cần
-            if record.response_required and record.handler_ids:
-                handler = record.handler_ids[0]
-                subject = "Phản hồi công văn số %s – %s" % (
-                    record.name,
-                    record.extract_content or "",
-                )
-                existing_outgoing = self.env["trasas.dispatch.outgoing"].search(
-                    [("incoming_dispatch_id", "=", record.id)], limit=1
-                )
-                if not existing_outgoing:
-                    self.env["trasas.dispatch.outgoing"].create(
-                        {
-                            "subject": subject,
-                            "incoming_dispatch_id": record.id,
-                            "recipient_id": record.sender_id.id,
-                            "drafter_id": handler.id,
-                        }
-                    )
-                    record.message_post(
-                        body=_(
-                            "Hệ thống đã tự động tạo Công văn đi phản hồi cho người xử lý %s."
-                        )
-                        % handler.name,
-                        subtype_xmlid="mail.mt_note",
-                    )
+            # Chỉ tạo nếu không qua bước Quản lý phân công (đã có handler_ids ngay từ đầu)
+            if not record.is_via_manager and record.response_required and record.handler_ids:
+                record._auto_create_outgoing_dispatch()
         return res
+
+    def action_manager_assign(self):
+        """Override to auto-create outgoing dispatch when Manager assigns handlers"""
+        res = super().action_manager_assign()
+        for record in self:
+            if record.response_required and record.handler_ids:
+                record._auto_create_outgoing_dispatch()
+        return res
+
+    def _auto_create_outgoing_dispatch(self):
+        """Helper to create a draft outgoing dispatch based on incoming data"""
+        self.ensure_one()
+        if not self.handler_ids:
+            return
+
+        # Check if already exists to avoid duplication
+        existing = self.env["trasas.dispatch.outgoing"].search(
+            [("incoming_dispatch_id", "=", self.id)], limit=1
+        )
+        if existing:
+            return
+
+        handler = self.handler_ids[0]
+        subject = _("Phản hồi công văn số %s – %s") % (
+            self.dispatch_number or self.name,
+            self.extract_content or "",
+        )
+        
+        self.env["trasas.dispatch.outgoing"].create({
+            "subject": subject,
+            "incoming_dispatch_id": self.id,
+            "recipient_id": self.sender_id.id,
+            "drafter_id": handler.id,
+        })
+        
+        self.message_post(
+            body=_("Hệ thống đã tự động tạo Công văn đi dự thảo cho người xử lý %s.") % handler.name,
+            subtype_xmlid="mail.mt_note",
+        )

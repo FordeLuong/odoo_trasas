@@ -59,6 +59,7 @@ class TrasasDispatchIncoming(models.Model):
         ),
         tracking=True,
     )
+    urgency_color = fields.Integer(related="urgency_id.color", string="Màu độ khẩn")
 
     extract_content = fields.Text(string="Trích yếu", required=True)
 
@@ -252,7 +253,9 @@ class TrasasDispatchIncoming(models.Model):
                         "message": f"Số công văn thủ công '{self.manual_number}' đã tồn tại trong hệ thống!",
                     }
                 }
-            self.dispatch_number = self.manual_number
+            self.name = self.manual_number
+        else:
+            self.name = "New"
 
     @api.constrains("dispatch_date", "date_received", "deadline")
     def _check_dates(self):
@@ -280,8 +283,6 @@ class TrasasDispatchIncoming(models.Model):
             if vals.get("name", "New") == "New" or vals.get("name") == _("New"):
                 if vals.get("is_manual_number") and vals.get("manual_number"):
                     vals["name"] = vals["manual_number"]
-                    if not vals.get("dispatch_number"):
-                        vals["dispatch_number"] = vals["manual_number"]
                 else:
                     vals["name"] = self.env["ir.sequence"].next_by_code(
                         "trasas.dispatch.incoming"

@@ -14,10 +14,13 @@
 
     <!-- Add Outgoing Dispatch Card to New Portal App Grid -->
     <template id="portal_sidebar_outgoing_dispatch" name="Portal Apps: Outgoing Dispatch"
-              inherit_id="portal_trasas.portal_my_home_inherit" priority="15">
+              inherit_id="trasas_portal.portal_my_home_inherit" priority="15">
         <xpath expr="//div[@id='portal_app_grid']" position="inside">
             <div class="col-12 col-md-6 col-xl-4 mb-3">
                 <a href="/my/outgoing_dispatches" class="app-card" style="border-left: 4px solid #1565c0;">
+                    <t t-if="outgoing_dispatch_count">
+                        <span class="app-badge"><t t-esc="outgoing_dispatch_count"/></span>
+                    </t>
                     <div class="app-icon" style="background-color: #1565c0;">
                         <i class="fa fa-arrow-up"/>
                     </div>
@@ -31,7 +34,7 @@
     </template>
 
     <!-- Empty template to override old mobile grid without parse error -->
-    <template id="portal_mobile_outgoing_dispatch" inherit_id="portal_trasas.portal_my_home_inherit">
+    <template id="portal_mobile_outgoing_dispatch" inherit_id="trasas_portal.portal_my_home_inherit">
         <xpath expr="." position="inside">
         </xpath>
     </template>

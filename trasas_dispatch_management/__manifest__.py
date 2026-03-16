@@ -18,7 +18,7 @@
     """,
     "author": "LiemPhong",
     "website": "https://www.psmerp.vn",
-    "depends": ["base", "mail", "contacts", "portal", "portal_trasas", "documents"],
+    "depends": ["base", "mail", "contacts", "portal", "trasas_portal", "documents"],
     "data": [
         # Security
         "security/security.xml",
