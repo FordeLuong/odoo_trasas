@@ -295,8 +295,16 @@ class TrasasContract(models.Model):
         string="Người phê duyệt đề xuất",
         domain=lambda self: [
             "|",
-            ("group_ids", "in", [self.env.ref("trasas_contract_management.group_contract_reviewer").id]),
-            ("group_ids", "in", [self.env.ref("trasas_contract_management.group_contract_approver").id]),
+            (
+                "group_ids",
+                "in",
+                [self.env.ref("trasas_contract_management.group_contract_reviewer").id],
+            ),
+            (
+                "group_ids",
+                "in",
+                [self.env.ref("trasas_contract_management.group_contract_approver").id],
+            ),
         ],
         tracking=True,
         help="Chọn người phê duyệt từ nhóm Ban Giám đốc hoặc GĐ Nghiệp vụ",
@@ -467,8 +475,12 @@ class TrasasContract(models.Model):
         is_admin = user.has_group("base.group_system")
         is_user = user.has_group("trasas_contract_management.group_contract_user")
         is_manager = user.has_group("trasas_contract_management.group_contract_manager")
-        is_approver = user.has_group("trasas_contract_management.group_contract_approver")
-        is_reviewer = user.has_group("trasas_contract_management.group_contract_reviewer")
+        is_approver = user.has_group(
+            "trasas_contract_management.group_contract_approver"
+        )
+        is_reviewer = user.has_group(
+            "trasas_contract_management.group_contract_reviewer"
+        )
 
         for record in self:
             # Hiện cho User nhưng ẩn cho Manager/Approver/Reviewer (dù có inherit)
@@ -476,7 +488,9 @@ class TrasasContract(models.Model):
             if is_admin:
                 record.is_operation_user = True
             else:
-                record.is_operation_user = is_user and not (is_manager or is_approver or is_reviewer)
+                record.is_operation_user = is_user and not (
+                    is_manager or is_approver or is_reviewer
+                )
 
     def _compute_is_cancel_dept_approver(self):
         """Kiểm tra user hiện tại có phải trưởng phòng của người yêu cầu hủy"""
@@ -540,15 +554,18 @@ class TrasasContract(models.Model):
         todo_type_id = self.env.ref("mail.mail_activity_data_todo").id
         user = self.env.user
         is_admin = user.has_group("base.group_system")
-        
+
         for record in self:
             if record.state != "in_review":
                 record.is_reviewer = False
                 continue
 
             # Kiểm tra xem user hiện tại có phải là người được chỉ định rà soát trên form không
-            is_designated = current_user_id in [record.reviewer_id.id, record.suggested_reviewer_id.id]
-            
+            is_designated = current_user_id in [
+                record.reviewer_id.id,
+                record.suggested_reviewer_id.id,
+            ]
+
             # Chỉ Admin hoặc Người được chỉ định đích danh mới thấy nút
             if is_admin or is_designated:
                 record.is_reviewer = True
@@ -580,15 +597,21 @@ class TrasasContract(models.Model):
         todo_type_id = self.env.ref("mail.mail_activity_data_todo").id
         user = self.env.user
         is_admin = user.has_group("base.group_system")
-        is_approver_group = user.has_group("trasas_contract_management.group_contract_approver")
-        is_reviewer_group = user.has_group("trasas_contract_management.group_contract_reviewer")
-        
+        is_approver_group = user.has_group(
+            "trasas_contract_management.group_contract_approver"
+        )
+        is_reviewer_group = user.has_group(
+            "trasas_contract_management.group_contract_reviewer"
+        )
+
         for record in self:
             # Ban giám đốc hoặc GĐ Nghiệp vụ được thấy nút phê duyệt của bất kỳ hợp đồng nào đang chờ
-            if is_admin or ((is_approver_group or is_reviewer_group) and record.state == "waiting"):
+            if is_admin or (
+                (is_approver_group or is_reviewer_group) and record.state == "waiting"
+            ):
                 record.is_current_approver = True
                 continue
-                
+
             if record.state != "waiting":
                 record.is_current_approver = False
                 continue
@@ -1122,7 +1145,9 @@ class TrasasContract(models.Model):
             # [B3] Tạo Activity cho Người rà soát đề xuất (Bắt buộc)
             reviewer = record.suggested_reviewer_id
             if not reviewer:
-                raise UserError(_("Vui lòng chọn Người rà soát đề xuất trước khi gửi rà soát!"))
+                raise UserError(
+                    _("Vui lòng chọn Người rà soát đề xuất trước khi gửi rà soát!")
+                )
 
             # Tạo Activity rà soát
             record._schedule_activity(
@@ -1131,7 +1156,7 @@ class TrasasContract(models.Model):
                 deadline=1,
                 note="Vui lòng rà soát hợp đồng",
             )
-            
+
             # Gửi email yêu cầu rà soát
             template = self.env.ref(
                 "trasas_contract_management.email_template_contract_review_request",
@@ -1648,14 +1673,18 @@ class TrasasContract(models.Model):
                 subject=_("Trưởng phòng duyệt hủy"),
             )
 
-            # Gửi Activity cho Ban Giám đốc
-            approvers = record._get_users_from_group(
-                "trasas_contract_management.group_contract_approver"
-            )
-            # Khôi phục trạng thái Hủy từ Lưu Kho cũng cần duyệt
-            if approvers:
+            # Gửi Activity cho Ban Giám đốc (Ưu tiên người đã duyệt hợp đồng này)
+            approver_user = record.approver_id
+            if not approver_user:
+                approvers = record._get_users_from_group(
+                    "trasas_contract_management.group_contract_approver"
+                )
+                if approvers:
+                    approver_user = approvers[0]
+
+            if approver_user:
                 record._schedule_activity(
-                    approvers[0].id,
+                    approver_user.id,
                     _("⚠️ Duyệt yêu cầu hủy hợp đồng (BGĐ): %s") % record.name,
                     deadline=1,
                     note="Yêu cầu hủy hợp đồng - Cần Ban Giám đốc duyệt",
@@ -1796,20 +1825,25 @@ class TrasasContract(models.Model):
 
             record.message_post(
                 body=_(
-                    "✅ Trưởng phòng %s đã duyệt yêu cầu đưa về nháp. Chuyển sang chờ Ban Giám đốc duyệt."
+                    "Trưởng phòng %s đã duyệt yêu cầu đưa về nháp. Chuyển sang chờ Ban Giám đốc duyệt."
                 )
                 % self.env.user.name,
                 subject=_("Trưởng phòng Duyệt về nháp"),
             )
 
-            # Gửi Activity cho Ban Giám đốc
-            approvers = record._get_users_from_group(
-                "trasas_contract_management.group_contract_approver"
-            )
-            if approvers:
+            # Gửi Activity cho Ban Giám đốc (Ưu tiên người đã duyệt hợp đồng này)
+            approver_user = record.approver_id
+            if not approver_user:
+                approvers = record._get_users_from_group(
+                    "trasas_contract_management.group_contract_approver"
+                )
+                if approvers:
+                    approver_user = approvers[0]
+
+            if approver_user:
                 record._schedule_activity(
-                    approvers[0].id,
-                    _("⚠️ Duyệt yêu cầu đưa hợp đồng về nháp (BGĐ): %s") % record.name,
+                    approver_user.id,
+                    _("Duyệt yêu cầu đưa hợp đồng về nháp (BGĐ): %s") % record.name,
                     deadline=1,
                     note="Yêu cầu đưa hợp đồng về nháp - Cần Ban Giám đốc duyệt",
                 )
