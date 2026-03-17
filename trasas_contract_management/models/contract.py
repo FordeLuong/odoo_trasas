@@ -45,6 +45,12 @@ class TrasasContract(models.Model):
         help="True nếu user hiện tại là người đang được giao phê duyệt hợp đồng này",
     )
 
+    is_operation_user = fields.Boolean(
+        string="Is Operation User",
+        compute="_compute_is_operation_user",
+        help="True nếu user hiện tại thuộc nhóm Vận hành và KHÔNG thuộc nhóm HCNS/Lãnh đạo",
+    )
+
     kanban_state = fields.Selection(
         [
             ("normal", "Bình thường"),
@@ -451,6 +457,26 @@ class TrasasContract(models.Model):
         )
         for record in self:
             record.is_approver = is_approver and not is_admin
+
+    def _compute_is_operation_user(self):
+        """
+        Kiểm tra user có thuộc nhóm Vận hành thuần túy không (để hiện nút Xác nhận hoàn tất)
+        Ẩn đối với HCNS, BGĐ và GĐ Nghiệp vụ theo yêu cầu.
+        """
+        user = self.env.user
+        is_admin = user.has_group("base.group_system")
+        is_user = user.has_group("trasas_contract_management.group_contract_user")
+        is_manager = user.has_group("trasas_contract_management.group_contract_manager")
+        is_approver = user.has_group("trasas_contract_management.group_contract_approver")
+        is_reviewer = user.has_group("trasas_contract_management.group_contract_reviewer")
+
+        for record in self:
+            # Hiện cho User nhưng ẩn cho Manager/Approver/Reviewer (dù có inherit)
+            # Admin vẫn cho hiện để quản trị
+            if is_admin:
+                record.is_operation_user = True
+            else:
+                record.is_operation_user = is_user and not (is_manager or is_approver or is_reviewer)
 
     def _compute_is_cancel_dept_approver(self):
         """Kiểm tra user hiện tại có phải trưởng phòng của người yêu cầu hủy"""

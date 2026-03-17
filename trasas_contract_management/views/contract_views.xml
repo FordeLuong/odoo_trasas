@@ -72,13 +72,12 @@
                             invisible="state != 'signing' or signing_flow != 'trasas_first' or not internal_sign_date or sent_to_partner_date"
                             groups="trasas_contract_management.group_contract_user"/>
                     
-                    <!-- B13: Xác nhận Hoàn tất (TRASAS First) - Chỉ HCNS -->
+                    <!-- B13: Xác nhận Hoàn tất (TRASAS First) - Chỉ Phòng Vận hành -->
                     <button name="action_confirm_signed" 
                             string="Xác nhận Hoàn tất" 
                             type="object" 
                             class="btn-success"
-                            invisible="state != 'signing' or signing_flow != 'trasas_first' or not sent_to_partner_date"
-                            groups="trasas_contract_management.group_contract_manager"/>
+                            invisible="state != 'signing' or signing_flow != 'trasas_first' or not sent_to_partner_date or not is_operation_user"/>
 
                     <!-- ============ LUỒNG: ĐỐI TÁC KÝ TRƯỚC ============ -->
                     <!-- B14: Xác nhận Đối tác đã ký -->
@@ -97,13 +96,12 @@
                             invisible="state != 'signing' or signing_flow != 'partner_first' or not partner_sign_date or internal_sign_date or is_approver"
                             groups="trasas_contract_management.group_contract_user"/>
                     
-                    <!-- B13: Xác nhận Hoàn tất (Partner First) - Chỉ HCNS -->
+                    <!-- B13: Xác nhận Hoàn tất (Partner First) - Chỉ Phòng Vận hành -->
                     <button name="action_confirm_signed" 
                             string="Xác nhận Hoàn tất" 
                             type="object" 
                             class="btn-success"
-                            invisible="state != 'signing' or signing_flow != 'partner_first' or not internal_sign_date"
-                            groups="trasas_contract_management.group_contract_manager"/>
+                            invisible="state != 'signing' or signing_flow != 'partner_first' or not internal_sign_date or not is_operation_user"/>
 
                     <!-- B16: Đóng dấu & Lưu kho - Chỉ HCNS -->
                     <button name="action_archive_contract" 
@@ -200,6 +198,7 @@
                     <field name="cancel_dept_approver_id" invisible="1"/>
                     <field name="draft_request_state" invisible="1"/>
                     <field name="is_draft_dept_approver" invisible="1"/>
+                    <field name="is_operation_user" invisible="1"/>
                     <field name="draft_dept_approver_id" invisible="1"/>
                 </header>
                 
