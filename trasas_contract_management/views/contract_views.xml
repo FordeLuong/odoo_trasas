@@ -345,19 +345,12 @@
                                        filename="final_scan_filename"
                                        readonly="state in ['signed', 'cancel']"/>
                                 <field name="final_scan_filename" invisible="1"/>
-                                
-                                <separator string="▼ Dành cho bộ phận vận hành upload bản đã đóng dấu ▼" colspan="2"/>
-                                <field name="stamped_file" 
-                                       filename="stamped_filename"
-                                       readonly="state not in ['signing', 'signed']"/>
-                                <field name="stamped_filename" invisible="1"/>
                             </group>
                             <separator string="Hướng dẫn"/>
                             <div class="alert alert-info" role="alert">
                                 <p><strong>Quy trình upload:</strong></p>
                                 <ul>
                                     <li><strong>Bản scan đang ký:</strong> Upload vào "Bản scan đã ký" để xác nhận hoàn tất ký kết.</li>
-                                    <li><strong>Bản đóng dấu:</strong> Sau khi hoàn tất ký, upload bản có dấu đỏ vào "Bản đóng dấu".</li>
                                     <li>Các file khác có thể kéo thả vào Chatter bên dưới.</li>
                                 </ul>
                             </div>
