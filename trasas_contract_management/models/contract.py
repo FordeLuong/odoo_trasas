@@ -1507,13 +1507,6 @@ class TrasasContract(models.Model):
             if record.state != "signed":
                 raise UserError(_("Chỉ có thể lưu kho hợp đồng đã ký!"))
 
-            if not record.stamped_file:
-                raise UserError(
-                    _(
-                        "Vui lòng upload bản đóng dấu (Bản cứng cuối cùng) trước khi lưu kho!"
-                    )
-                )
-
             record.write({"state": "archived"})
 
             record.message_post(
