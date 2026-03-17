@@ -25,7 +25,6 @@
         "portal",
         "trasas_portal",
         "trasas_dispatch_management",
-        "trasas_demo_users",
     ],
     "data": [
         # Security
