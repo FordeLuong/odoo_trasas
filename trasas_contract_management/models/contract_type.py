@@ -113,6 +113,8 @@ class ContractType(models.Model):
         )
         if not root_folder:
             return
+        if not root_folder.active:
+            root_folder.action_unarchive()
         Document = self.env["documents.document"].sudo()
         DocType = self.env["trasas.document.type"].sudo()
         for rec in self:

@@ -839,6 +839,14 @@ class TrasasContract(models.Model):
 
     @api.model
     def _create_folders_for_existing(self):
+        # 0. Đảm bảo folder gốc được unarchive trước
+        root_folder = self.env.ref(
+            "trasas_contract_management.document_folder_contract_root",
+            raise_if_not_found=False,
+        )
+        if root_folder and not root_folder.active:
+            root_folder.action_unarchive()
+
         # 1. Khôi phục/Tạo folder cho những thằng bị mất hoặc chưa có
         for rec in self.search([]):
             if rec.document_folder_id and not rec.document_folder_id.exists():
