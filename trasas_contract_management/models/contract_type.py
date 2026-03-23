@@ -90,7 +90,10 @@ class ContractType(models.Model):
         if "active" in vals:
             for rec in self:
                 if rec.document_folder_id:
-                    rec.document_folder_id.sudo().write({"active": vals["active"]})
+                    if vals["active"]:
+                        rec.document_folder_id.sudo().action_unarchive()
+                    else:
+                        rec.document_folder_id.sudo().action_archive()
                 if rec.document_type_id:
                     rec.document_type_id.sudo().write({"active": vals["active"]})
         return res
@@ -98,7 +101,7 @@ class ContractType(models.Model):
     def unlink(self):
         for rec in self:
             if rec.document_folder_id:
-                rec.document_folder_id.sudo().write({"active": False})
+                rec.document_folder_id.sudo().action_archive()
             if rec.document_type_id:
                 rec.document_type_id.sudo().unlink()
         return super().unlink()
@@ -147,9 +150,11 @@ class ContractType(models.Model):
                 )
                 rec.document_folder_id = folder.id
             else:
-                rec.document_folder_id.write(
-                    {"name": folder_name, "active": rec.active}
-                )
+                rec.document_folder_id.write({"name": folder_name})
+                if rec.active and not rec.document_folder_id.active:
+                    rec.document_folder_id.action_unarchive()
+                elif not rec.active and rec.document_folder_id.active:
+                    rec.document_folder_id.action_archive()
 
             # 3. Cross-link: Link Document Type to Folder
             if rec.document_type_id and rec.document_folder_id:

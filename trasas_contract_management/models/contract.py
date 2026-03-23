@@ -736,16 +736,28 @@ class TrasasContract(models.Model):
     def write(self, vals):
         res = super().write(vals)
 
-        # Cập nhật tên thư mục nếu name (số hợp đồng) đổi
-        if "name" in vals:
+        # Cập nhật tên thư mục và vị trí nếu name hoặc đối tác hoặc loại thay đổi
+        if any(f in vals for f in ["name", "partner_id", "contract_type_id", "active"]):
             for rec in self:
                 if rec.document_folder_id:
-                    folder_name = (
-                        f"{rec.name}_{rec.partner_id.name}"
-                        if rec.name
-                        else rec.partner_id.name
-                    )
-                    rec.document_folder_id.sudo().write({"name": folder_name})
+                    update_vals = {}
+                    if "name" in vals or "partner_id" in vals:
+                        update_vals["name"] = (
+                            f"{rec.name}_{rec.partner_id.name}"
+                            if rec.name
+                            else rec.partner_id.name
+                        )
+                    if "contract_type_id" in vals and rec.contract_type_id.document_folder_id:
+                        update_vals["folder_id"] = rec.contract_type_id.document_folder_id.id
+
+                    if update_vals:
+                        rec.document_folder_id.sudo().write(update_vals)
+                    
+                    if "active" in vals:
+                        if vals["active"]:
+                            rec.document_folder_id.sudo().action_unarchive()
+                        else:
+                            rec.document_folder_id.sudo().action_archive()
 
         # Xử lý khi có file mới tải lên => sync sang Documents app
         if any(f in vals for f in ["final_scan_file", "stamped_file"]):
@@ -803,7 +815,7 @@ class TrasasContract(models.Model):
         for rec in self:
             # Nếu folder đã có nhưng bị lưu trữ (archived), thì khôi phục lại
             if rec.document_folder_id and not rec.document_folder_id.active:
-                rec.document_folder_id.write({"active": True})
+                rec.document_folder_id.action_unarchive()
                 continue
 
             if (
