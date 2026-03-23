@@ -813,11 +813,14 @@ class TrasasContract(models.Model):
     def _create_document_folder(self):
         Document = self.env["documents.document"].sudo()
         for rec in self:
+<<<<<<< HEAD
             # Nếu folder đã có nhưng bị lưu trữ (archived), thì khôi phục lại
             if rec.document_folder_id and not rec.document_folder_id.active:
                 rec.document_folder_id.action_unarchive()
                 continue
 
+=======
+>>>>>>> parent of 9f4ce89 (chỉnh sửa hd)
             if (
                 not rec.document_folder_id
                 and rec.contract_type_id
@@ -839,6 +842,7 @@ class TrasasContract(models.Model):
 
     @api.model
     def _create_folders_for_existing(self):
+<<<<<<< HEAD
         # 0. Đảm bảo folder gốc được unarchive trước
         root_folder = self.env.ref(
             "trasas_contract_management.document_folder_contract_root",
@@ -860,6 +864,12 @@ class TrasasContract(models.Model):
             if not rec.document_folder_id.active:
                 continue
 
+=======
+        records = self.search([("document_folder_id", "=", False)])
+        records._create_document_folder()
+        # Duyệt qua từng record để đồng bộ file đính kèm (tránh lỗi singleton)
+        for rec in self.search([]):
+>>>>>>> parent of 9f4ce89 (chỉnh sửa hd)
             # Tạo attachment cho các trường binary nếu đã có dữ liệu nhưng chưa có attachment
             if rec.final_scan_file:
                 rec._create_attachment_from_binary(
@@ -878,7 +888,7 @@ class TrasasContract(models.Model):
         Bao gồm cả Chatter và các trường Binary (final_scan_file, stamped_file).
         """
         self.ensure_one()
-        if not self.document_folder_id or not self.document_folder_id.active:
+        if not self.document_folder_id:
             return
 
         Document = self.env["documents.document"].sudo()
