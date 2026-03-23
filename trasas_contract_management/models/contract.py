@@ -736,28 +736,16 @@ class TrasasContract(models.Model):
     def write(self, vals):
         res = super().write(vals)
 
-        # Cập nhật tên thư mục và vị trí nếu name hoặc đối tác hoặc loại thay đổi
-        if any(f in vals for f in ["name", "partner_id", "contract_type_id", "active"]):
+        # Cập nhật tên thư mục nếu name (số hợp đồng) đổi
+        if "name" in vals:
             for rec in self:
                 if rec.document_folder_id:
-                    update_vals = {}
-                    if "name" in vals or "partner_id" in vals:
-                        update_vals["name"] = (
-                            f"{rec.name}_{rec.partner_id.name}"
-                            if rec.name
-                            else rec.partner_id.name
-                        )
-                    if "contract_type_id" in vals and rec.contract_type_id.document_folder_id:
-                        update_vals["folder_id"] = rec.contract_type_id.document_folder_id.id
-
-                    if update_vals:
-                        rec.document_folder_id.sudo().write(update_vals)
-                    
-                    if "active" in vals:
-                        if vals["active"]:
-                            rec.document_folder_id.sudo().action_unarchive()
-                        else:
-                            rec.document_folder_id.sudo().action_archive()
+                    folder_name = (
+                        f"{rec.name}_{rec.partner_id.name}"
+                        if rec.name
+                        else rec.partner_id.name
+                    )
+                    rec.document_folder_id.sudo().write({"name": folder_name})
 
         # Xử lý khi có file mới tải lên => sync sang Documents app
         if any(f in vals for f in ["final_scan_file", "stamped_file"]):
@@ -811,16 +799,21 @@ class TrasasContract(models.Model):
             )
 
     def _create_document_folder(self):
+        root_folder = self.env.ref(
+            "trasas_contract_management.document_folder_contract_root",
+            raise_if_not_found=False,
+        )
+        # Nếu root folder bị lưu trữ (archived), thì khôi phục lại
+        if root_folder and not root_folder.active:
+            root_folder.sudo().write({"active": True})
+
         Document = self.env["documents.document"].sudo()
         for rec in self:
-<<<<<<< HEAD
             # Nếu folder đã có nhưng bị lưu trữ (archived), thì khôi phục lại
             if rec.document_folder_id and not rec.document_folder_id.active:
-                rec.document_folder_id.action_unarchive()
+                rec.document_folder_id.write({"active": True})
                 continue
 
-=======
->>>>>>> parent of 9f4ce89 (chỉnh sửa hd)
             if (
                 not rec.document_folder_id
                 and rec.contract_type_id
@@ -842,34 +835,18 @@ class TrasasContract(models.Model):
 
     @api.model
     def _create_folders_for_existing(self):
-<<<<<<< HEAD
-        # 0. Đảm bảo folder gốc được unarchive trước
-        root_folder = self.env.ref(
-            "trasas_contract_management.document_folder_contract_root",
-            raise_if_not_found=False,
-        )
-        if root_folder and not root_folder.active:
-            root_folder.action_unarchive()
+        # 1. Tạo folder cho những thằng chưa có
+        records_no_folder = self.search([("document_folder_id", "=", False)])
+        records_no_folder._create_document_folder()
 
-        # 1. Khôi phục/Tạo folder cho những thằng bị mất hoặc chưa có
-        for rec in self.search([]):
-            if rec.document_folder_id and not rec.document_folder_id.exists():
-                rec.write({"document_folder_id": False})
-            rec._create_document_folder()
-
-        # 2. Đồng bộ file cho các hợp đồng (chỉ những thằng folder đang active)
+        # 2. Đồng bộ file cho TOÀN BỘ hợp đồng (chỉ những thằng folder đang active)
+        # Search lại để lấy danh sách mới nhất sau Step 1
         all_contracts = self.search([("document_folder_id", "!=", False)])
         for rec in all_contracts:
             # Skip nếu folder vẫn archived (trường hợp hiếm)
             if not rec.document_folder_id.active:
                 continue
 
-=======
-        records = self.search([("document_folder_id", "=", False)])
-        records._create_document_folder()
-        # Duyệt qua từng record để đồng bộ file đính kèm (tránh lỗi singleton)
-        for rec in self.search([]):
->>>>>>> parent of 9f4ce89 (chỉnh sửa hd)
             # Tạo attachment cho các trường binary nếu đã có dữ liệu nhưng chưa có attachment
             if rec.final_scan_file:
                 rec._create_attachment_from_binary(
@@ -888,7 +865,7 @@ class TrasasContract(models.Model):
         Bao gồm cả Chatter và các trường Binary (final_scan_file, stamped_file).
         """
         self.ensure_one()
-        if not self.document_folder_id:
+        if not self.document_folder_id or not self.document_folder_id.active:
             return
 
         Document = self.env["documents.document"].sudo()

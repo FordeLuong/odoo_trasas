@@ -90,10 +90,7 @@ class ContractType(models.Model):
         if "active" in vals:
             for rec in self:
                 if rec.document_folder_id:
-                    if vals["active"]:
-                        rec.document_folder_id.sudo().action_unarchive()
-                    else:
-                        rec.document_folder_id.sudo().action_archive()
+                    rec.document_folder_id.sudo().write({"active": vals["active"]})
                 if rec.document_type_id:
                     rec.document_type_id.sudo().write({"active": vals["active"]})
         return res
@@ -101,7 +98,7 @@ class ContractType(models.Model):
     def unlink(self):
         for rec in self:
             if rec.document_folder_id:
-                rec.document_folder_id.sudo().action_archive()
+                rec.document_folder_id.sudo().write({"active": False})
             if rec.document_type_id:
                 rec.document_type_id.sudo().unlink()
         return super().unlink()
@@ -113,8 +110,10 @@ class ContractType(models.Model):
         )
         if not root_folder:
             return
+        
+        # Nếu root folder bị lưu trữ (archived), thì khôi phục lại
         if not root_folder.active:
-            root_folder.action_unarchive()
+            root_folder.sudo().write({"active": True})
         Document = self.env["documents.document"].sudo()
         DocType = self.env["trasas.document.type"].sudo()
         for rec in self:
@@ -152,11 +151,9 @@ class ContractType(models.Model):
                 )
                 rec.document_folder_id = folder.id
             else:
-                rec.document_folder_id.write({"name": folder_name})
-                if rec.active and not rec.document_folder_id.active:
-                    rec.document_folder_id.action_unarchive()
-                elif not rec.active and rec.document_folder_id.active:
-                    rec.document_folder_id.action_archive()
+                rec.document_folder_id.write(
+                    {"name": folder_name, "active": rec.active}
+                )
 
             # 3. Cross-link: Link Document Type to Folder
             if rec.document_type_id and rec.document_folder_id:
@@ -168,15 +165,8 @@ class ContractType(models.Model):
 
     @api.model
     def _create_folders_for_existing(self):
-        """Khôi phục/Tạo folder cho master data nếu bị thiếu hoặc bị xóa"""
-        all_types = self.search([])
-        for rec in all_types:
-            # Nếu folder_id đã có nhưng bản ghi đó không tồn tại (xóa cứng)
-            if rec.document_folder_id and not rec.document_folder_id.exists():
-                rec.write({"document_folder_id": False})
-            
-            # Nếu folder bị lưu trữ (archived), _create_document_folder sẽ handle reactivate
-            rec._create_document_folder()
+        records = self.search([("document_folder_id", "=", False)])
+        records._create_document_folder()
 
     def action_view_contracts(self):
         """Xem danh sách hợp đồng thuộc loại này"""
