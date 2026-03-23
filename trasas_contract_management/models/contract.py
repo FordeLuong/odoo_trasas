@@ -827,12 +827,13 @@ class TrasasContract(models.Model):
 
     @api.model
     def _create_folders_for_existing(self):
-        # 1. Tạo folder cho những thằng chưa có
-        records_no_folder = self.search([("document_folder_id", "=", False)])
-        records_no_folder._create_document_folder()
+        # 1. Khôi phục/Tạo folder cho những thằng bị mất hoặc chưa có
+        for rec in self.search([]):
+            if rec.document_folder_id and not rec.document_folder_id.exists():
+                rec.write({"document_folder_id": False})
+            rec._create_document_folder()
 
-        # 2. Đồng bộ file cho TOÀN BỘ hợp đồng (chỉ những thằng folder đang active)
-        # Search lại để lấy danh sách mới nhất sau Step 1
+        # 2. Đồng bộ file cho các hợp đồng (chỉ những thằng folder đang active)
         all_contracts = self.search([("document_folder_id", "!=", False)])
         for rec in all_contracts:
             # Skip nếu folder vẫn archived (trường hợp hiếm)

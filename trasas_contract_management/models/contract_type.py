@@ -161,8 +161,15 @@ class ContractType(models.Model):
 
     @api.model
     def _create_folders_for_existing(self):
-        records = self.search([("document_folder_id", "=", False)])
-        records._create_document_folder()
+        """Khôi phục/Tạo folder cho master data nếu bị thiếu hoặc bị xóa"""
+        all_types = self.search([])
+        for rec in all_types:
+            # Nếu folder_id đã có nhưng bản ghi đó không tồn tại (xóa cứng)
+            if rec.document_folder_id and not rec.document_folder_id.exists():
+                rec.write({"document_folder_id": False})
+            
+            # Nếu folder bị lưu trữ (archived), _create_document_folder sẽ handle reactivate
+            rec._create_document_folder()
 
     def action_view_contracts(self):
         """Xem danh sách hợp đồng thuộc loại này"""
