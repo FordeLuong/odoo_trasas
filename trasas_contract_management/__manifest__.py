@@ -35,6 +35,7 @@
         "sign",
         "documents",
         "hr",
+        "trasas_document_management",
     ],
     "data": [
         # Security

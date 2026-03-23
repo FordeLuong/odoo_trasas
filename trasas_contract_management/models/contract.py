@@ -764,6 +764,13 @@ class TrasasContract(models.Model):
 
         return res
 
+    def message_post(self, **kwargs):
+        """Override để đồng bộ file ngay khi upload qua chatter"""
+        msg = super().message_post(**kwargs)
+        if msg.attachment_ids:
+            self._sync_attachments_to_document()
+        return msg
+
     def _create_attachment_from_binary(self, file_content, file_name):
         """Tạo ir.attachment từ trường binary nếu chưa có"""
         self.ensure_one()

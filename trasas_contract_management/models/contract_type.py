@@ -54,6 +54,14 @@ class ContractType(models.Model):
         readonly=True,
     )
 
+    # Field synchronization with trasas_document_management
+    document_type_id = fields.Many2one(
+        "trasas.document.type",
+        string="Loại hồ sơ tương ứng",
+        readonly=True,
+        help="Liên kết với mẫu loại hồ sơ trong module Quản lý tài liệu",
+    )
+
     @api.depends("code")
     def _compute_contract_count(self):
         """Đếm số hợp đồng theo loại"""
@@ -72,10 +80,28 @@ class ContractType(models.Model):
         res = super().write(vals)
         if "name" in vals or "code" in vals:
             for rec in self:
+                folder_name = f"{rec.code} - {rec.name}" if rec.code else rec.name
                 if rec.document_folder_id:
-                    folder_name = f"{rec.code} - {rec.name}" if rec.code else rec.name
                     rec.document_folder_id.sudo().write({"name": folder_name})
+                if rec.document_type_id:
+                    rec.document_type_id.sudo().write(
+                        {"name": rec.name, "code": rec.code}
+                    )
+        if "active" in vals:
+            for rec in self:
+                if rec.document_folder_id:
+                    rec.document_folder_id.sudo().write({"active": vals["active"]})
+                if rec.document_type_id:
+                    rec.document_type_id.sudo().write({"active": vals["active"]})
         return res
+
+    def unlink(self):
+        for rec in self:
+            if rec.document_folder_id:
+                rec.document_folder_id.sudo().write({"active": False})
+            if rec.document_type_id:
+                rec.document_type_id.sudo().unlink()
+        return super().unlink()
 
     def _create_document_folder(self):
         root_folder = self.env.ref(
@@ -85,17 +111,53 @@ class ContractType(models.Model):
         if not root_folder:
             return
         Document = self.env["documents.document"].sudo()
+        DocType = self.env["trasas.document.type"].sudo()
         for rec in self:
+            # 1. Create/Update Document Type
+            if not rec.document_type_id:
+                doc_type = DocType.create(
+                    {
+                        "name": rec.name,
+                        "code": rec.code,
+                        "active": rec.active,
+                        "sequence": rec.sequence,
+                    }
+                )
+                rec.document_type_id = doc_type.id
+            else:
+                rec.document_type_id.write(
+                    {
+                        "name": rec.name,
+                        "code": rec.code,
+                        "active": rec.active,
+                        "sequence": rec.sequence,
+                    }
+                )
+
+            # 2. Create/Update Folder
+            folder_name = f"{rec.code} - {rec.name}" if rec.code else rec.name
             if not rec.document_folder_id:
-                folder_name = f"{rec.code} - {rec.name}" if rec.code else rec.name
                 folder = Document.create(
                     {
                         "name": folder_name,
                         "type": "folder",
                         "folder_id": root_folder.id,
+                        "active": rec.active,
                     }
                 )
                 rec.document_folder_id = folder.id
+            else:
+                rec.document_folder_id.write(
+                    {"name": folder_name, "active": rec.active}
+                )
+
+            # 3. Cross-link: Link Document Type to Folder
+            if rec.document_type_id and rec.document_folder_id:
+                rec.document_type_id.write({"folder_id": rec.document_folder_id.id})
+                # Link folder to and display Document Type
+                # Note: In Odoo 19, documents.document inherited by trasas_document_management 
+                # has document_type_id
+                rec.document_folder_id.write({"document_type_id": rec.document_type_id.id})
 
     @api.model
     def _create_folders_for_existing(self):
