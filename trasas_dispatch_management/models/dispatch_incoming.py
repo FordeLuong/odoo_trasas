@@ -289,6 +289,8 @@ class TrasasDispatchIncoming(models.Model):
                     ) or _("New")
         records = super().create(vals_list)
         records._create_document_folder()
+        for rec in records:
+            rec.sudo()._sync_attachments_to_document()
         return records
 
     def write(self, vals):
@@ -305,10 +307,11 @@ class TrasasDispatchIncoming(models.Model):
                     rec.document_folder_id.sudo().write({"name": folder_name})
 
         # Xử lý sync file
-        if any(f in vals for f in ["attachment_ids", "response_file"]):
+        # Always sync attachments if any relevant field is updated, or if the folder was just created
+        if any(f in vals for f in ["attachment_ids", "response_file"]) or ("document_folder_id" in vals and vals["document_folder_id"]):
             for rec in self:
                 if vals.get("response_file"):
-                    rec._create_attachment_from_binary(
+                    rec.sudo()._create_attachment_from_binary(
                         vals.get("response_file"),
                         vals.get("response_filename") or f"Phan_hoi_{rec.name}.pdf",
                     )
@@ -417,13 +420,27 @@ class TrasasDispatchIncoming(models.Model):
         Document = self.env["documents.document"].sudo()
         Attachment = self.env["ir.attachment"].sudo()
 
+        # 1. Tìm attachments qua res_model (Chatter)
         domain = [
             ("res_model", "=", self._name),
             ("res_id", "=", self.id),
         ]
-        attachments = Attachment.search(domain)
+        chatter_attachments = Attachment.search(domain)
+        
+        # 2. Lấy attachments từ trường Many2many (Notebook)
+        # Đảm bảo các file này cũng được gắn res_model/res_id để nhảy số vào Chatter
+        m2m_attachments = self.attachment_ids.sudo()
+        for att in m2m_attachments:
+            if not att.res_model or not att.res_id:
+                att.write({
+                    "res_model": self._name,
+                    "res_id": self.id,
+                })
+        
+        # Hợp nhất danh sách để đồng bộ
+        all_attachments = chatter_attachments | m2m_attachments
 
-        for attachment in attachments:
+        for attachment in all_attachments:
             existing = Document.search([("attachment_id", "=", attachment.id)], limit=1)
             if not existing:
                 Document.create(

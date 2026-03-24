@@ -206,7 +206,8 @@
                             string="Đồng bộ tài liệu"
                             type="object"
                             class="btn-info text-white"
-                            help="Thủ công đồng bộ lại file từ Chatter/Binary sang ứng dụng Documents nếu bị lỗi hoặc thiếu."/>
+                            help="Thủ công đồng bộ lại file từ Chatter/Binary sang ứng dụng Documents nếu bị lỗi hoặc thiếu."
+                            invisible="1"/>
                 </header>
                 
                 <sheet>

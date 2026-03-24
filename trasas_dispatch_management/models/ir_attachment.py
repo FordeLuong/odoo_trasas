@@ -10,11 +10,23 @@ class IrAttachment(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        # Ưu tiên gán res_model/res_id từ context nếu widget M2M không gửi lên
+        if self.env.context.get("default_res_model") in ["trasas.dispatch.incoming", "trasas.dispatch.outgoing"]:
+            for vals in vals_list:
+                if not vals.get("res_model"):
+                    vals["res_model"] = self.env.context.get("default_res_model")
+                if not vals.get("res_id") and self.env.context.get("default_res_id"):
+                    vals["res_id"] = self.env.context.get("default_res_id")
+
         records = super(IrAttachment, self).create(vals_list)
         self._sync_dispatch_documents(records)
         return records
 
     def write(self, vals):
+        # Chống loop đè
+        if len(vals.keys()) == 2 and "res_model" in vals and "res_id" in vals:
+            return super(IrAttachment, self).write(vals)
+            
         res = super(IrAttachment, self).write(vals)
         if any(f in vals for f in ["datas", "name", "res_model", "res_id"]):
             self._sync_dispatch_documents(self)

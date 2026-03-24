@@ -284,6 +284,19 @@ class TrasasDispatchOutgoing(models.Model):
                     )
         records = super().create(vals_list)
         records._create_document_folder()
+        for rec in records:
+            # Xử lý sync file
+            if rec.draft_file:
+                rec.sudo()._create_attachment_from_binary(
+                    rec.draft_file,
+                    rec.draft_filename or f"Du_thao_{rec.name}.pdf",
+                )
+            if rec.official_file:
+                rec.sudo()._create_attachment_from_binary(
+                    rec.official_file,
+                    rec.official_filename or f"Chinh_thuc_{rec.name}.pdf",
+                )
+            rec.sudo()._sync_attachments_to_document()
         return records
 
     def write(self, vals):
@@ -364,14 +377,27 @@ class TrasasDispatchOutgoing(models.Model):
         Document = self.env["documents.document"].sudo()
         Attachment = self.env["ir.attachment"].sudo()
 
-        # Tìm tất cả attachment liên quan
+        # 1. Tìm attachments qua res_model (Chatter)
         domain = [
             ("res_model", "=", self._name),
             ("res_id", "=", self.id),
         ]
-        attachments = Attachment.search(domain)
+        chatter_attachments = Attachment.search(domain)
+        
+        # 2. Lấy attachments từ trường Many2many (Notebook)
+        # Đảm bảo các file này cũng được gắn res_model/res_id để nhảy số vào Chatter
+        m2m_attachments = self.attachment_ids.sudo()
+        for att in m2m_attachments:
+            if not att.res_model or not att.res_id:
+                att.write({
+                    "res_model": self._name,
+                    "res_id": self.id,
+                })
+        
+        # Hợp nhất danh sách để đồng bộ
+        all_attachments = chatter_attachments | m2m_attachments
 
-        for attachment in attachments:
+        for attachment in all_attachments:
             existing = Document.search([("attachment_id", "=", attachment.id)], limit=1)
             if not existing:
                 Document.create(
