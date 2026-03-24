@@ -84,7 +84,7 @@ class ContractType(models.Model):
                 if rec.document_folder_id:
                     rec.document_folder_id.sudo().write({"name": folder_name})
                 if rec.document_type_id:
-                    rec.document_type_id.sudo().write(
+                    rec.document_type_id.sudo().with_context(skip_folder_sync=True).write(
                         {"name": rec.name, "code": rec.code}
                     )
         if "active" in vals:
@@ -92,7 +92,7 @@ class ContractType(models.Model):
                 if rec.document_folder_id:
                     rec.document_folder_id.sudo().write({"active": vals["active"]})
                 if rec.document_type_id:
-                    rec.document_type_id.sudo().write({"active": vals["active"]})
+                    rec.document_type_id.sudo().with_context(skip_folder_sync=True).write({"active": vals["active"]})
         return res
 
     def unlink(self):
@@ -110,16 +110,12 @@ class ContractType(models.Model):
         )
         if not root_folder:
             return
-        
-        # Nếu root folder bị lưu trữ (archived), thì khôi phục lại
-        if not root_folder.active:
-            root_folder.sudo().write({"active": True})
         Document = self.env["documents.document"].sudo()
         DocType = self.env["trasas.document.type"].sudo()
         for rec in self:
-            # 1. Create/Update Document Type
+            # 1. Create/Update Document Type - Skip standard folder sync (will be managed here)
             if not rec.document_type_id:
-                doc_type = DocType.create(
+                doc_type = DocType.with_context(skip_folder_sync=True).create(
                     {
                         "name": rec.name,
                         "code": rec.code,
@@ -129,7 +125,7 @@ class ContractType(models.Model):
                 )
                 rec.document_type_id = doc_type.id
             else:
-                rec.document_type_id.write(
+                rec.document_type_id.with_context(skip_folder_sync=True).write(
                     {
                         "name": rec.name,
                         "code": rec.code,
@@ -159,9 +155,11 @@ class ContractType(models.Model):
             if rec.document_type_id and rec.document_folder_id:
                 rec.document_type_id.write({"folder_id": rec.document_folder_id.id})
                 # Link folder to and display Document Type
-                # Note: In Odoo 19, documents.document inherited by trasas_document_management 
+                # Note: In Odoo 19, documents.document inherited by trasas_document_management
                 # has document_type_id
-                rec.document_folder_id.write({"document_type_id": rec.document_type_id.id})
+                rec.document_folder_id.write(
+                    {"document_type_id": rec.document_type_id.id}
+                )
 
     @api.model
     def _create_folders_for_existing(self):

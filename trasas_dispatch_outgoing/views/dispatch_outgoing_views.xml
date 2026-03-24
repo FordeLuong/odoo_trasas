@@ -31,8 +31,10 @@
                     <group>
                         <group string="Thông tin chung">
                             <field name="subject"/>
+                            <field name="type_id" options="{'no_create': True, 'no_open': True}"/>
                             <field name="is_manual_number"/>
                             <field name="manual_number" invisible="not is_manual_number" required="is_manual_number"/>
+                            <field name="document_folder_id" groups="base.group_no_one"/>
                         </group>
                         <group string="Thời gian &amp; Nơi nhận">
                             <field name="date_created"/>

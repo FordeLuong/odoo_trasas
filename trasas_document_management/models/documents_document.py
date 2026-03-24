@@ -23,13 +23,15 @@ class TrasasDocumentType(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
-        records._sync_document_folder()
+        if not self.env.context.get('skip_folder_sync'):
+            records._sync_document_folder()
         return records
 
     def write(self, vals):
         res = super().write(vals)
-        if any(f in vals for f in ["name", "active", "sequence"]):
-            self._sync_document_folder()
+        if not self.env.context.get('skip_folder_sync'):
+            if any(f in vals for f in ["name", "active", "sequence"]):
+                self._sync_document_folder()
         return res
 
     def unlink(self):

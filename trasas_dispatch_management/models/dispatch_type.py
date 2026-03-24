@@ -8,6 +8,12 @@ class TrasasDispatchType(models.Model):
 
     name = fields.Char(string="Tên loại", required=True)
     code = fields.Char(string="Mã", help="Mã viết tắt (nếu có)")
+    dispatch_type = fields.Selection(
+        [("incoming", "Công văn đến"), ("outgoing", "Công văn đi")],
+        string="Phân loại",
+        required=True,
+        default="incoming",
+    )
     active = fields.Boolean(default=True)
     description = fields.Text(string="Mô tả")
 
@@ -35,24 +41,27 @@ class TrasasDispatchType(models.Model):
     def _create_document_folder(self):
         """Tự động tạo Folder cho Loại văn bản trong Documents app"""
         Document = self.env["documents.document"].sudo()
-        root_folder = self.env.ref(
-            "trasas_dispatch_management.document_workspace_dispatch",
-            raise_if_not_found=False,
-        )
-
-        if not root_folder:
-            return  # Nếu chưa cài workspace thì bỏ qua
-
+        
         for rec in self:
-            if not rec.document_folder_id:
-                folder = Document.create(
-                    {
-                        "name": rec.name,
-                        "type": "folder",
-                        "folder_id": root_folder.id,
-                    }
-                )
-                rec.write({"document_folder_id": folder.id})
+            if rec.document_folder_id:
+                continue
+
+            xml_id = "trasas_dispatch_management.document_workspace_dispatch"
+            if rec.dispatch_type == "outgoing":
+                xml_id = "trasas_dispatch_management.document_workspace_dispatch_outgoing"
+            
+            root_folder = self.env.ref(xml_id, raise_if_not_found=False)
+            if not root_folder:
+                continue
+
+            folder = Document.create(
+                {
+                    "name": rec.name,
+                    "type": "folder",
+                    "folder_id": root_folder.id,
+                }
+            )
+            rec.write({"document_folder_id": folder.id})
 
     @api.model
     def _create_folders_for_existing(self):

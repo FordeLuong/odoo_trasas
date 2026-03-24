@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <list string="Loại công văn" editable="bottom">
                 <field name="name"/>
+                <field name="dispatch_type"/>
                 <field name="code"/>
                 <field name="description"/>
                 <field name="active" widget="boolean_toggle"/>

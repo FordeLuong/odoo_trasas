@@ -16,6 +16,14 @@
             <field name="access_internal">edit</field>
         </record>
 
+        <!-- Root Folder Cấp 1: Công văn đi -->
+        <record id="document_workspace_dispatch_outgoing" model="documents.document">
+            <field name="name">Công văn đi</field>
+            <field name="type">folder</field>
+            <field name="folder_id" ref="trasas_dispatch_management.document_workspace_dispatch_root"/>
+            <field name="access_internal">edit</field>
+        </record>
+
         <!-- Gọi hàm tạo thư mục lưu trữ cho Loại công văn đã có -->
         <function model="trasas.dispatch.type" name="_create_folders_for_existing" />
         

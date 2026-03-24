@@ -8,3 +8,4 @@ from . import contract_appendix
 from . import contract_reject_wizard
 from . import contract_cancel_wizard
 from . import contract_draft_wizard
+from . import ir_attachment

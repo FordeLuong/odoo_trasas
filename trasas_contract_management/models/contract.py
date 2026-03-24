@@ -228,6 +228,13 @@ class TrasasContract(models.Model):
 
     final_scan_filename = fields.Char(string="Tên file scan")
 
+    stamped_file = fields.Binary(
+        string="Bản đóng dấu",
+        attachment=True,
+        help="Bản scan hợp đồng đã đóng dấu đỏ (Final)",
+    )
+    stamped_filename = fields.Char(string="Tên file đóng dấu")
+
     appendix_ids = fields.One2many(
         "trasas.contract.appendix", "contract_id", string="Phụ lục"
     )
@@ -349,18 +356,6 @@ class TrasasContract(models.Model):
         tracking=True,
         help="Ngày đối tác ký hợp đồng (nếu có)",
     )
-
-    final_scan_file = fields.Binary(
-        string="Bản scan đã ký", attachment=True, help="File scan hợp đồng có đủ chữ ký"
-    )
-    final_scan_filename = fields.Char(string="Tên file scan")
-
-    stamped_file = fields.Binary(
-        string="Bản đóng dấu",
-        attachment=True,
-        help="Bản scan hợp đồng đã đóng dấu đỏ (Final)",
-    )
-    stamped_filename = fields.Char(string="Tên file đóng dấu")
 
     active = fields.Boolean(
         string="Active", default=True, help="Bỏ chọn để archive hợp đồng"
@@ -760,7 +755,7 @@ class TrasasContract(models.Model):
                         vals.get("stamped_file"),
                         vals.get("stamped_filename") or f"Ban_Dong_Dau_{rec.name}.pdf",
                     )
-                rec._sync_attachments_to_document()
+                rec.sudo()._sync_attachments_to_document()
 
         return res
 
@@ -768,7 +763,7 @@ class TrasasContract(models.Model):
         """Override để đồng bộ file ngay khi upload qua chatter"""
         msg = super().message_post(**kwargs)
         if msg.attachment_ids:
-            self._sync_attachments_to_document()
+            self.sudo()._sync_attachments_to_document()
         return msg
 
     def _create_attachment_from_binary(self, file_content, file_name):
@@ -865,6 +860,10 @@ class TrasasContract(models.Model):
         Bao gồm cả Chatter và các trường Binary (final_scan_file, stamped_file).
         """
         self.ensure_one()
+        # Đảm bảo folder đã được tạo trước khi sync
+        if not self.document_folder_id:
+            self.sudo()._create_document_folder()
+
         if not self.document_folder_id or not self.document_folder_id.active:
             return
 
@@ -882,13 +881,36 @@ class TrasasContract(models.Model):
             # Kiểm tra xem đã tồn tại doc cho attachment này chưa
             existing = Document.search([("attachment_id", "=", attachment.id)], limit=1)
             if not existing:
-                Document.create(
-                    {
-                        "attachment_id": attachment.id,
-                        "folder_id": self.document_folder_id.id,
-                        "name": attachment.name,
-                    }
-                )
+                try:
+                    Document.create(
+                        {
+                            "attachment_id": attachment.id,
+                            "folder_id": self.document_folder_id.id,
+                            "name": attachment.name,
+                        }
+                    )
+                except Exception:
+                    # Bỏ qua nếu có lỗi để không làm gián đoạn luồng chính
+                    pass
+            else:
+                # Đảm bảo nó nằm đúng folder của hợp đồng nếu nó bị Odoo tự động đưa vào folder khác
+                if existing.folder_id != self.document_folder_id:
+                    existing.write({'folder_id': self.document_folder_id.id})
+
+    def action_sync_documents(self):
+        """Nút bấm thủ công để đồng bộ lại toàn bộ tài liệu sang Documents app"""
+        self.ensure_one()
+        self.sudo()._sync_attachments_to_document()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Thành công'),
+                'message': _('Đã đồng bộ tài liệu sang Documents app.'),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
 
     def action_view_documents(self):
         """Mở danh sách file đính kèm của Hợp đồng (Giao diện list view)"""

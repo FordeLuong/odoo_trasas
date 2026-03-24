@@ -22,6 +22,13 @@ class TrasasDispatchOutgoing(models.Model):
     is_manual_number = fields.Boolean(string="Cấp số thủ công", tracking=True)
     manual_number = fields.Char(string="Số CV (Thủ công)", tracking=True)
 
+    type_id = fields.Many2one(
+        "trasas.dispatch.type",
+        string="Loại công văn",
+        domain="[('dispatch_type', '=', 'outgoing')]",
+        tracking=True,
+    )
+
     # --- Ngày tháng ---
     date_created = fields.Date(
         string="Ngày soạn thảo", default=fields.Date.context_today, required=True
@@ -105,6 +112,13 @@ class TrasasDispatchOutgoing(models.Model):
     content = fields.Html(string="Nội dung trích yếu")
 
     note = fields.Text(string="Ghi chú")
+
+    document_folder_id = fields.Many2one(
+        "documents.document",
+        string="Thư mục tài liệu (Documents)",
+        domain="[('type', '=', 'folder')]",
+        readonly=True,
+    )
 
     # --- Lưu trữ ---
     location_id = fields.Many2one(
@@ -253,7 +267,6 @@ class TrasasDispatchOutgoing(models.Model):
                     }
                 }
 
-    # --- Sequence Logic ---
     @api.model_create_multi
     def create(self, vals_list):
         """Cấp số công văn đi ngay khi tạo (sử dụng sequence chính thức)."""
@@ -269,7 +282,106 @@ class TrasasDispatchOutgoing(models.Model):
                         )
                         or "New"
                     )
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        records._create_document_folder()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+
+        # Cập nhật tên folder nếu đổi trích yếu hoặc số hiệu
+        if any(f in vals for f in ["name", "subject"]):
+            for rec in self:
+                if rec.document_folder_id:
+                    folder_name = f"{rec.name}_{rec.subject}" if rec.name and rec.subject else rec.name or rec.subject
+                    rec.document_folder_id.sudo().write({"name": folder_name})
+
+        # Xử lý sync file
+        if any(f in vals for f in ["attachment_ids", "draft_file", "official_file"]):
+            for rec in self:
+                rec.sudo()._sync_attachments_to_document()
+
+        return res
+
+    def _create_document_folder(self):
+        """Tạo thư mục lưu trữ cho Công văn đi"""
+        Document = self.env["documents.document"].sudo()
+        root_outgoing = self.env.ref("trasas_dispatch_management.document_workspace_dispatch_outgoing", raise_if_not_found=False)
+
+        for rec in self:
+            if rec.document_folder_id:
+                continue
+
+            folder_name = f"{rec.name}_{rec.subject}" if rec.name and rec.subject else rec.name or rec.subject
+
+            parent_id = False
+            if rec.is_manual_number:
+                if root_outgoing:
+                    manual_parent = Document.search(
+                        [
+                            ("name", "=", "Công văn đi (Thủ công)"),
+                            ("type", "=", "folder"),
+                            ("folder_id", "=", root_outgoing.id),
+                        ],
+                        limit=1,
+                    )
+                    if not manual_parent:
+                        manual_parent = Document.create(
+                            {
+                                "name": "Công văn đi (Thủ công)",
+                                "type": "folder",
+                                "folder_id": root_outgoing.id,
+                            }
+                        )
+                    parent_id = manual_parent.id
+            elif rec.type_id and rec.type_id.document_folder_id:
+                parent_id = rec.type_id.document_folder_id.id
+            elif root_outgoing:
+                # Default to root if no type/manual
+                parent_id = root_outgoing.id
+
+            if parent_id:
+                folder_vals = {
+                    "name": folder_name,
+                    "type": "folder",
+                    "folder_id": parent_id,
+                }
+                # Cấp quyền Edit cho nhóm HCNS
+                hcns_group = self.env.ref("trasas_dispatch_management.group_dispatch_coordinator", raise_if_not_found=False)
+                if hcns_group:
+                    folder_vals["access_internal"] = "edit"
+
+                folder = Document.create(folder_vals)
+                # Dùng sudo để ghi lại vào bản ghi để tránh lỗi cho user
+                rec.sudo().write({"document_folder_id": folder.id})
+
+    def _sync_attachments_to_document(self):
+        """Đồng bộ các file đính kèm của Công văn đi sang ứng dụng Documents"""
+        self.ensure_one()
+        if not self.document_folder_id:
+            return
+
+        Document = self.env["documents.document"].sudo()
+        Attachment = self.env["ir.attachment"].sudo()
+
+        # Tìm tất cả attachment liên quan
+        domain = [
+            ("res_model", "=", self._name),
+            ("res_id", "=", self.id),
+        ]
+        attachments = Attachment.search(domain)
+
+        for attachment in attachments:
+            existing = Document.search([("attachment_id", "=", attachment.id)], limit=1)
+            if not existing:
+                Document.create(
+                    {
+                        "attachment_id": attachment.id,
+                        "folder_id": self.document_folder_id.id,
+                        "name": attachment.name,
+                        "confidential_level": "public",
+                    }
+                )
 
     # --- Helper: get stage by XML ID ---
     def _get_stage(self, xmlid):

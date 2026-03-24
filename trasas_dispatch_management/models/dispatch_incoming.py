@@ -312,7 +312,7 @@ class TrasasDispatchIncoming(models.Model):
                         vals.get("response_file"),
                         vals.get("response_filename") or f"Phan_hoi_{rec.name}.pdf",
                     )
-                rec._sync_attachments_to_document()
+                rec.sudo()._sync_attachments_to_document()
 
         return res
 
@@ -382,14 +382,19 @@ class TrasasDispatchIncoming(models.Model):
                 parent_id = rec.type_id.document_folder_id.id
 
             if parent_id:
-                folder = Document.create(
-                    {
-                        "name": folder_name,
-                        "type": "folder",
-                        "folder_id": parent_id,
-                    }
-                )
-                rec.write({"document_folder_id": folder.id})
+                folder_vals = {
+                    "name": folder_name,
+                    "type": "folder",
+                    "folder_id": parent_id,
+                }
+                # Ensure HCNS group has access to the folder
+                hcns_group = self.env.ref("trasas_dispatch_management.group_dispatch_coordinator", raise_if_not_found=False)
+                if hcns_group:
+                    folder_vals["access_internal"] = "edit"
+                
+                folder = Document.create(folder_vals)
+                # Use sudo to write back to the record to avoid permission issues for HCNS users
+                rec.sudo().write({"document_folder_id": folder.id})
 
     @api.model
     def _create_folders_for_existing(self):

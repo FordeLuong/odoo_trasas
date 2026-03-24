@@ -58,6 +58,7 @@
         "views/contract_config_views.xml",
         "views/res_config_settings_views.xml",
         "views/menu_views.xml",
+        "views/portal_templates.xml",
     ],
     "demo": [],
     "installable": True,

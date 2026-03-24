@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from . import models
+from . import controllers
 
 
 def _assign_stages_to_existing_contracts(env):

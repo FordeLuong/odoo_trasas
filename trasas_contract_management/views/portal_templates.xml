@@ -1,0 +1,573 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Contract to Portal Homepage -->
+    <template id="portal_my_home_contract" name="Portal My Home: Contract" 
+              inherit_id="portal.portal_my_home" priority="50">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Hợp đồng</t>
+                <t t-set="url" t-value="'/my/contracts'"/>
+                <t t-set="placeholder_count" t-value="'contract_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Add Contract Card to New Portal App Grid -->
+    <template id="portal_sidebar_contract" name="Portal Apps: Contract"
+              inherit_id="trasas_portal.portal_my_home_inherit" priority="20">
+        <xpath expr="//div[@id='portal_app_grid']" position="inside">
+            <div class="col-12 col-md-6 col-xl-4 mb-3">
+                <a href="/my/contracts" class="app-card" style="border-left: 4px solid #2e7d32;">
+                    <t t-if="contract_count">
+                        <span class="app-badge"><t t-esc="contract_count"/></span>
+                    </t>
+                    <div class="app-icon" style="background-color: #2e7d32;">
+                        <i class="fa fa-handshake-o"/>
+                    </div>
+                    <div class="app-info">
+                        <span class="app-title">Hợp đồng</span>
+                        <span class="app-subtitle">Ký kết &amp; Theo dõi</span>
+                    </div>
+                </a>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- List View -->
+    <template id="portal_my_contracts" name="My Contracts">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Hợp đồng của tôi</t>
+            </t>
+            
+            <div class="container mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0">Danh sách hợp đồng</h3>
+                    <a href="/my/contracts/new" class="btn btn-primary">
+                        <i class="fa fa-plus me-1"/> Tạo hợp đồng mới
+                    </a>
+                </div>
+
+                <t t-if="request.params.get('message') == 'created'">
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="fa fa-check-circle me-2"/>
+                        Hợp đồng đã được tạo thành công! Đang ở trạng thái nháp.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+
+                <!-- Table -->
+                <div class="card shadow-sm border-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Số hợp đồng</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Ngày bắt đầu</th>
+                                    <th>Ngày kết thúc</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="contracts" t-as="contract">
+                                    <tr>
+                                        <td>
+                                            <a t-attf-href="/my/contracts/#{contract.id}" class="fw-bold text-primary">
+                                                <t t-esc="contract.name"/>
+                                            </a>
+                                        </td>
+                                        <td><t t-esc="contract.title"/></td>
+                                        <td><t t-esc="contract.date_start"/></td>
+                                        <td><t t-esc="contract.date_end"/></td>
+                                        <td>
+                                            <span t-if="contract.state == 'draft'" class="badge rounded-pill bg-secondary">Nháp</span>
+                                            <span t-elif="contract.state == 'in_review'" class="badge rounded-pill bg-info">Đang rà soát</span>
+                                            <span t-elif="contract.state == 'waiting'" class="badge rounded-pill bg-warning">Chờ duyệt</span>
+                                            <span t-elif="contract.state == 'approved'" class="badge rounded-pill bg-primary">Đã duyệt</span>
+                                            <span t-elif="contract.state == 'signed'" class="badge rounded-pill bg-success">Đã ký</span>
+                                            <span t-else="" class="badge rounded-pill bg-dark"><t t-esc="contract.state"/></span>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pager -->
+                <div t-if="pager" class="mt-4 d-flex justify-content-center">
+                    <t t-call="portal.pager"/>
+                </div>
+
+                <!-- Empty State -->
+                <t t-if="not contracts">
+                    <div class="text-center py-5 bg-white rounded shadow-sm mt-3">
+                        <i class="fa fa-handshake-o fa-4x text-muted mb-3" style="opacity: 0.3;"/>
+                        <h4 class="text-muted">Chưa có hợp đồng nào</h4>
+                        <p class="text-secondary">Hãy nhấn nút "Tạo hợp đồng mới" để bắt đầu.</p>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- Detail View -->
+    <template id="portal_contract_page" name="Contract Detail">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-transparent p-0 mb-4">
+                        <li class="breadcrumb-item"><a href="/my/contracts">Hợp đồng của tôi</a></li>
+                        <li class="breadcrumb-item active"><t t-esc="contract.name"/></li>
+                    </ol>
+                </nav>
+
+                <t t-if="request.params.get('message') == 'submitted_review'">
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <i class="fa fa-check-circle me-2"/> Yêu cầu rà soát đã được gửi thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('message') == 'submitted_approval'">
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <i class="fa fa-check-circle me-2"/> Hợp đồng đã được gửi phê duyệt thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('message') == 'updated'">
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <i class="fa fa-check-circle me-2"/> Cập nhật thông tin hợp đồng thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('error')">
+                    <div class="alert alert-danger alert-dismissible fade show mb-4">
+                        <i class="fa fa-exclamation-triangle me-2"/> <t t-esc="request.params.get('error')"/>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+
+                <!-- Workflow Status Bar (Stepper) -->
+                <div class="card shadow-sm border-0 mb-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        <div class="d-flex portal-workflow-stepper">
+                            <t t-foreach="stages" t-as="stage">
+                                <div t-attf-class="flex-fill text-center py-3 position-relative #{'active bg-primary text-white' if contract.state == stage[0] else 'text-muted bg-light border-end'}">
+                                    <span class="fw-bold"><t t-esc="stage[1]"/></span>
+                                    <t t-if="contract.state == stage[0]">
+                                        <div class="status-indicator position-absolute bottom-0 start-50 translate-middle-x mb-1" style="width: 30%; height: 3px; background: white; border-radius: 2px;"></div>
+                                    </t>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
+                <form t-attf-action="/my/contracts/#{contract.id}/update" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <!-- Main Content -->
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-header bg-white py-3">
+                                    <h4 class="mb-0 text-primary fw-bold">
+                                        <i class="fa fa-file-text-o me-2"/>
+                                        Chi tiết hợp đồng: <t t-esc="contract.title"/>
+                                    </h4>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row mb-4">
+                                        <div class="col-sm-6 mb-3">
+                                            <label class="text-muted small text-uppercase fw-bold mb-1">Số hợp đồng</label>
+                                            <p class="fs-5 mb-0 fw-bold text-dark"><t t-esc="contract.name"/></p>
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <label class="text-muted small text-uppercase fw-bold mb-1">Loại hợp đồng</label>
+                                            <p class="fs-5 mb-0"><t t-esc="contract.contract_type_id.name"/></p>
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <label class="text-muted small text-uppercase fw-bold mb-1">Ngày bắt đầu</label>
+                                            <p class="mb-0"><i class="fa fa-calendar-check-o text-success me-2"/><t t-esc="contract.date_start"/></p>
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <label class="text-muted small text-uppercase fw-bold mb-1">Ngày kết thúc</label>
+                                            <p class="mb-0"><i class="fa fa-calendar-times-o text-danger me-2"/><t t-esc="contract.date_end"/></p>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4 border-top pt-3">
+                                        <div class="col-sm-6 mb-3">
+                                            <label class="text-muted small text-uppercase fw-bold mb-1">Người rà soát đề xuất</label>
+                                            <t t-if="contract.state == 'draft'">
+                                                <select name="suggested_reviewer_id" class="form-select">
+                                                    <option value="">-- Chọn người rà soát --</option>
+                                                    <t t-foreach="reviewers" t-as="reviewer">
+                                                        <option t-att-value="reviewer.id" t-att-selected="reviewer.id == contract.suggested_reviewer_id.id">
+                                                            <t t-esc="reviewer.name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </t>
+                                            <t t-else="">
+                                                <p class="mb-0 text-primary"><i class="fa fa-user-o me-2"/><t t-esc="contract.suggested_reviewer_id.name or 'Chưa chọn'"/></p>
+                                            </t>
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <label class="text-muted small text-uppercase fw-bold mb-1">Người phê duyệt đề xuất</label>
+                                            <t t-if="contract.state == 'draft'">
+                                                <select name="suggested_approver_id" class="form-select">
+                                                    <option value="">-- Chọn người phê duyệt --</option>
+                                                    <t t-foreach="approvers" t-as="approver">
+                                                        <option t-att-value="approver.id" t-att-selected="approver.id == contract.suggested_approver_id.id">
+                                                            <t t-esc="approver.name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </t>
+                                            <t t-else="">
+                                                <p class="mb-0 text-primary"><i class="fa fa-user-circle-o me-2"/><t t-esc="contract.suggested_approver_id.name or 'Chưa chọn'"/></p>
+                                            </t>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="text-muted small text-uppercase fw-bold mb-2">Mô tả nội dung</label>
+                                        <div class="p-3 bg-light rounded border-start border-4 border-primary">
+                                            <t t-if="contract.description">
+                                                <t t-esc="contract.description"/>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="text-muted italic">Không có mô tả chi tiết.</span>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Attachments Section -->
+                            <div class="card mt-4 shadow-sm border-0 rounded-3 overflow-hidden mb-4">
+                                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0 fw-bold text-dark">
+                                        <i class="fa fa-paperclip me-2 text-primary"/> Hồ sơ / Tài liệu đính kèm
+                                    </h5>
+                                    <span class="badge bg-light text-dark rounded-pill border" t-if="attachments">
+                                        <t t-esc="len(attachments)"/> file
+                                    </span>
+                                </div>
+                                <div class="card-body p-0">
+                                    <!-- List existing attachments -->
+                                    <div t-if="attachments" class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light text-muted small text-uppercase">
+                                                <tr>
+                                                    <th class="ps-4">Tên file</th>
+                                                    <th>Ngày tải lên</th>
+                                                    <th class="text-end pe-4">Thao tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="attachments" t-as="attachment">
+                                                    <tr>
+                                                        <td class="ps-4">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="me-3 fs-3">
+                                                                    <i class="fa fa-file-pdf-o text-danger" t-if="attachment.mimetype == 'application/pdf'"/>
+                                                                    <i class="fa fa-file-word-o text-primary" t-elif="attachment.mimetype in ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']"/>
+                                                                    <i class="fa fa-file-image-o text-info" t-elif="attachment.mimetype and attachment.mimetype.startswith('image/')"/>
+                                                                    <i class="fa fa-file-o text-secondary" t-else=""/>
+                                                                </div>
+                                                                <a t-attf-href="/web/content/#{attachment.id}?download=true" target="_blank" class="text-decoration-none text-dark fw-bold" t-esc="attachment.name"/>
+                                                            </div>
+                                                        </td>
+                                                        <td class="small text-muted"><span t-field="attachment.create_date" t-options='{"widget": "date"}'/></td>
+                                                        <td class="text-end pe-4">
+                                                            <a t-attf-href="/web/content/#{attachment.id}?download=true" class="btn btn-sm btn-outline-secondary border-0" title="Tải xuống">
+                                                                <i class="fa fa-download fs-5"/>
+                                                            </a>
+                                                            <t t-if="contract.state == 'draft'">
+                                                                <a t-attf-href="/my/contracts/#{contract.id}/delete_attachment/#{attachment.id}" class="btn btn-sm btn-outline-danger border-0" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa file này?')">
+                                                                    <i class="fa fa-trash-o fs-5"/>
+                                                                </a>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div t-else="" class="text-center py-5 text-muted border-top">
+                                        <i class="fa fa-folder-open-o fa-3x mb-3 d-block opacity-25"/>
+                                        <p class="mb-0">Chưa có tài liệu nào được đính kèm.</p>
+                                    </div>
+
+                                    <!-- Standard Upload & Action Area (Only for Draft) -->
+                                    <div t-if="contract.state == 'draft'" class="p-4 bg-light border-top">
+                                        <h6 class="fw-bold mb-3"><i class="fa fa-upload me-2 text-primary"/> Đính kèm tài liệu &amp; Thực hiện chuyển bước</h6>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label small fw-bold">Chọn file đính kèm bổ sung (PDF, Word, Ảnh...)</label>
+                                                <input type="file" name="attachments" id="attachments_input" class="form-control" multiple="multiple"/>
+                                                <div class="form-text text-muted small">Cần ít nhất 1 file đính kèm để có thể Gửi rà soát hoặc Phê duyệt.</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex flex-wrap gap-2 mt-2">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fa fa-save me-1"/> Lưu thông tin &amp; File
+                                            </button>
+                                            <button type="submit" t-attf-formaction="/my/contracts/#{contract.id}/submit_review" class="btn btn-info text-white">
+                                                <i class="fa fa-search me-1"/> Lưu &amp; Gửi rà soát
+                                            </button>
+                                            <button type="submit" t-attf-formaction="/my/contracts/#{contract.id}/submit_approval" class="btn btn-warning">
+                                                <i class="fa fa-paper-plane me-1"/> Lưu &amp; Gửi phê duyệt
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- History Section (Chatter) -->
+
+                            <!-- History Section (Chatter) -->
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 fw-bold text-secondary">
+                                        <i class="fa fa-history me-2"/> Lịch sử xử lý &amp; Trao đổi
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush">
+                                        <t t-foreach="contract.message_ids" t-as="message">
+                                            <!-- Only show relevant messages (comments or tracking) -->
+                                            <li t-if="not message.is_internal and (message.body or message.tracking_value_ids)" class="list-group-item p-3">
+                                                <div class="d-flex">
+                                                    <div class="flex-shrink-0">
+                                                        <img t-if="message.author_id.image_128" t-attf-src="/web/image/res.partner/#{message.author_id.id}/image_128" 
+                                                             class="rounded-circle" style="width: 40px; height: 40px;"/>
+                                                        <div t-else="" class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                                            <t t-esc="message.author_id.name[0] if message.author_id else 'S'"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-grow-1 ms-3">
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <span class="fw-bold"><t t-esc="message.author_id.name or 'Hệ thống'"/></span>
+                                                            <small class="text-muted"><t t-esc="message.date.strftime('%Y-%m-%d %H:%M')"/></small>
+                                                        </div>
+                                                        <div class="message-body small text-secondary">
+                                                            <t t-raw="message.body"/>
+                                                        </div>
+                                                        <!-- Tracking values (state changes) -->
+                                                        <t t-if="message.tracking_value_ids">
+                                                            <div class="mt-2 p-2 bg-light rounded x-small">
+                                                                <t t-foreach="message.tracking_value_ids" t-as="tracking">
+                                                                    <div>
+                                                                        <i class="fa fa-exchange me-1"/> 
+                                                                        <span class="fw-bold"><t t-esc="tracking.field_id.field_description"/></span>: 
+                                                                        <span class="text-muted"><t t-esc="tracking.old_value_char or 'Rỗng'"/></span> 
+                                                                        <i class="fa fa-long-arrow-right mx-1"/> 
+                                                                        <span class="text-primary fw-bold"><t t-esc="tracking.new_value_char"/></span>
+                                                                    </div>
+                                                                </t>
+                                                            </div>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </t>
+                                    </ul>
+                                    <t t-if="not any(not m.is_internal and (m.body or m.tracking_value_ids) for m in contract.message_ids)">
+                                        <div class="p-4 text-center text-muted italic">
+                                            Chưa có lịch sử xử lý.
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <!-- Sidebar Actions -->
+                            <div class="card shadow-sm border-0 mb-4 sticky-top" style="top: 20px; z-index: 100;">
+                                <div class="card-header bg-light py-3">
+                                    <h5 class="mb-0 fw-bold">Trạng thái xử lý</h5>
+                                </div>
+                                <div class="card-body text-center p-4">
+                                    <div class="status-badge mb-3">
+                                        <span t-if="contract.state == 'draft'" class="badge bg-secondary px-4 py-2 fs-6">Dự thảo (Nháp)</span>
+                                        <span t-elif="contract.state == 'in_review'" class="badge bg-info px-4 py-2 fs-6">Đang rà soát</span>
+                                        <span t-elif="contract.state == 'waiting'" class="badge bg-warning px-4 py-2 fs-6 text-dark">Chờ phê duyệt</span>
+                                        <span t-elif="contract.state == 'approved'" class="badge bg-primary px-4 py-2 fs-6">Đã phê duyệt</span>
+                                        <span t-elif="contract.state == 'signed'" class="badge bg-success px-4 py-2 fs-6 text-dark">Đã ký kết</span>
+                                        <span t-else="" class="badge bg-dark px-4 py-2 fs-6"><t t-esc="contract.state"/></span>
+                                    </div>
+                                    <p class="text-muted small">
+                                        Tạo ngày: <t t-esc="contract.create_date.strftime('%Y-%m-%d')"/>
+                                    </p>
+                                    <hr/>
+                                    <div class="d-grid gap-2">
+                                        <t t-if="contract.state == 'draft'">
+                                            <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                                                <i class="fa fa-save me-2"/> Lưu thay đổi &amp; File
+                                            </button>
+                                        </t>
+                                        <button class="btn btn-outline-secondary" disabled="disabled">
+                                            <i class="fa fa-print me-2"/> In hợp đồng
+                                        </button>
+                                    </div>
+                                    <t t-if="contract.state != 'draft'">
+                                        <div class="mt-3 p-2 bg-light rounded text-muted small italic">
+                                            <i class="fa fa-lock me-1"/> Hợp đồng đã khóa để xử lý.
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <!-- Create Form -->
+    <template id="portal_contract_form" name="New Contract">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-transparent p-0 mb-4">
+                        <li class="breadcrumb-item"><a href="/my/contracts">Hợp đồng của tôi</a></li>
+                        <li class="breadcrumb-item active">Tạo hợp đồng mới</li>
+                    </ol>
+                </nav>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="card shadow border-0 overflow-hidden">
+                            <div class="card-header bg-primary text-white py-3">
+                                <h4 class="mb-0"><i class="fa fa-pencil-square-o me-2"/> Nhập thông tin hợp đồng mới</h4>
+                            </div>
+                            <div class="card-body p-5">
+                                <form action="/my/contracts/create" method="post" enctype="multipart/form-data">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    
+                                    <div class="row mb-4">
+                                        <div class="col-md-8">
+                                            <label for="title" class="form-label fw-bold">Tiêu đề hợp đồng *</label>
+                                            <input type="text" name="title" id="title" class="form-control" 
+                                                   placeholder="VD: Hợp đồng cung cấp dịch vụ logistics 2026" required="required"/>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="contract_date" class="form-label fw-bold">Ngày tạo hợp đồng</label>
+                                            <input type="date" name="contract_date" id="contract_date" class="form-control" 
+                                                   t-att-value="datetime.date.today().strftime('%Y-%m-%d')"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label for="contract_type_id" class="form-label fw-bold">Loại hợp đồng *</label>
+                                            <select name="contract_type_id" id="contract_type_id" class="form-select" required="required">
+                                                <option value="">-- Chọn loại hợp đồng --</option>
+                                                <t t-foreach="contract_types" t-as="type">
+                                                    <option t-att-value="type.id"><t t-esc="type.name"/></option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="partner_id" class="form-label fw-bold">Đối tác *</label>
+                                            <select name="partner_id" id="partner_id" class="form-select" required="required">
+                                                <t t-foreach="partners" t-as="p">
+                                                    <option t-att-value="p.id">
+                                                        <t t-esc="p.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Luồng ký *</label>
+                                            <div class="d-flex gap-4 mt-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="signing_flow" id="flow1" value="trasas_first" checked="checked"/>
+                                                    <label class="form-check-label" for="flow1">TRASAS ký trước</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="signing_flow" id="flow2" value="partner_first"/>
+                                                    <label class="form-check-label" for="flow2">Đối tác ký trước</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="storage_location" class="form-label fw-bold">Vị trí lưu kho</label>
+                                            <input type="text" name="storage_location" id="storage_location" class="form-control" placeholder="VD: Tủ A, Kệ 2"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label for="suggested_reviewer_id" class="form-label fw-bold">Người rà soát đề xuất</label>
+                                            <select name="suggested_reviewer_id" id="suggested_reviewer_id" class="form-select">
+                                                <option value="">-- Chọn người rà soát --</option>
+                                                <t t-foreach="reviewers" t-as="r">
+                                                    <option t-att-value="r.id"><t t-esc="r.name"/></option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="suggested_approver_id" class="form-label fw-bold">Người phê duyệt đề xuất</label>
+                                            <select name="suggested_approver_id" id="suggested_approver_id" class="form-select">
+                                                <option value="">-- Chọn người phê duyệt --</option>
+                                                <t t-foreach="approvers" t-as="a">
+                                                    <option t-att-value="a.id"><t t-esc="a.name"/></option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <label for="date_start" class="form-label fw-bold">Ngày bắt đầu *</label>
+                                            <input type="date" name="date_start" id="date_start" class="form-control" required="required"/>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="date_end" class="form-label fw-bold">Ngày kết thúc *</label>
+                                            <input type="date" name="date_end" id="date_end" class="form-control" required="required"/>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="sign_deadline" class="form-label fw-bold">Hạn ký</label>
+                                            <input type="date" name="sign_deadline" id="sign_deadline" class="form-control"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="attachment" class="form-label fw-bold">Hồ sơ / Tài liệu đính kèm (PDF, Word, Ảnh...)</label>
+                                        <input type="file" name="attachments" id="attachments" class="form-control" multiple="multiple"/>
+                                        <div class="form-text text-muted small">Bạn có thể chọn nhiều file cùng lúc để đính kèm ngay khi tạo.</div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="description" class="form-label fw-bold">Mô tả nội dung</label>
+                                        <textarea name="description" id="description" class="form-control" rows="4" 
+                                                  placeholder="Chi tiết nội dung yêu cầu..."></textarea>
+                                    </div>
+
+                                    <hr class="my-4"/>
+
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="/my/contracts" class="btn btn-light px-4">Hủy</a>
+                                        <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
+                                            <i class="fa fa-check me-2"/> Tạo hợp đồng
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

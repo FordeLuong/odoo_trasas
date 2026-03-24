@@ -200,6 +200,13 @@
                     <field name="is_draft_dept_approver" invisible="1"/>
                     <field name="is_operation_user" invisible="1"/>
                     <field name="draft_dept_approver_id" invisible="1"/>
+
+                    <!-- Nút: Đồng bộ tài liệu sang Documents -->
+                    <button name="action_sync_documents"
+                            string="Đồng bộ tài liệu"
+                            type="object"
+                            class="btn-info text-white"
+                            help="Thủ công đồng bộ lại file từ Chatter/Binary sang ứng dụng Documents nếu bị lỗi hoặc thiếu."/>
                 </header>
                 
                 <sheet>
@@ -490,20 +497,19 @@
                         domain="[('active', '=', False)]"/>
                 
                 <!-- Group By -->
-                <!-- <group expand="0" string="Group By">
-                    <filter string="Trạng thái" name="group_state" 
-                            context="{'group_by': 'state'}"/>
-                    <filter string="Loại hợp đồng" name="group_type" 
-                            context="{'group_by': 'contract_type_id'}"/>
-                    <filter string="Đối tác" name="group_partner" 
-                            context="{'group_by': 'partner_id'}"/>
-                    <filter string="Người tạo" name="group_user" 
-                            context="{'group_by': 'user_id'}"/>
-                    <filter string="Tháng bắt đầu" name="group_date_start" 
-                            context="{'group_by': 'date_start:month'}"/>
-                    <filter string="Tháng kết thúc" name="group_date_end" 
-                            context="{'group_by': 'date_end:month'}"/>
-                </group> -->
+                <separator/>
+                <filter string="Trạng thái" name="group_state" 
+                        context="{'group_by': 'state'}"/>
+                <filter string="Loại hợp đồng" name="group_type" 
+                        context="{'group_by': 'contract_type_id'}"/>
+                <filter string="Đối tác" name="group_partner" 
+                        context="{'group_by': 'partner_id'}"/>
+                <filter string="Người tạo" name="group_user" 
+                        context="{'group_by': 'user_id'}"/>
+                <filter string="Tháng bắt đầu" name="group_date_start" 
+                        context="{'group_by': 'date_start:month'}"/>
+                <filter string="Tháng kết thúc" name="group_date_end" 
+                        context="{'group_by': 'date_end:month'}"/>
             </search>
         </field>
     </record>

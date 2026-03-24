@@ -25,7 +25,7 @@
                             <field name="active"/>
                             <field name="default_duration_days"/>
                             <field name="name_pattern" placeholder="Ví dụ: {code}/{year}/{sequence:04d}"/>
-                            <!-- <field name="document_type_id" groups="base.group_no_one"/> -->
+                            <field name="document_type_id" groups="base.group_no_one"/>
                         </group>
                     </group>
                     <group>
