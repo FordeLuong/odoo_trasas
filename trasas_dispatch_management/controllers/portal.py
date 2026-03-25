@@ -159,3 +159,27 @@ class DispatchPortal(CustomerPortal):
             return request.redirect(f"/my/dispatch/{dispatch_id}?message=submitted")
         except Exception as e:
             return request.redirect(f"/my/dispatch/{dispatch_id}?error={str(e)}")
+    @http.route(
+        ["/my/dispatch/<int:dispatch_id>/no_response"],
+        type="http",
+        auth="user",
+        website=True,
+        methods=["POST"],
+        csrf=True,
+    )
+    def portal_dispatch_no_response(self, dispatch_id, **post):
+        """Hoàn thành công văn đến (Không cần phản hồi) từ portal"""
+        try:
+            dispatch = (
+                request.env["trasas.dispatch.incoming"].sudo().browse(dispatch_id)
+            )
+            # Check access: must be assigned handler
+            if request.env.user not in dispatch.handler_ids:
+                return request.redirect("/my")
+
+            if dispatch.state == "processing":
+                dispatch.action_no_response_needed()
+
+            return request.redirect("/my/dispatches?message=no_response_done")
+        except Exception as e:
+            return request.redirect(f"/my/dispatch/{dispatch_id}?error={str(e)}")

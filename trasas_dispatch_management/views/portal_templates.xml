@@ -255,6 +255,16 @@
                                     <i class="fa fa-paper-plane me-2"/>
                                     Gửi phản hồi
                                 </button>
+
+                                <button type="button" class="btn btn-outline-secondary ms-2"
+                                        onclick="if(confirm('Bạn có chắc chắn công văn này không cần phản hồi? (Công văn sẽ chuyển sang trạng thái Hoàn thành)')) { document.getElementById('form_no_response').submit(); }">
+                                    <i class="fa fa-times me-2"/>
+                                    Không cần phản hồi
+                                </button>
+                            </form>
+
+                            <form id="form_no_response" method="POST" t-attf-action="/my/dispatch/#{dispatch.id}/no_response" class="d-none">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             </form>
                         </t>
 

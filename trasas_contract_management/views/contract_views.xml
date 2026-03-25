@@ -61,7 +61,7 @@
                             string="Xác nhận TRASAS đã ký"
                             type="object"
                             class="btn-success"
-                            invisible="state != 'signing' or signing_flow != 'trasas_first' or internal_sign_date or is_approver"
+                            invisible="state != 'signing' or signing_method == 'digital' or signing_flow != 'trasas_first' or internal_sign_date or is_approver"
                             groups="trasas_contract_management.group_contract_user"/>
                             
                     <!-- B12: Xác nhận Đã gửi cho Đối tác -->
@@ -69,7 +69,7 @@
                             string="Xác nhận Đã gửi Đối tác"
                             type="object"
                             class="btn-primary"
-                            invisible="state != 'signing' or signing_flow != 'trasas_first' or not internal_sign_date or sent_to_partner_date"
+                            invisible="state != 'signing' or signing_method == 'digital' or signing_flow != 'trasas_first' or not internal_sign_date or sent_to_partner_date"
                             groups="trasas_contract_management.group_contract_user"/>
                     
                     <!-- B13: Xác nhận Hoàn tất (TRASAS First) - Chỉ Phòng Vận hành -->
@@ -77,7 +77,7 @@
                             string="Xác nhận Hoàn tất" 
                             type="object" 
                             class="btn-success"
-                            invisible="state != 'signing' or signing_flow != 'trasas_first' or not sent_to_partner_date or not is_operation_user"/>
+                            invisible="state != 'signing' or signing_method == 'digital' or signing_flow != 'trasas_first' or not sent_to_partner_date or not is_operation_user"/>
 
                     <!-- ============ LUỒNG: ĐỐI TÁC KÝ TRƯỚC ============ -->
                     <!-- B14: Xác nhận Đối tác đã ký -->
@@ -85,7 +85,7 @@
                             string="Xác nhận Đối tác đã ký"
                             type="object"
                             class="btn-primary"
-                            invisible="state != 'signing' or signing_flow != 'partner_first' or partner_sign_date"
+                            invisible="state != 'signing' or signing_method == 'digital' or signing_flow != 'partner_first' or partner_sign_date"
                             groups="trasas_contract_management.group_contract_user"/>
                             
                     <!-- B15: Xác nhận TRASAS đã ký (Giám đốc - Luồng Đối tác ký trước) -->
@@ -93,7 +93,7 @@
                             string="Xác nhận TRASAS đã ký"
                             type="object"
                             class="btn-success"
-                            invisible="state != 'signing' or signing_flow != 'partner_first' or not partner_sign_date or internal_sign_date or is_approver"
+                            invisible="state != 'signing' or signing_method == 'digital' or signing_flow != 'partner_first' or not partner_sign_date or internal_sign_date or is_approver"
                             groups="trasas_contract_management.group_contract_user"/>
                     
                     <!-- B13: Xác nhận Hoàn tất (Partner First) - Chỉ Phòng Vận hành -->
@@ -101,7 +101,7 @@
                             string="Xác nhận Hoàn tất" 
                             type="object" 
                             class="btn-success"
-                            invisible="state != 'signing' or signing_flow != 'partner_first' or not internal_sign_date or not is_operation_user"/>
+                            invisible="state != 'signing' or signing_method == 'digital' or signing_flow != 'partner_first' or not internal_sign_date or not is_operation_user"/>
 
                     <!-- B16: Đóng dấu & Lưu kho - Chỉ HCNS -->
                     <button name="action_archive_contract" 
@@ -249,6 +249,10 @@
                                    options="{'no_create': True}"
                                    readonly="state not in ['draft']"/>
                             <field name="partner_id" 
+                                   readonly="state not in ['draft']"/>
+                            <field name="signing_method" 
+                                   widget="radio"
+                                   options="{'horizontal': true}"
                                    readonly="state not in ['draft']"/>
                             <field name="signing_flow" 
                                    widget="radio"

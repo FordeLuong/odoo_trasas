@@ -137,6 +137,7 @@
                             invisible="state != 'processing' or response_required"
                             groups="trasas_dispatch_management.group_dispatch_coordinator,trasas_dispatch_management.group_dispatch_administrator"/>
                     
+                    <field name="is_handler" invisible="1"/>
                     <button name="action_cancel" string="Hủy bỏ" type="object" 
                             invisible="state == 'cancel'"
                             groups="trasas_dispatch_management.group_dispatch_coordinator,trasas_dispatch_management.group_dispatch_administrator"/>
@@ -144,6 +145,11 @@
                     <button name="action_draft" string="Về nháp" type="object" 
                             invisible="state == 'draft'"
                             groups="trasas_dispatch_management.group_dispatch_reviewer,trasas_dispatch_management.group_dispatch_administrator"/>
+                    
+                    <button name="action_no_response_needed" string="Không cần phản hồi" type="object"
+                            class="btn-secondary"
+                            invisible="state != 'processing' or not is_handler"
+                            help="Kết thúc công văn này mà không cần tạo văn bản phản hồi."/>
                     
                     <field name="stage_id" widget="statusbar" 
                            options="{'clickable': 1}"/>

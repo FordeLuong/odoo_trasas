@@ -50,6 +50,12 @@ class TrasasContractDigitalSignature(models.Model):
         """
         self.ensure_one()
 
+        if self.signing_method != "digital":
+            raise UserError(
+                # pylint: disable=E0102
+                _("Bắt buộc phải chọn phương thức ký là Chữ ký số!")
+            )
+
         if self.state not in ("approved", "signing"):
             raise UserError(
                 _(

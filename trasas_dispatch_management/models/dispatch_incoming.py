@@ -145,12 +145,31 @@ class TrasasDispatchIncoming(models.Model):
                 record.manager_id and record.manager_id == self.env.user
             )
 
+    def action_no_response_needed(self):
+        """Người xử lý xác nhận không cần phản hồi => Hoàn thành luôn"""
+        self.ensure_one()
+        # Cập nhật trạng thái và cờ phản hồi
+        stage_done = self.env.ref("trasas_dispatch_management.stage_done", raise_if_not_found=False)
+        self.write({
+            "response_required": False,
+            "stage_id": stage_done.id if stage_done else self.stage_id.id,
+        })
+        # Log note
+        self.message_post(body=_("Người xử lý xác nhận không cần phản hồi. Công văn đã được tự động hoàn tất."))
+
     is_overdue = fields.Boolean(
         string="Quá hạn", compute="_compute_is_overdue", store=True
     )
     overdue_days = fields.Integer(
         string="Số ngày quá hạn", compute="_compute_is_overdue"
     )
+    is_handler = fields.Boolean(
+        string="Là người xử lý", compute="_compute_is_handler"
+    )
+
+    def _compute_is_handler(self):
+        for record in self:
+            record.is_handler = self.env.user in record.handler_ids
 
     def _default_stage_id(self):
         """Get the default draft stage"""
@@ -298,7 +317,8 @@ class TrasasDispatchIncoming(models.Model):
 
         if "name" in vals or "dispatch_number" in vals:
             for rec in self:
-                if rec.document_folder_id:
+                # Chỉ đổi tên folder nếu đây là thư mục riêng biệt của công văn thủ công
+                if rec.document_folder_id and rec.is_manual_number:
                     folder_name = (
                         f"{rec.name}_{rec.dispatch_number}"
                         if rec.name and rec.dispatch_number
@@ -348,21 +368,19 @@ class TrasasDispatchIncoming(models.Model):
 
     def _create_document_folder(self):
         Document = self.env["documents.document"].sudo()
-        type_folders = self.mapped("type_id.document_folder_id")
-        root_incoming = type_folders.mapped("folder_id")[:1] if type_folders else False
+        root_incoming = self.env.ref("trasas_dispatch_management.document_workspace_dispatch", raise_if_not_found=False)
 
         for rec in self:
             if rec.document_folder_id:
                 continue
 
-            folder_name = (
-                f"{rec.name}_{rec.dispatch_number}"
-                if rec.name and rec.dispatch_number
-                else rec.name or rec.dispatch_number
-            )
-
-            parent_id = False
             if rec.is_manual_number:
+                folder_name = (
+                    f"{rec.name}_{rec.dispatch_number}"
+                    if rec.name and rec.dispatch_number
+                    else rec.name or rec.dispatch_number
+                )
+                parent_id = False
                 if root_incoming:
                     manual_parent = Document.search(
                         [
@@ -381,23 +399,24 @@ class TrasasDispatchIncoming(models.Model):
                             }
                         )
                     parent_id = manual_parent.id
-            elif rec.type_id and rec.type_id.document_folder_id:
-                parent_id = rec.type_id.document_folder_id.id
 
-            if parent_id:
-                folder_vals = {
-                    "name": folder_name,
-                    "type": "folder",
-                    "folder_id": parent_id,
-                }
-                # Ensure HCNS group has access to the folder
-                hcns_group = self.env.ref("trasas_dispatch_management.group_dispatch_coordinator", raise_if_not_found=False)
-                if hcns_group:
-                    folder_vals["access_internal"] = "edit"
-                
-                folder = Document.create(folder_vals)
-                # Use sudo to write back to the record to avoid permission issues for HCNS users
-                rec.sudo().write({"document_folder_id": folder.id})
+                if parent_id:
+                    folder_vals = {
+                        "name": folder_name,
+                        "type": "folder",
+                        "folder_id": parent_id,
+                    }
+                    # Ensure HCNS group has access to the folder
+                    hcns_group = self.env.ref("trasas_dispatch_management.group_dispatch_coordinator", raise_if_not_found=False)
+                    if hcns_group:
+                        folder_vals["access_internal"] = "edit"
+                    
+                    folder = Document.create(folder_vals)
+                    # Use sudo to write back to the record to avoid permission issues for HCNS users
+                    rec.sudo().write({"document_folder_id": folder.id})
+            else:
+                if root_incoming:
+                    rec.sudo().write({"document_folder_id": root_incoming.id})
 
     @api.model
     def _create_folders_for_existing(self):

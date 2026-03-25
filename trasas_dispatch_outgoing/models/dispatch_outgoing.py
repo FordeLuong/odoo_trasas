@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
 
 
@@ -84,7 +84,6 @@ class TrasasDispatchOutgoing(models.Model):
     approver_id = fields.Many2one(
         "res.users",
         string="Người duyệt",
-        required=True,
         tracking=True,
         default=_default_approver,
         domain=lambda self: [
@@ -302,10 +301,10 @@ class TrasasDispatchOutgoing(models.Model):
     def write(self, vals):
         res = super().write(vals)
 
-        # Cập nhật tên folder nếu đổi trích yếu hoặc số hiệu
+        # Cập nhật tên folder nếu đổi trích yếu hoặc số hiệu (chỉ cho thư mục thủ công)
         if any(f in vals for f in ["name", "subject"]):
             for rec in self:
-                if rec.document_folder_id:
+                if rec.document_folder_id and rec.is_manual_number:
                     folder_name = f"{rec.name}_{rec.subject}" if rec.name and rec.subject else rec.name or rec.subject
                     rec.document_folder_id.sudo().write({"name": folder_name})
 
@@ -325,10 +324,9 @@ class TrasasDispatchOutgoing(models.Model):
             if rec.document_folder_id:
                 continue
 
-            folder_name = f"{rec.name}_{rec.subject}" if rec.name and rec.subject else rec.name or rec.subject
-
-            parent_id = False
             if rec.is_manual_number:
+                folder_name = f"{rec.name}_{rec.subject}" if rec.name and rec.subject else rec.name or rec.subject
+                parent_id = False
                 if root_outgoing:
                     manual_parent = Document.search(
                         [
@@ -347,26 +345,24 @@ class TrasasDispatchOutgoing(models.Model):
                             }
                         )
                     parent_id = manual_parent.id
-            elif rec.type_id and rec.type_id.document_folder_id:
-                parent_id = rec.type_id.document_folder_id.id
-            elif root_outgoing:
-                # Default to root if no type/manual
-                parent_id = root_outgoing.id
 
-            if parent_id:
-                folder_vals = {
-                    "name": folder_name,
-                    "type": "folder",
-                    "folder_id": parent_id,
-                }
-                # Cấp quyền Edit cho nhóm HCNS
-                hcns_group = self.env.ref("trasas_dispatch_management.group_dispatch_coordinator", raise_if_not_found=False)
-                if hcns_group:
-                    folder_vals["access_internal"] = "edit"
+                if parent_id:
+                    folder_vals = {
+                        "name": folder_name,
+                        "type": "folder",
+                        "folder_id": parent_id,
+                    }
+                    # Cấp quyền Edit cho nhóm HCNS
+                    hcns_group = self.env.ref("trasas_dispatch_management.group_dispatch_coordinator", raise_if_not_found=False)
+                    if hcns_group:
+                        folder_vals["access_internal"] = "edit"
 
-                folder = Document.create(folder_vals)
-                # Dùng sudo để ghi lại vào bản ghi để tránh lỗi cho user
-                rec.sudo().write({"document_folder_id": folder.id})
+                    folder = Document.create(folder_vals)
+                    # Dùng sudo để ghi lại vào bản ghi để tránh lỗi cho user
+                    rec.sudo().write({"document_folder_id": folder.id})
+            else:
+                if root_outgoing:
+                    rec.sudo().write({"document_folder_id": root_outgoing.id})
 
     def _sync_attachments_to_document(self):
         """Đồng bộ các file đính kèm của Công văn đi sang ứng dụng Documents"""
@@ -632,6 +628,19 @@ class TrasasDispatchOutgoing(models.Model):
     def action_draft(self):
         stage_draft = self._get_stage("outgoing_stage_draft")
         if not stage_draft:
-            raise UserError("Chưa cấu hình giai đoạn 'Dự thảo'!")
+            raise UserError(_("Chưa cấu hình giai đoạn 'Dự thảo'!"))
         for record in self:
             record.stage_id = stage_draft
+
+    def action_no_response_needed(self):
+        """Hủy công văn đi và đánh dấu công văn đến là không cần phản hồi"""
+        self.ensure_one()
+        # 1. Hủy bản thân công văn đi
+        self.action_cancel()
+        
+        # 2. Xử lý công văn đến gốc (nếu có)
+        if self.incoming_dispatch_id:
+            # Gọi hàm xử lý của incoming (đã có logic done và log note)
+            self.incoming_dispatch_id.sudo().action_no_response_needed()
+            
+        return True

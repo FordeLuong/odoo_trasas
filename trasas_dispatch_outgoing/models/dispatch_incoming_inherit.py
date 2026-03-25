@@ -61,6 +61,10 @@ class TrasasDispatchIncoming(models.Model):
         if existing:
             return
 
+        if not self.sender_id:
+            # Nếu chưa có nơi gửi (đối tác), không thể tạo CV đi phản hồi tự động
+            return
+
         handler = self.handler_ids[0]
         subject = _("Phản hồi công văn số %s – %s") % (
             self.dispatch_number or self.name,

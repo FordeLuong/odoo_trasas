@@ -168,6 +168,17 @@ class TrasasContract(models.Model):
     )
 
     # ============ LUỒNG KÝ ============
+    signing_method = fields.Selection(
+        [
+            ("manual", "Ký tay / Scan"),
+            ("digital", "Chữ ký số (API)"),
+        ],
+        string="Phương thức ký",
+        default="manual",
+        required=True,
+        tracking=True,
+    )
+
     signing_flow = fields.Selection(
         [
             ("trasas_first", "TRASAS ký trước"),
@@ -1121,17 +1132,18 @@ class TrasasContract(models.Model):
         if self.state != "signing":
             return
 
-        # Validate: TRASAS đã ký và có file scan
-        if not self.internal_sign_date:
-            raise UserError(_("TRASAS chưa ký hợp đồng!"))
+        # Validate: Kiểm tra file scan (Bỏ qua cho luồng Ký số vì module kia sẽ tự lo)
+        if self.signing_method == "manual":
+            if not self.internal_sign_date:
+                raise UserError(_("TRASAS chưa ký hợp đồng!"))
 
-        if not self.final_scan_file:
-            raise UserError(
-                _(
-                    "Vui lòng upload bản scan hợp đồng đã ký đầy đủ!\n"
-                    "Vào tab 'File đính kèm' để upload file."
+            if not self.final_scan_file:
+                raise UserError(
+                    _(
+                        "Vui lòng upload bản scan hợp đồng đã ký đầy đủ!\n"
+                        "Vào tab 'File đính kèm' để upload file."
+                    )
                 )
-            )
 
         self.write(
             {
@@ -1391,7 +1403,17 @@ class TrasasContract(models.Model):
             # --- Activity Logic ---
             record._close_activities()
 
-            # [B10/B14] Tạo Activity theo luồng ký
+            # [PHÂN NHÁNH KÝ] Nếu ký số, không tạo Activity thủ công
+            if record.signing_method == "digital":
+                record.message_post(
+                    body=_(
+                        "Hợp đồng áp dụng quy trình <b>Chữ ký số</b>.<br/>"
+                        "Vui lòng bấm nút <b>Tạo yêu cầu ký số</b> để tiếp tục."
+                    )
+                )
+                continue
+
+            # [B10/B14] Tạo Activity theo luồng ký (Luồng Ký tay)
             if record.signing_flow == "trasas_first":
                 # Luồng A: TRASAS ký trước [B11]
                 # Ưu tiên Người phê duyệt đề xuất

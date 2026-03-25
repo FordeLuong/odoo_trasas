@@ -228,3 +228,28 @@ class OutgoingDispatchPortal(CustomerPortal):
             return request.redirect(
                 f"/my/outgoing_dispatch/{dispatch_id}?error={str(e)}"
             )
+    @http.route(
+        ["/my/outgoing_dispatch/<int:dispatch_id>/no_response"],
+        type="http",
+        auth="user",
+        website=True,
+        methods=["POST"],
+        csrf=True,
+    )
+    def portal_outgoing_dispatch_no_response(self, dispatch_id, **post):
+        """Hủy công văn đi và hoàn thành công văn đến gốc (Không cần phản hồi)"""
+        try:
+            dispatch = (
+                request.env["trasas.dispatch.outgoing"].sudo().browse(dispatch_id)
+            )
+            if request.env.user.id != dispatch.drafter_id.id:
+                return request.redirect("/my")
+
+            if dispatch.state == "draft":
+                dispatch.action_no_response_needed()
+
+            return request.redirect("/my/outgoing_dispatches?message=no_response_done")
+        except Exception as e:
+            return request.redirect(
+                f"/my/outgoing_dispatch/{dispatch_id}?error={str(e)}"
+            )

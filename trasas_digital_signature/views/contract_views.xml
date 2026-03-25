@@ -26,7 +26,7 @@
                         string="Tạo yêu cầu ký số"
                         type="object"
                         class="btn-primary"
-                        invisible="state not in ['approved', 'signing']"
+                        invisible="state not in ['approved', 'signing'] or signing_method != 'digital'"
                         groups="trasas_contract_management.group_contract_user"/>
             </xpath>
         </field>
