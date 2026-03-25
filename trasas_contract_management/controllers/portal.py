@@ -211,6 +211,7 @@ class ContractPortal(CustomerPortal):
             "partner_id": int(post.get("partner_id"))
             if post.get("partner_id")
             else request.env.user.partner_id.id,
+            "signing_method": post.get("signing_method") or "manual",
             "signing_flow": post.get("signing_flow") or "trasas_first",
             "suggested_reviewer_id": int(post.get("suggested_reviewer_id"))
             if post.get("suggested_reviewer_id")

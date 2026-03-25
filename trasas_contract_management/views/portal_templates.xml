@@ -334,7 +334,7 @@
                             <!-- History Section (Chatter) -->
                             <div class="card shadow-sm border-0 mb-4">
                                 <div class="card-header bg-white py-3">
-                                    <h5 class="mb-0 fw-bold text-secondary">
+                                    <h5 class="mb-0 fw-bold text-body">
                                         <i class="fa fa-history me-2"/> Lịch sử xử lý &amp; Trao đổi
                                     </h5>
                                 </div>
@@ -353,21 +353,21 @@
                                                     </div>
                                                     <div class="flex-grow-1 ms-3">
                                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                                            <span class="fw-bold"><t t-esc="message.author_id.name or 'Hệ thống'"/></span>
-                                                            <small class="text-muted"><t t-esc="message.date.strftime('%Y-%m-%d %H:%M')"/></small>
+                                                            <span class="fw-bold text-body"><t t-esc="message.author_id.name or 'Hệ thống'"/></span>
+                                                            <small style="opacity: 0.75;"><t t-esc="message.date.strftime('%Y-%m-%d %H:%M')"/></small>
                                                         </div>
-                                                        <div class="message-body small text-secondary">
+                                                        <div class="message-body mt-2" style="color: inherit !important; opacity: 0.9;">
                                                             <t t-raw="message.body"/>
                                                         </div>
                                                         <!-- Tracking values (state changes) -->
                                                         <t t-if="message.tracking_value_ids">
-                                                            <div class="mt-2 p-2 bg-light rounded x-small">
+                                                            <div class="mt-2 p-2 rounded" style="background-color: rgba(0,0,0,0.05);">
                                                                 <t t-foreach="message.tracking_value_ids" t-as="tracking">
-                                                                    <div>
+                                                                    <div class="text-body" style="font-size: 0.9em;">
                                                                         <i class="fa fa-exchange me-1"/> 
                                                                         <span class="fw-bold"><t t-esc="tracking.field_id.field_description"/></span>: 
-                                                                        <span class="text-muted"><t t-esc="tracking.old_value_char or 'Rỗng'"/></span> 
-                                                                        <i class="fa fa-long-arrow-right mx-1"/> 
+                                                                        <span style="opacity: 0.7;"><t t-esc="tracking.old_value_char or 'Rỗng'"/></span> 
+                                                                        <i class="fa fa-long-arrow-right mx-2 text-primary"/> 
                                                                         <span class="text-primary fw-bold"><t t-esc="tracking.new_value_char"/></span>
                                                                     </div>
                                                                 </t>
@@ -488,6 +488,19 @@
 
                                     <div class="row mb-4">
                                         <div class="col-md-6">
+                                            <label class="form-label fw-bold">Phương thức ký *</label>
+                                            <div class="d-flex gap-4 mt-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="signing_method" id="method1" value="manual" checked="checked"/>
+                                                    <label class="form-check-label" for="method1">Ký tay / Scan</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="signing_method" id="method2" value="digital"/>
+                                                    <label class="form-check-label" for="method2">Chữ ký số (API)</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
                                             <label class="form-label fw-bold">Luồng ký *</label>
                                             <div class="d-flex gap-4 mt-2">
                                                 <div class="form-check">
@@ -500,6 +513,9 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div class="row mb-4">
                                         <div class="col-md-6">
                                             <label for="storage_location" class="form-label fw-bold">Vị trí lưu kho</label>
                                             <input type="text" name="storage_location" id="storage_location" class="form-control" placeholder="VD: Tủ A, Kệ 2"/>
