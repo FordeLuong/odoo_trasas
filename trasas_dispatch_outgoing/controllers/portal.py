@@ -253,3 +253,38 @@ class OutgoingDispatchPortal(CustomerPortal):
             return request.redirect(
                 f"/my/outgoing_dispatch/{dispatch_id}?error={str(e)}"
             )
+    @http.route(
+        ["/my/dispatch/<int:dispatch_id>/create_outgoing"],
+        type="http",
+        auth="user",
+        website=True,
+        methods=["POST"],
+        csrf=True,
+    )
+    def portal_dispatch_create_outgoing(self, dispatch_id, **kw):
+        """Tạo công văn đi phản hồi từ portal (thủ công)"""
+        try:
+            # Sử dụng sudo() để đảm bảo quyền tạo bản ghi từ portal
+            dispatch = (
+                request.env["trasas.dispatch.incoming"].sudo().browse(dispatch_id)
+            )
+            # Kiểm tra quyền truy cập: phải là người xử lý hoặc Admin
+            if request.env.user not in dispatch.handler_ids and not request.env.is_admin():
+                return request.redirect("/my")
+
+            if dispatch.state != "processing":
+                 return request.redirect(f"/my/dispatch/{dispatch_id}?error=invalid_state")
+
+            # Gọi action đã định nghĩa ở model (đã có logic tạo y hệt logic cũ)
+            result = dispatch.action_create_outgoing_dispatch()
+            
+            # Lấy ID của công văn đi vừa tạo từ dictionary kết quả của action_create_outgoing_dispatch
+            outgoing_id = result.get("res_id")
+            if outgoing_id:
+                # Chuyển hướng đến trang chi tiết Công văn đi trên portal
+                return request.redirect(f"/my/outgoing_dispatch/{outgoing_id}")
+
+            return request.redirect(f"/my/dispatch/{dispatch_id}?error=creation_failed")
+        except Exception as e:
+            return request.redirect(f"/my/dispatch/{dispatch_id}?error={str(e)}")
+

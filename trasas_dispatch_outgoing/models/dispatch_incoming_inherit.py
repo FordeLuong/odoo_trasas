@@ -32,38 +32,38 @@ class TrasasDispatchIncoming(models.Model):
         }
 
     def action_confirm(self):
-        """Override to auto-create outgoing dispatch if response is required (Direct flow)"""
-        res = super().action_confirm()
-        for record in self:
-            # Chỉ tạo nếu không qua bước Quản lý phân công (đã có handler_ids ngay từ đầu)
-            if not record.is_via_manager and record.response_required and record.handler_ids:
-                record._auto_create_outgoing_dispatch()
-        return res
+        """Override to remove auto-creation (Manual flow now)"""
+        return super().action_confirm()
 
     def action_manager_assign(self):
-        """Override to auto-create outgoing dispatch when Manager assigns handlers"""
-        res = super().action_manager_assign()
-        for record in self:
-            if record.response_required and record.handler_ids:
-                record._auto_create_outgoing_dispatch()
-        return res
+        """Override to remove auto-creation (Manual flow now)"""
+        return super().action_manager_assign()
 
-    def _auto_create_outgoing_dispatch(self):
-        """Helper to create a draft outgoing dispatch based on incoming data"""
+    def action_create_outgoing_dispatch(self):
+        """Manual action to create a draft outgoing dispatch based on incoming data"""
         self.ensure_one()
-        if not self.handler_ids:
-            return
+        from odoo import _
+        from odoo.exceptions import UserError
 
-        # Check if already exists to avoid duplication
+        if not self.handler_ids:
+            raise UserError(_("Vui lòng chọn Người xử lý trước khi tạo công văn đi phản hồi!"))
+
+        # Check if already exists to avoid duplication (limit to 1 draft/active one)
         existing = self.env["trasas.dispatch.outgoing"].search(
-            [("incoming_dispatch_id", "=", self.id)], limit=1
+            [("incoming_dispatch_id", "=", self.id), ("state", "!=", "cancel")], limit=1
         )
         if existing:
-            return
+            return {
+                "name": _("Công văn đi phản hồi"),
+                "type": "ir.actions.act_window",
+                "res_model": "trasas.dispatch.outgoing",
+                "res_id": existing.id,
+                "view_mode": "form",
+                "target": "current",
+            }
 
         if not self.sender_id:
-            # Nếu chưa có nơi gửi (đối tác), không thể tạo CV đi phản hồi tự động
-            return
+            raise UserError(_("Vui lòng điền thông tin 'Nơi gửi' để xác định nơi nhận cho công văn phản hồi!"))
 
         handler = self.handler_ids[0]
         subject = _("Phản hồi công văn số %s – %s") % (
@@ -71,7 +71,7 @@ class TrasasDispatchIncoming(models.Model):
             self.extract_content or "",
         )
         
-        self.env["trasas.dispatch.outgoing"].create({
+        outgoing = self.env["trasas.dispatch.outgoing"].create({
             "subject": subject,
             "incoming_dispatch_id": self.id,
             "recipient_id": self.sender_id.id,
@@ -79,6 +79,27 @@ class TrasasDispatchIncoming(models.Model):
         })
         
         self.message_post(
-            body=_("Hệ thống đã tự động tạo Công văn đi dự thảo cho người xử lý %s.") % handler.name,
+            body=_("Công văn đi dự thảo đã được tạo bởi %s.") % self.env.user.name,
             subtype_xmlid="mail.mt_note",
         )
+
+        return {
+            "name": _("Công văn đi phản hồi"),
+            "type": "ir.actions.act_window",
+            "res_model": "trasas.dispatch.outgoing",
+            "res_id": outgoing.id,
+            "view_mode": "form",
+            "target": "current",
+        }
+
+    def action_no_response_needed(self):
+        """Override to cancel linked outgoing dispatches if any"""
+        res = super().action_no_response_needed()
+        for record in self:
+            if record.outgoing_dispatch_ids:
+                active_outgoing = record.outgoing_dispatch_ids.filtered(lambda x: x.state != 'cancel')
+                if active_outgoing:
+                    active_outgoing.action_cancel()
+                    record.message_post(body=_("Các công văn đi phản hồi liên quan đã được tự động hủy."))
+        return res
+

@@ -184,7 +184,7 @@
                             <field name="dispatch_date"/>
                             <field name="date_received"/>
                         </group>
-                        <group string="Phân loại &amp; Lưu trữ">
+                        <group string="Phân loại and Lưu trữ">
                             <field name="dispatch_mode" widget="radio" options="{'horizontal': true}"/>
                             <field name="urgency_id" options="{'no_create': True, 'no_open': True}"/>
                             <field name="location_id" invisible="dispatch_mode != 'hard_copy'" options="{'no_create': True}"/>
@@ -193,7 +193,7 @@
                     </group>
 
                     <notebook>
-                        <page string="Nội dung &amp; Xử lý" name="content_page">
+                        <page string="Nội dung and Xử lý" name="content_page">
                             <group>
                                 <field name="extract_content" placeholder="Tóm tắt nội dung trích yếu..."/>
                             </group>

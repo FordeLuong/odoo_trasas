@@ -37,7 +37,7 @@
                             <field name="manual_number" invisible="not is_manual_number" required="is_manual_number"/>
                             <field name="document_folder_id" groups="base.group_no_one"/>
                         </group>
-                        <group string="Thời gian &amp; Nơi nhận">
+                        <group string="Thời gian and Nơi nhận">
                             <field name="date_created"/>
                             <field name="date_promulgated"/>
                             <field name="recipient_id"/>
@@ -59,7 +59,7 @@
                         <page string="Nội dung chi tiết">
                             <field name="content"/>
                         </page>
-                        <page string="Tài liệu đính kèm &amp; Lưu trữ">
+                        <page string="Tài liệu đính kèm and Lưu trữ">
                             <group>
                                 <field name="location_id" options="{'no_create': True}"/>
                             </group>

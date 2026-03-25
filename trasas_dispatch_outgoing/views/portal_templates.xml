@@ -26,7 +26,7 @@
                     </div>
                     <div class="app-info">
                         <span class="app-title">Công văn đi</span>
-                        <span class="app-subtitle">Phát hành &amp; Theo dõi</span>
+                        <span class="app-subtitle">Phát hành and Theo dõi</span>
                     </div>
                 </a>
             </div>
@@ -254,7 +254,7 @@
                         <!-- Submit Form for Draft (Only if in Draft state) -->
                         <t t-if="dispatch.state == 'draft'">
                             <hr class="my-4"/>
-                            <h5 class="mb-3 text-primary"><i class="fa fa-upload me-2"/>Upload Bản Dự thảo mới &amp; Trình duyệt</h5>
+                            <h5 class="mb-3 text-primary"><i class="fa fa-upload me-2"/>Upload Bản Dự thảo mới and Trình duyệt</h5>
                             <div class="alert alert-warning">
                                 <i class="fa fa-info-circle me-1"/> 
                                 Bạn cần đính kèm file dự thảo mới nhất trước khi trình lên <strong>Ban Giám đốc</strong> để phê duyệt.
@@ -287,7 +287,7 @@
                                 
                                 <button type="submit" class="btn btn-primary btn-lg mt-2">
                                     <i class="fa fa-paper-plane me-2"/>
-                                    Lưu &amp; Gửi Phê duyệt
+                                    Lưu and Gửi Phê duyệt
                                 </button>
 
                                 <button type="button" class="btn btn-outline-secondary btn-lg mt-2 ms-2"
@@ -346,5 +346,23 @@
                 </div>
             </div>
         </t>
+    </template>
+
+    <!-- Inherit Incoming Dispatch Detail to add manual creation button -->
+    <template id="portal_dispatch_detail_inherit_outgoing" inherit_id="trasas_dispatch_management.portal_dispatch_detail">
+        <xpath expr="//button[@type='submit'][contains(., 'Gửi phản hồi')]" position="before">
+            <button type="button" class="btn btn-primary"
+                    t-if="dispatch.response_required and dispatch.outgoing_dispatch_count == 0 and dispatch.state == 'processing'"
+                    onclick="if(confirm('Hệ thống sẽ tạo một bản ghi Công văn đi dự thảo và chuyển hướng bạn đến đó. Tiếp tục?')) { document.getElementById('form_create_outgoing').submit(); }">
+                <i class="fa fa-plus-circle me-2"/>
+                Tạo CV đi phản hồi
+            </button>
+        </xpath>
+        <xpath expr="//form[@id='form_no_response']" position="after">
+            <form id="form_create_outgoing" method="POST" t-attf-action="/my/dispatch/{{ dispatch.id }}/create_outgoing" class="d-none">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            </form>
+        </xpath>
+
     </template>
 </odoo>
