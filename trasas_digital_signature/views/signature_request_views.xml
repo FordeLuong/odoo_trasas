@@ -187,4 +187,54 @@
             </p>
         </field>
     </record>
+
+    <!-- Simplified form view for Signature Request: Optimized for CCCD input -->
+    <record id="view_signature_request_form_simple" model="ir.ui.view">
+        <field name="name">trasas.signature.request.form.simple</field>
+        <field name="model">trasas.signature.request</field>
+        <field name="arch" type="xml">
+            <form string="Nhập thông tin định danh &amp; Gửi">
+                <header>
+                    <button name="action_send"
+                            string="Gửi yêu cầu ký"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,sent,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group name="left">
+                            <field name="contract_id" readonly="1"/>
+                            <field name="provider_id" readonly="1"/>
+                        </group>
+                        <group name="right">
+                            <field name="signing_flow" readonly="1"/>
+                            <field name="deadline" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+
+                    <separator string="Danh sách người ký (Bắt buộc nhập CCCD/MST)"/>
+                    <field name="signer_ids" readonly="state != 'draft'">
+                        <list editable="bottom" create="0" delete="0">
+                            <field name="sign_order" readonly="1"/>
+                            <field name="signer_name" readonly="1"/>
+                            <field name="signer_email" readonly="1"/>
+                            <field name="role" readonly="1"/>
+                            <field name="id_number" required="1" placeholder="Nhập CCCD/MST..."/>
+                            <field name="state" invisible="1"/>
+                        </list>
+                    </field>
+
+                    <div class="alert alert-info mt-2" role="alert">
+                        Lưu ý: Bạn cần nhập đầy đủ CCCD/MST cho các người ký trước khi nhấn "Gửi yêu cầu ký".
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
 </odoo>

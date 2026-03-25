@@ -143,6 +143,48 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"/>
                     </div>
                 </t>
+                <t t-if="request.params.get('message') == 'signing_started'">
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <i class="fa fa-check-circle me-2"/> Quy trình ký kết đã được khởi tạo thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('message') == 'internal_signed'">
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <i class="fa fa-check-circle me-2"/> Xác nhận TRASAS đã ký thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('message') == 'sent_to_partner'">
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <i class="fa fa-check-circle me-2"/> Đã xác nhận gửi hợp đồng cho đối tác!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('message') == 'partner_signed'">
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <i class="fa fa-check-circle me-2"/> Xác nhận đối tác đã ký thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('message') == 'signing_completed'">
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <i class="fa fa-check-circle me-2"/> Hoàn tất ký kết! Hợp đồng đã chuyển sang trạng thái "Đã ký".
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('message') == 'scan_uploaded'">
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <i class="fa fa-check-circle me-2"/> Upload bản scan hoàn tất thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
+                <t t-if="request.params.get('message') == 'sign_request_created'">
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <i class="fa fa-check-circle me-2"/> Yêu cầu ký số đã được tạo thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                    </div>
+                </t>
                 <t t-if="request.params.get('error')">
                     <div class="alert alert-danger alert-dismissible fade show mb-4">
                         <i class="fa fa-exclamation-triangle me-2"/> <t t-esc="request.params.get('error')"/>
@@ -166,10 +208,10 @@
                     </div>
                 </div>
 
-                <form t-attf-action="/my/contracts/#{contract.id}/update" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                    <div class="row">
-                        <div class="col-lg-8">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <form t-attf-action="/my/contracts/#{contract.id}/update" method="post" enctype="multipart/form-data" id="contract_update_form">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <!-- Main Content -->
                             <div class="card shadow-sm border-0 mb-4">
                                 <div class="card-header bg-white py-3">
@@ -326,6 +368,23 @@
                                             </button>
                                         </div>
                                     </div>
+
+                                    <!-- Upload Area during Signing (bổ sung file) -->
+                                    <div t-if="contract.state == 'signing'" class="p-4 bg-light border-top">
+                                        <h6 class="fw-bold mb-3"><i class="fa fa-upload me-2 text-primary"/> Đính kèm tài liệu bổ sung</h6>
+                                        <form t-attf-action="/my/contracts/#{contract.id}/upload" method="post" enctype="multipart/form-data">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label small fw-bold">Chọn file đính kèm bổ sung (PDF, Word, Ảnh...)</label>
+                                                    <input type="file" name="file" class="form-control" multiple="multiple"/>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fa fa-upload me-1"/> Tải lên
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
 
@@ -385,7 +444,9 @@
                                     </t>
                                 </div>
                             </div>
-                        </div>
+                        </form>
+                    </div> <!-- end col-lg-8 -->
+
 
                         <div class="col-lg-4">
                             <!-- Sidebar Actions -->
@@ -408,7 +469,7 @@
                                     <hr/>
                                     <div class="d-grid gap-2">
                                         <t t-if="contract.state == 'draft'">
-                                            <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                                            <button type="submit" form="contract_update_form" class="btn btn-primary btn-lg shadow-sm">
                                                 <i class="fa fa-save me-2"/> Lưu thay đổi &amp; File
                                             </button>
                                         </t>
@@ -416,16 +477,248 @@
                                             <i class="fa fa-print me-2"/> In hợp đồng
                                         </button>
                                     </div>
-                                    <t t-if="contract.state != 'draft'">
+
+                                    <!-- ===== B6: Bắt đầu ký (approved → signing) ===== -->
+                                    <t t-if="contract.state == 'approved'">
+                                        <form t-attf-action="/my/contracts/#{contract.id}/start_signing" method="post" class="mt-3">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                                                <i class="fa fa-pencil-square-o me-2"/> Bắt đầu quy trình ký
+                                            </button>
+                                        </form>
+                                    </t>
+
+                                    <!-- ===== SIGNING STATE: Hiển thị nút theo luồng ===== -->
+                                    <t t-if="contract.state == 'signing'">
+                                        <!-- Thông tin luồng ký -->
+                                        <div class="alert alert-info small mt-3 mb-3">
+                                            <strong>Phương thức:</strong>
+                                            <t t-if="contract.signing_method == 'manual'">Ký tay / Scan</t>
+                                            <t t-else="">Chữ ký số (API)</t><br/>
+                                            <strong>Luồng:</strong>
+                                            <t t-if="contract.signing_flow == 'trasas_first'">TRASAS ký trước</t>
+                                            <t t-else="">Đối tác ký trước</t>
+                                        </div>
+
+                                        <!-- ===== KÝ TAY: LUỒNG A (TRASAS KÝ TRƯỚC) ===== -->
+                                        <t t-if="contract.signing_method == 'manual' and contract.signing_flow == 'trasas_first'">
+                                            <!-- B11: Xác nhận TRASAS đã ký -->
+                                            <t t-if="not contract.internal_sign_date">
+                                                <form t-attf-action="/my/contracts/#{contract.id}/mark_internal_signed" method="post" class="mb-2">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <button type="submit" class="btn btn-success w-100" onclick="return confirm('Xác nhận TRASAS đã ký hợp đồng?')">
+                                                        <i class="fa fa-check me-2"/> Xác nhận TRASAS đã ký (B11)
+                                                    </button>
+                                                </form>
+                                            </t>
+                                            <!-- B12: Xác nhận đã gửi đối tác -->
+                                            <t t-if="contract.internal_sign_date and not contract.sent_to_partner_date">
+                                                <form t-attf-action="/my/contracts/#{contract.id}/mark_sent_partner" method="post" class="mb-2">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Xác nhận đã gửi hợp đồng cho đối tác?')">
+                                                        <i class="fa fa-send me-2"/> Xác nhận đã gửi đối tác (B12)
+                                                    </button>
+                                                </form>
+                                            </t>
+                                            <!-- B13: Upload scan + Hoàn tất (Gộp cho Luồng A) -->
+                                            <t t-if="contract.sent_to_partner_date">
+                                                <form t-attf-action="/my/contracts/#{contract.id}/confirm_signed" method="post" enctype="multipart/form-data">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-bold text-danger">Bắt buộc: Upload bản scan đã ký (PDF/Ảnh):</label>
+                                                        <input type="file" name="final_scan" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required="required"/>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-success w-100 shadow-sm" onclick="return confirm('Hợp đồng sẽ được chuyển sang trạng thái ĐÃ KÝ. Bạn chắc chắn đã chọn đúng bản scan cuối cùng?')">
+                                                        <i class="fa fa-check-circle me-2"/> Xác nhận đã ký &amp; Hoàn tất (B13)
+                                                    </button>
+                                                </form>
+                                            </t>
+                                        </t>
+
+                                        <!-- ===== KÝ TAY: LUỒNG B (ĐỐI TÁC KÝ TRƯỚC) ===== -->
+                                        <t t-if="contract.signing_method == 'manual' and contract.signing_flow == 'partner_first'">
+                                            <!-- B14: Xác nhận đối tác đã ký -->
+                                            <t t-if="not contract.partner_sign_date">
+                                                <form t-attf-action="/my/contracts/#{contract.id}/mark_partner_signed" method="post" class="mb-2">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Xác nhận đối tác đã ký hợp đồng?')">
+                                                        <i class="fa fa-user-check me-2"/> Xác nhận đối tác đã ký (B14)
+                                                    </button>
+                                                </form>
+                                            </t>
+                                            <!-- B15: Xác nhận TRASAS đã ký -->
+                                            <t t-if="contract.partner_sign_date and not contract.internal_sign_date">
+                                                <form t-attf-action="/my/contracts/#{contract.id}/mark_internal_signed" method="post" class="mb-2">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <button type="submit" class="btn btn-success w-100" onclick="return confirm('Xác nhận TRASAS đã ký hợp đồng?')">
+                                                        <i class="fa fa-check me-2"/> Xác nhận TRASAS đã ký (B15)
+                                                    </button>
+                                                </form>
+                                            </t>
+                                            <!-- Upload scan + Hoàn tất (B13) -->
+                                            <t t-if="contract.internal_sign_date">
+                                                <form t-attf-action="/my/contracts/#{contract.id}/confirm_signed" method="post" enctype="multipart/form-data">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-bold text-danger">Bắt buộc: Upload bản scan đã ký (PDF/Ảnh):</label>
+                                                        <input type="file" name="final_scan" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required="required"/>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-success w-100 shadow-sm" onclick="return confirm('Hợp đồng sẽ được chuyển sang trạng thái ĐÃ KÝ. Bạn chắc chắn đã chọn đúng bản scan cuối cùng?')">
+                                                        <i class="fa fa-check-circle me-2"/> Xác nhận đã ký &amp; Hoàn tất (B13)
+                                                    </button>
+                                                </form>
+                                            </t>
+                                        </t>
+
+                                        <!-- ===== KÝ SỐ ===== -->
+                                        <t t-if="contract.signing_method == 'digital'">
+                                            <!-- 1. Trường hợp: Chưa có yêu cầu nào → Hiển thị nút tạo -->
+                                            <t t-if="not active_sign_request">
+                                                <!-- Hiển thị file nào sẽ được ký -->
+                                                <t t-if="contract_pdf_attachments">
+                                                    <div class="alert alert-secondary small py-2 mb-2 text-center">
+                                                        <i class="fa fa-paperclip me-1"/> Tài liệu đăng ký:
+                                                        <strong><t t-esc="contract_pdf_attachments[0].name"/></strong>
+                                                    </div>
+
+                                                    <!-- Form nhập CCCD trước khi gửi -->
+                                                    <form t-attf-action="/my/contracts/#{contract.id}/create_sign_request" method="post" class="mt-3">
+                                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                        
+                                                        <!-- Chọn nhà cung cấp -->
+                                                        <div class="mb-3">
+                                                            <label class="small fw-bold mb-1 text-muted">Chọn nhà cung cấp chữ ký số:</label>
+                                                            <select name="provider_id" class="form-select form-select-sm" required="required">
+                                                                <t t-foreach="signature_providers" t-as="provider">
+                                                                    <option t-att-value="provider.id"><t t-esc="provider.name"/></option>
+                                                                </t>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="card bg-white shadow-sm border mb-3">
+                                                            <div class="card-header bg-light py-2">
+                                                                <h6 class="mb-0 small fw-bold">Thông tin định danh người ký (Bắt buộc)</h6>
+                                                            </div>
+                                                            <div class="card-body py-2 px-3">
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-sm table-borderless mb-0 align-middle">
+                                                                        <thead>
+                                                                            <tr class="small text-muted border-bottom">
+                                                                                <th style="width: 40%">Vai trò / Tên</th>
+                                                                                <th>Định danh (CCCD/MST)</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody class="small">
+                                                                            <t t-foreach="default_signers" t-as="signer">
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="fw-bold"><t t-esc="signer['role_label']"/></div>
+                                                                                        <div class="text-muted"><t t-esc="signer['name']"/></div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="text" 
+                                                                                               t-attf-name="signer_id_number_#{signer_index}" 
+                                                                                               class="form-control form-control-sm" 
+                                                                                               placeholder="Nhập CCCD/MST..." 
+                                                                                               required="required"/>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </t>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm" onclick="return confirm('Xác nhận thông tin và gửi yêu cầu ký số?')">
+                                                            <i class="fa fa-certificate me-2"/> Xác nhận &amp; Gửi yêu cầu ký
+                                                        </button>
+                                                    </form>
+                                                </t>
+                                                <t t-else="">
+                                                    <div class="alert alert-warning small py-2 mb-2">
+                                                        <i class="fa fa-exclamation-triangle me-1"/>
+                                                        Chưa có file đính kèm. Vui lòng upload file hợp đồng trước.
+                                                    </div>
+                                                </t>
+                                            </t>
+
+                                            <!-- 2. Trường hợp: Đã có yêu cầu đang xử lý → Hiển thị trạng thái -->
+                                            <t t-if="active_sign_request">
+                                                <div class="card border-0 bg-light mt-2 mb-2">
+                                                    <div class="card-body py-2 px-3">
+                                                        <div class="small fw-bold mb-1">
+                                                            <i class="fa fa-certificate text-primary me-1"/> Yêu cầu ký số
+                                                        </div>
+                                                        <div class="small">
+                                                            Mã: <strong><t t-esc="active_sign_request.name"/></strong>
+                                                        </div>
+                                                        <div class="small mt-1">
+                                                            Trạng thái:
+                                                            <span t-if="active_sign_request.state == 'draft'" class="badge bg-secondary">Nháp</span>
+                                                            <span t-if="active_sign_request.state == 'sent'" class="badge bg-primary">Đã gửi - Chờ ký</span>
+                                                            <span t-if="active_sign_request.state == 'partially_signed'" class="badge bg-warning text-dark">Ký một phần</span>
+                                                            <span t-if="active_sign_request.state == 'completed'" class="badge bg-success">Hoàn tất</span>
+
+                                                            <a t-if="active_sign_request.state in ['sent', 'partially_signed']"
+                                                               t-attf-href="/my/contracts/#{contract.id}/check_sign_status"
+                                                               class="btn btn-sm btn-outline-primary py-0 px-2 ms-2"
+                                                               style="font-size: 0.75rem;">
+                                                                <i class="fa fa-refresh me-1"/> Cập nhật
+                                                            </a>
+                                                        </div>
+
+                                                        <!-- Thông tin tiến độ: ai đã ký, ai chưa ký -->
+                                                        <div class="mt-2 small">
+                                                            <t t-foreach="active_sign_request.signer_ids" t-as="signer">
+                                                                <div>
+                                                                    <i t-attf-class="fa fa-circle me-1 #{
+                                                                        'text-success' if signer.state == 'signed' else
+                                                                        'text-warning' if signer.state == 'sent' else
+                                                                        'text-secondary'
+                                                                    }"/>
+                                                                    <t t-esc="signer.signer_name"/> —
+                                                                    <t t-if="signer.state == 'signed'">✓ Đã ký
+                                                                        <t t-if="signer.signed_date">
+                                                                            (<t t-esc="signer.signed_date" t-options='{"widget": "date"}'/>)
+                                                                        </t>
+                                                                    </t>
+                                                                    <t t-elif="signer.state == 'sent'">Đang chờ ký</t>
+                                                                    <t t-else="">Chưa đến lượt</t>
+                                                                </div>
+                                                            </t>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </t>
+                                    </t>
+
+                                    <!-- ===== SIGNED: Thông báo hoàn tất ===== -->
+                                    <t t-if="contract.state == 'signed'">
+                                        <div class="alert alert-success mt-3 mb-0">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span><i class="fa fa-check-circle me-2"/> Hợp đồng đã ký kết thành công.</span>
+                                                <t t-if="contract.final_scan_file">
+                                                    <a t-attf-href="/web/content/trasas.contract/#{contract.id}/final_scan_file?download=true" class="btn btn-sm btn-success border-white">
+                                                        <i class="fa fa-download me-1"/> Tải bản gốc
+                                                    </a>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </t>
+
+                                    <!-- Các trạng thái khác: khóa -->
+                                    <t t-if="contract.state in ('in_review', 'waiting')">
                                         <div class="mt-3 p-2 bg-light rounded text-muted small italic">
-                                            <i class="fa fa-lock me-1"/> Hợp đồng đã khóa để xử lý.
+                                            <i class="fa fa-lock me-1"/> Hợp đồng đang chờ xử lý nội bộ.
                                         </div>
                                     </t>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </form>
+                        </div> <!-- end col-lg-4 -->
+                    </div> <!-- end row -->
+                <!-- Entire row is now closed properly -->
             </div>
         </t>
     </template>

@@ -66,11 +66,14 @@ class TrasasContractDigitalSignature(models.Model):
 
         signer_vals = self._prepare_default_signers()
 
+        view_id = self.env.ref("trasas_digital_signature.view_signature_request_form_simple").id
         return {
             "name": _("Tạo yêu cầu ký số"),
             "type": "ir.actions.act_window",
             "res_model": "trasas.signature.request",
             "view_mode": "form",
+            "view_id": view_id,
+            "target": "new",
             "context": {
                 "default_contract_id": self.id,
                 "default_signing_flow": self.signing_flow,
@@ -94,30 +97,15 @@ class TrasasContractDigitalSignature(models.Model):
             if self.approver_id
             else self.env.user.partner_id
         )
-        # External: đối tác hợp đồng
-        external_partner = self.partner_id
 
         internal_vals = {
             "partner_id": internal_partner.id,
             "role": "internal",
             "signer_name": internal_partner.name or "",
             "signer_email": internal_partner.email or "",
+            "sign_order": 1,
         }
-        external_vals = {
-            "partner_id": external_partner.id,
-            "role": "external",
-            "signer_name": external_partner.name or "",
-            "signer_email": external_partner.email or "",
-        }
-
-        if self.signing_flow == "trasas_first":
-            internal_vals["sign_order"] = 1
-            external_vals["sign_order"] = 2
-        else:
-            external_vals["sign_order"] = 1
-            internal_vals["sign_order"] = 2
 
         return [
             (0, 0, internal_vals),
-            (0, 0, external_vals),
         ]
