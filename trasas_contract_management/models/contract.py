@@ -1979,6 +1979,22 @@ class TrasasContract(models.Model):
                 subject=_("Từ chối về nháp"),
             )
 
+    def unlink(self):
+        """[Hạn chế xóa] Chỉ cho phép xóa hợp đồng ở trạng thái Nháp"""
+        for record in self:
+            if record.state != "draft":
+                raise UserError(
+                    _(
+                        "Bạn không thể xóa hợp đồng '%s' vì nó không ở trạng thái Nháp! "
+                        "(Trạng thái hiện tại: %s)"
+                    )
+                    % (
+                        record.name,
+                        dict(self._fields["state"].selection).get(record.state),
+                    )
+                )
+        return super(TrasasContract, self).unlink()
+
     # ============ NOTIFICATION METHODS ============
     def _send_approval_notification(self):
         """Gửi email thông báo cho người phê duyệt"""
