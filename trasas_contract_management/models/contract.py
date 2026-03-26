@@ -148,6 +148,7 @@ class TrasasContract(models.Model):
         string="Đối tác",
         required=True,
         tracking=True,
+        domain=[("is_company", "=", True)],
         help="Đối tác ký kết hợp đồng",
     )
 
@@ -459,18 +460,18 @@ class TrasasContract(models.Model):
     )
 
     # ============ COMPUTED FIELDS ============
+    @api.depends_context("uid")
     def _compute_is_approver(self):
         """
         Kiểm tra user hiện tại có phải Approver (Giám đốc) không.
-        Admin sẽ trả về False để thấy được các nút bị ẩn bởi is_approver.
+        Cho phép Admin thấy luôn để quản trị.
         """
-        user = self.env.user
-        is_admin = user.has_group("base.group_system")
-        is_approver = user.has_group(
+        is_approver = self.env.user.has_group(
             "trasas_contract_management.group_contract_approver"
         )
+        is_admin = self.env.user.has_group("base.group_system")
         for record in self:
-            record.is_approver = is_approver and not is_admin
+            record.is_approver = is_approver or is_admin
 
     def _compute_is_operation_user(self):
         """
@@ -498,14 +499,23 @@ class TrasasContract(models.Model):
                     is_manager or is_approver or is_reviewer
                 )
 
+    @api.depends("cancel_requester_id", "cancel_request_state")
+    @api.depends_context("uid")
     def _compute_is_cancel_dept_approver(self):
         """Kiểm tra user hiện tại có phải trưởng phòng của người yêu cầu hủy"""
+        is_admin = self.env.user.has_group("base.group_system")
+        is_manager = self.env.user.has_group(
+            "trasas_contract_management.group_contract_manager"
+        )
         for record in self:
+            if is_admin:
+                record.is_cancel_dept_approver = True
+                continue
             if not record.cancel_requester_id:
                 record.is_cancel_dept_approver = False
                 continue
             # Tìm employee của người yêu cầu hủy
-            employee = self.env["hr.employee"].search(
+            employee = self.env["hr.employee"].sudo().search(
                 [("user_id", "=", record.cancel_requester_id.id)], limit=1
             )
             if employee and employee.parent_id and employee.parent_id.user_id:
@@ -514,22 +524,25 @@ class TrasasContract(models.Model):
                 )
             else:
                 # Nếu không tìm được trưởng phòng, cho manager duyệt
-                is_admin = self.env.user.has_group("base.group_system")
-                record.is_cancel_dept_approver = (
-                    self.env.user.has_group(
-                        "trasas_contract_management.group_contract_manager"
-                    )
-                    and not is_admin
-                )
+                record.is_cancel_dept_approver = is_manager
 
+    @api.depends("draft_requester_id", "draft_request_state")
+    @api.depends_context("uid")
     def _compute_is_draft_dept_approver(self):
         """Kiểm tra user hiện tại có phải trưởng phòng của người yêu cầu về nháp"""
+        is_admin = self.env.user.has_group("base.group_system")
+        is_manager = self.env.user.has_group(
+            "trasas_contract_management.group_contract_manager"
+        )
         for record in self:
+            if is_admin:
+                record.is_draft_dept_approver = True
+                continue
             if not record.draft_requester_id:
                 record.is_draft_dept_approver = False
                 continue
             # Tìm employee của người yêu cầu về nháp
-            employee = self.env["hr.employee"].search(
+            employee = self.env["hr.employee"].sudo().search(
                 [("user_id", "=", record.draft_requester_id.id)], limit=1
             )
             if employee and employee.parent_id and employee.parent_id.user_id:
@@ -538,13 +551,7 @@ class TrasasContract(models.Model):
                 )
             else:
                 # Nếu không tìm được trưởng phòng, cho manager duyệt
-                is_admin = self.env.user.has_group("base.group_system")
-                record.is_draft_dept_approver = (
-                    self.env.user.has_group(
-                        "trasas_contract_management.group_contract_manager"
-                    )
-                    and not is_admin
-                )
+                record.is_draft_dept_approver = is_manager
 
     @api.depends("state", "activity_ids", "reviewer_id", "suggested_reviewer_id")
     def _compute_is_reviewer(self):

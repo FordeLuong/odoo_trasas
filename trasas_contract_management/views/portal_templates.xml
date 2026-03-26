@@ -712,11 +712,90 @@
                                             <i class="fa fa-lock me-1"/> Hợp đồng đang chờ xử lý nội bộ.
                                         </div>
                                     </t>
+
+                                    <!-- ===== YÊU CẦU THAY ĐỔI / HỦY ===== -->
+                                    <t t-if="contract.state in ['approved', 'signing', 'signed', 'archived']">
+                                        <div class="mt-4 pt-3 border-top text-start">
+                                            <h6 class="text-muted fw-bold small mb-3">Yêu cầu thay đổi</h6>
+                                            <div class="d-grid gap-2">
+                                                <!-- Nút: Yêu cầu về nháp -->
+                                                <t t-if="contract.draft_request_state not in ['dept_pending', 'bgd_pending']">
+                                                    <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalRequestDraft">
+                                                        <i class="fa fa-undo me-1"/> Yêu cầu về nháp
+                                                    </button>
+                                                </t>
+                                                <t t-else="">
+                                                    <div class="alert alert-warning small py-1 px-2 mb-1">
+                                                        <i class="fa fa-clock-o me-1"/> Đang chờ duyệt về nháp
+                                                    </div>
+                                                </t>
+
+                                                <!-- Nút: Yêu cầu hủy -->
+                                                <t t-if="contract.cancel_request_state not in ['dept_pending', 'bgd_pending']">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalRequestCancel">
+                                                        <i class="fa fa-times-circle me-1"/> Yêu cầu hủy hợp đồng
+                                                    </button>
+                                                </t>
+                                                <t t-else="">
+                                                    <div class="alert alert-danger small py-1 px-2 mb-0">
+                                                        <i class="fa fa-clock-o me-1"/> Đang chờ duyệt hủy
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </t>
                                 </div>
                             </div>
                         </div> <!-- end col-lg-4 -->
                     </div> <!-- end row -->
-                <!-- Entire row is now closed properly -->
+            </div>
+
+            <!-- Modal Yêu cầu về nháp -->
+            <div class="modal fade" id="modalRequestDraft" tabindex="-1">
+                <div class="modal-dialog">
+                    <form t-attf-action="/my/contracts/#{contract.id}/request_draft" method="post" class="modal-content text-start">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="modal-header bg-warning">
+                            <h5 class="modal-title fw-bold">Yêu cầu đưa hợp đồng về nháp</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="small text-muted">Hành động này sẽ gửi yêu cầu phê duyệt đưa hợp đồng quay lại trạng thái Nháp để chỉnh sửa.</p>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Lý do yêu cầu *</label>
+                                <textarea name="reason" class="form-control" rows="3" required="required" placeholder="Vui lòng nhập lý do cụ thể..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-warning fw-bold">Gửi yêu cầu</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal Yêu cầu hủy -->
+            <div class="modal fade" id="modalRequestCancel" tabindex="-1">
+                <div class="modal-dialog">
+                    <form t-attf-action="/my/contracts/#{contract.id}/request_cancel" method="post" class="modal-content text-start">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title fw-bold">Yêu cầu hủy hợp đồng</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="small text-muted">Hành động này sẽ gửi yêu cầu phê duyệt hủy hợp đồng. Sau khi hủy, hợp đồng sẽ không thể chỉnh sửa.</p>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Lý do hủy *</label>
+                                <textarea name="reason" class="form-control" rows="3" required="required" placeholder="Vui lòng nhập lý do cụ thể..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-danger fw-bold">Gửi yêu cầu hủy</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </t>
     </template>

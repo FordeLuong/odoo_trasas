@@ -140,7 +140,7 @@
                             string="Duyệt hủy (Ban Giám đốc)" 
                             type="object"
                             class="btn-warning"
-                            invisible="cancel_request_state != 'bgd_pending' or not is_approver or cancel_dept_approver_id == uid"
+                            invisible="cancel_request_state != 'bgd_pending' or not is_approver"
                             groups="trasas_contract_management.group_contract_approver"/>
 
                     <!-- Nút: Từ chối hủy -->
@@ -177,7 +177,7 @@
                             string="Duyệt về nháp (Ban Giám đốc)" 
                             type="object"
                             class="btn-warning"
-                            invisible="draft_request_state != 'bgd_pending' or not is_approver or draft_dept_approver_id == uid"
+                            invisible="draft_request_state != 'bgd_pending' or not is_approver"
                             groups="trasas_contract_management.group_contract_approver"/>
 
                     <!-- Nút: Từ chối về nháp -->

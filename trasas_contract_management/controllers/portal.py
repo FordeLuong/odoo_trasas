@@ -230,8 +230,8 @@ class ContractPortal(CustomerPortal):
         reviewers = request.env["res.users"].sudo().search([("share", "=", False)])
         approvers = request.env["res.users"].sudo().browse(combined_approver_ids)
 
-        # Fetch partners (for simplicity, letting them select from all partners as requested to be like internal)
-        partners = request.env["res.partner"].sudo().search([])
+        # Fetch partners (show only companies)
+        partners = request.env["res.partner"].sudo().search([("is_company", "=", True)])
 
         values = {
             "contract_types": contract_types,
@@ -448,6 +448,52 @@ class ContractPortal(CustomerPortal):
                         attachment_ids=[attachment.id],
                     )
         return request.redirect(f"/my/contracts/{contract_id}?message=updated")
+
+    @http.route(
+        ["/my/contracts/<int:contract_id>/request_draft"],
+        type="http",
+        auth="user",
+        website=True,
+        methods=["POST"],
+        csrf=True,
+    )
+    def portal_contract_request_draft(self, contract_id, **post):
+        contract = request.env["trasas.contract"].sudo().browse(contract_id)
+        if not self._check_contract_access(contract):
+            return request.redirect("/my/contracts")
+
+        reason = post.get("reason")
+        if not reason:
+            return request.redirect(f"/my/contracts/{contract_id}?error=Vui lòng nhập lý do!")
+
+        try:
+            contract.sudo()._submit_draft_request(reason)
+            return request.redirect(f"/my/contracts/{contract_id}?message=draft_requested")
+        except Exception as e:
+            return request.redirect(f"/my/contracts/{contract_id}?error={str(e)}")
+
+    @http.route(
+        ["/my/contracts/<int:contract_id>/request_cancel"],
+        type="http",
+        auth="user",
+        website=True,
+        methods=["POST"],
+        csrf=True,
+    )
+    def portal_contract_request_cancel(self, contract_id, **post):
+        contract = request.env["trasas.contract"].sudo().browse(contract_id)
+        if not self._check_contract_access(contract):
+            return request.redirect("/my/contracts")
+
+        reason = post.get("reason")
+        if not reason:
+            return request.redirect(f"/my/contracts/{contract_id}?error=Vui lòng nhập lý do!")
+
+        try:
+            contract.sudo()._submit_cancel_request(reason)
+            return request.redirect(f"/my/contracts/{contract_id}?message=cancel_requested")
+        except Exception as e:
+            return request.redirect(f"/my/contracts/{contract_id}?error={str(e)}")
 
     @http.route(
         ["/my/contracts/<int:contract_id>/upload"],
