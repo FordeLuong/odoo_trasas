@@ -355,7 +355,7 @@
                             <group>
                                 <field name="final_scan_file" 
                                        filename="final_scan_filename"
-                                       readonly="state in ['signed', 'cancel']"/>
+                                       readonly="state in ['archived', 'cancel']"/>
                                 <field name="final_scan_filename" invisible="1"/>
                             </group>
                             <separator string="Hướng dẫn"/>

@@ -522,13 +522,12 @@
                                             </t>
                                             <!-- B13: Upload scan + Hoàn tất (Gộp cho Luồng A) -->
                                             <t t-if="contract.sent_to_partner_date">
-                                                <form t-attf-action="/my/contracts/#{contract.id}/confirm_signed" method="post" enctype="multipart/form-data">
+                                                <form t-attf-action="/my/contracts/#{contract.id}/confirm_signed" method="post">
                                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                                    <div class="mb-3">
-                                                        <label class="form-label small fw-bold text-danger">Bắt buộc: Upload bản scan đã ký (PDF/Ảnh):</label>
-                                                        <input type="file" name="final_scan" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required="required"/>
+                                                    <div class="alert alert-info py-2 small mb-3">
+                                                        <i class="fa fa-info-circle me-1"/> Bấm nút dưới đây để xác nhận đã nhận được bản ký từ đối tác và hoàn tất quy trình.
                                                     </div>
-                                                    <button type="submit" class="btn btn-success w-100 shadow-sm" onclick="return confirm('Hợp đồng sẽ được chuyển sang trạng thái ĐÃ KÝ. Bạn chắc chắn đã chọn đúng bản scan cuối cùng?')">
+                                                    <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm" onclick="return confirm('Xác nhận hoàn tất ký kết hợp đồng?')">
                                                         <i class="fa fa-check-circle me-2"/> Xác nhận đã ký &amp; Hoàn tất (B13)
                                                     </button>
                                                 </form>
@@ -557,13 +556,12 @@
                                             </t>
                                             <!-- Upload scan + Hoàn tất (B13) -->
                                             <t t-if="contract.internal_sign_date">
-                                                <form t-attf-action="/my/contracts/#{contract.id}/confirm_signed" method="post" enctype="multipart/form-data">
+                                                <form t-attf-action="/my/contracts/#{contract.id}/confirm_signed" method="post">
                                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                                    <div class="mb-3">
-                                                        <label class="form-label small fw-bold text-danger">Bắt buộc: Upload bản scan đã ký (PDF/Ảnh):</label>
-                                                        <input type="file" name="final_scan" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required="required"/>
+                                                    <div class="alert alert-info py-2 small mb-3">
+                                                        <i class="fa fa-info-circle me-1"/> Bấm nút dưới đây để xác nhận hoàn tất quy trình ký kết.
                                                     </div>
-                                                    <button type="submit" class="btn btn-success w-100 shadow-sm" onclick="return confirm('Hợp đồng sẽ được chuyển sang trạng thái ĐÃ KÝ. Bạn chắc chắn đã chọn đúng bản scan cuối cùng?')">
+                                                    <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm" onclick="return confirm('Xác nhận hoàn tất ký kết hợp đồng?')">
                                                         <i class="fa fa-check-circle me-2"/> Xác nhận đã ký &amp; Hoàn tất (B13)
                                                     </button>
                                                 </form>

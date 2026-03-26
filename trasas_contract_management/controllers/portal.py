@@ -615,34 +615,12 @@ class ContractPortal(CustomerPortal):
         csrf=True,
     )
     def portal_confirm_signed(self, contract_id, **post):
-        """B13: Xác nhận hoàn tất ký kết (signing → signed) - Gộp cả upload scan"""
+        """B13: Xác nhận hoàn tất ký kết (signing → signed)"""
         contract = request.env["trasas.contract"].sudo().browse(contract_id)
         if not self._check_contract_access(contract):
             return request.redirect("/my/contracts")
 
-        # Xử lý upload file nếu có (bắt buộc theo UI mới)
-        file = request.httprequest.files.get("final_scan")
-        if file:
-            file_content = base64.b64encode(file.read())
-            contract.sudo().write(
-                {
-                    "final_scan_file": file_content,
-                    "final_scan_filename": file.filename,
-                }
-            )
-            # Ép ghi xuống DB ngay để action_confirm_signed phía dưới nhìn thấy file
-            contract.sudo().flush_recordset(["final_scan_file"])
-
-            # Tạo attachment đồng bộ
-            request.env["ir.attachment"].sudo().create(
-                {
-                    "name": file.filename,
-                    "datas": file_content,
-                    "res_model": "trasas.contract",
-                    "res_id": contract.id,
-                }
-            )
-
+        # Chuyển trạng thái sang Đã ký
         try:
             contract.action_confirm_signed()
             return request.redirect(

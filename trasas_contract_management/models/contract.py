@@ -706,17 +706,21 @@ class TrasasContract(models.Model):
     def _check_signing_flow_completion(self):
         """
         [B9-B13] Kiểm tra luồng ký phải hoàn tất đúng quy trình
-        Trước khi signed, cả 2 bên phải ký
+        - Khi đã ký (signed): TRASAS phải hoàn tất việc ký nội bộ.
+        - Khi lưu kho (archived): Phải có bản scan cuối cùng.
         """
         for record in self:
             if record.state == "signed":
-                # Validate: Phải có TRASAS ký và File scan
+                # Validate: Phải có TRASAS ký
                 if not record.internal_sign_date:
                     raise ValidationError(
                         _("Lỗi! TRASAS chưa ký. Hãy bấm 'Xác nhận TRASAS đã ký' trước.")
                     )
+            
+            if record.state == "archived":
+                # Validate: Phải có File scan khi lưu kho
                 if not record.final_scan_file:
-                    raise ValidationError(_("Lỗi! Chưa upload bản scan hoàn tất."))
+                    raise ValidationError(_("Lỗi! Chưa upload bản scan hoàn tất để lưu kho."))
 
     # ============ CREATE & WRITE ============
     @api.model_create_multi
@@ -1132,18 +1136,10 @@ class TrasasContract(models.Model):
         if self.state != "signing":
             return
 
-        # Validate: Kiểm tra file scan (Bỏ qua cho luồng Ký số vì module kia sẽ tự lo)
+        # Validate: Kiểm tra chữ ký nội bộ (Bỏ qua cho luồng Ký số vì module kia sẽ tự lo)
         if self.signing_method == "manual":
             if not self.internal_sign_date:
                 raise UserError(_("TRASAS chưa ký hợp đồng!"))
-
-            if not self.final_scan_file:
-                raise UserError(
-                    _(
-                        "Vui lòng upload bản scan hợp đồng đã ký đầy đủ!\n"
-                        "Vào tab 'File đính kèm' để upload file."
-                    )
-                )
 
         self.write(
             {
@@ -1603,6 +1599,14 @@ class TrasasContract(models.Model):
         for record in self:
             if record.state != "signed":
                 raise UserError(_("Chỉ có thể lưu kho hợp đồng đã ký!"))
+
+            if not record.final_scan_file:
+                raise UserError(
+                    _(
+                        "Vui lòng upload bản scan hợp đồng trước khi thực hiện Lưu kho!\n"
+                        "Bạn có thể upload tại tab 'File đính kèm'."
+                    )
+                )
 
             record.write({"state": "archived"})
 
